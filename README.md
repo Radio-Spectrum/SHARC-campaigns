@@ -9,34 +9,24 @@ After setting it up, you need to run this same command for this repository as we
 pip install -e .
 ```
 
-The nomenclature used here should always be based on the simulator. Since the simulator
+The nomenclature used here should always be based on the simulator.
 
 
 Project structure:
+```
 .
 ├── from-docs
 │   ├── imt
-│   │   ├── macro
-│   │   │   └── 7.1-8.4GHz
-│   │   │       ├── readme.md
-│   │   │       └── imt_params.yaml
-│   │   ├── hotspot
-│   │   │   └── 7.1-8.4GHz
-│   │   │       ├── readme.md
-│   │   │       └── imt_params.yaml
-│   │   └── mss-dc
-│   │       └── 7.1-8.4GHz
-│   │           ├── readme.md
-│   │           └── imt_params.yaml
+│   │   ├── imt.frequency.topology.equipment-spec.yaml
+│   │   └── imt.1-3GHz.single-bs.aas-macro-bs.yaml
 │   └── system
 │       └── mss-dc
-│           ├── readme.md
-│           └── system-A
-│               └── 2.1GHz
-│                   ├── readme.md
-│                   └── mss_d2d_params.yaml
+│           └── system-A.some-other.stuff
+│       └── eess-es
+│           └── some-stuff.some-other.stuff
 └── campaigns
     └── mss_dc_to_imt
         ├── readme.md
         └── run.py
+```
 
