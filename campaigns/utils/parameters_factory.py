@@ -9,6 +9,7 @@ import re
 
 from sharc.parameters.parameters import Parameters
 from campaigns.utils.constants import ROOT_PARAMS_DIR, ROOT_DIR
+from campaigns.utils.tracking_proxy import TrackingProxy
 
 
 class ParametersFactory():
@@ -105,8 +106,6 @@ class ParametersFactory():
                                 f"\t id '{id}' is also used in '{self._ids_to_dir[id]}'\n"
                             )
                         self._ids_to_dir[id] = file_path
-
-                        print(f"{file_path}: {value.strip()}")
                         break
                     else:
                         raise ValueError(
@@ -147,13 +146,17 @@ class ParametersFactory():
         if sys_key in self._data:
             # TODO: permit overwrite with another method
             raise ValueError(
-                f"Loading parameter {id} would overwrite existing data"
+                f"Loading parameter {id} would overwrite existing {sys_key} data"
             )
         self._data[sys_key] = sys_data
-        self._data["metadata"][id] = metadata
-        self._data["metadata"]["based_on_ids"].append(
-            id
-        )
+
+        if None not in [id, metadata]:
+            self._data["metadata"][id] = metadata
+
+        if id is not None:
+            self._data["metadata"]["based_on_ids"].append(
+                id
+            )
 
         return self
 
@@ -163,13 +166,20 @@ class ParametersFactory():
     # NOTE: a proxy/observer could update Parameters and
     # dict at the same time..?
     def build(
-        self
-    ) -> dict:
+        self, filepath=".tmp.yaml"
+    ) -> Parameters:
         """
         Resets factory data, and returns previous accumulated data
         """
-        data =self._data
+        self._write_to_file(filepath)
 
+        params = Parameters()
+        params.set_file_name(filepath)
+        params.read_params()
+
+        starting_data = self._data
         self._reset()
 
-        return data
+        return TrackingProxy(
+            params, starting_data
+        )
