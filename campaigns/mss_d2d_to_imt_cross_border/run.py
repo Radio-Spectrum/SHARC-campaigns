@@ -4,9 +4,13 @@ from campaigns.utils.constants import ROOT_DIR, SHARC_SIM_ROOT_DIR
 from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 import numpy as np
-import os
+from pathlib import Path
 
-campaign_name = "mss_d2d_to_imt_cross_border"
+CAMPAIGN_NAME = "mss_d2d_to_imt_cross_border"
+CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
+
+CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
+INPUTS_DIR = CAMPAIGN_DIR / "input/"
 
 def generate():
     general = {
@@ -14,16 +18,12 @@ def generate():
         ###########################################################################
         # Number of simulation snapshots
         ###########################################################################
-        "num_snapshots": 10000,
+        "num_snapshots": 11,
         "enable_cochannel": True,
         "enable_adjacent_channel": True,
         ###########################################################################,
         # if FALSE, then a new output directory is created,
         "overwrite_output": False,
-        ###########################################################################,
-        # output destination folder - this is relative SHARC/sharc directory,
-        "output_dir": "campaigns/mss_d2d_to_imt_cross_border/output_base_ul/",
-        "output_dir_prefix": "output_mss_d2d_to_imt_cross_border_base_ul",
         "system": "MSS_D2D",
     }
 
@@ -48,6 +48,7 @@ def generate():
         "LAT_LONG_INSIDE_COUNTRY",
         "MINIMUM_ELEVATION_FROM_ES",
     ]
+    params.mss_d2d.beam_positioning.type = "SERVICE_GRID"
     params.mss_d2d.sat_is_active_if.lat_long_inside_country.country_names = ["Brazil", "Argentina"]
     params.mss_d2d.beam_positioning.service_grid.country_names = ["Brazil", "Argentina"]
     # this is distance in km so that actual best satellite is used for each grid point
@@ -82,10 +83,12 @@ def generate():
     params.imt.topology.central_longitude = -54.5746686
     params.imt.topology.central_altitude = 200
 
-    campaign_str = f"campaigns/{campaign_name}"
-    CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / campaign_str
-    INPUTS_DIR = CAMPAIGN_DIR / "inputs/"
-    os.makedirs(INPUTS_DIR, exist_ok=True)
+    INPUTS_DIR.mkdir(parents=True, exist_ok=True)
+    
+    for item in INPUTS_DIR.iterdir():
+        if item.is_file() and item.name.endswith(".yaml"):
+            item.unlink()
+
     print(f"Outputting input files to {CAMPAIGN_DIR}")
 
     distances = np.linspace(params.mss_d2d.cell_radius / 1e3, 100, 4)
@@ -99,13 +102,15 @@ def generate():
 
             for border in distances:
                 params.mss_d2d.beam_positioning.service_grid.grid_margin_from_border = border
-                params.general.output_dir = f"{campaign_str}/output_base_{link}/"
-                os.makedirs(os.path.dirname(params.general.output_dir), exist_ok=True)
+                params.general.output_dir = f"{CAMPAIGN_STR}/output_{link}/"
+                Path(params.general.output_dir).mkdir(
+                    exist_ok=True
+                )
 
                 postfix = f"mss_d2d_to_imt_cross_border_{border}km_{load}load_{link}"
                 params.general.output_dir_prefix = f"output_{postfix}"
                 file = INPUTS_DIR / f"parameter_{postfix}.yaml"
-        
+
                 # Create parent directories if they don't exist
                 dump_parameters(
                     file, params
@@ -119,4 +124,4 @@ if __name__ == "__main__":
     # This function will execute the campaign with the given name.
     # It will look for the campaign directory under the specified name and
     # start the necessary processes.
-    run_campaign(campaign_name)
+    run_campaign(CAMPAIGN_NAME)
