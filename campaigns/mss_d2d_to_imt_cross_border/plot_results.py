@@ -5,15 +5,29 @@ from pathlib import Path
 import plotly.graph_objects as go
 from sharc.results import Results
 from sharc.post_processor import PostProcessor
+from campaigns.mss_d2d_to_imt_cross_border.cmd_parser import get_cmd_parser
 
-from campaigns.mss_d2d_to_imt_cross_border.run import CAMPAIGN_STR
+from campaigns.mss_d2d_to_imt_cross_border.run import CAMPAIGN_STR, get_output_dir_start
 from campaigns.utils.constants import SHARC_SIM_ROOT_DIR
 
 OUTPUT_ROOT_FOLDER = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 
 post_processor = PostProcessor()
 
-distances = [36.675, 57.783, 78.892, 100.0]
+parser = get_cmd_parser()
+args = parser.parse_args()
+
+distances_map = {
+    "mss-dc.system-a": [36.726, 57.817, 78.909, 100.0],
+    "system-3.2110-2200MHz.340km": [48.438, 65.625, 82.813, 100.0],
+    "system-4.2110-2200MHz.690km": [23.784, 49.189, 74.595, 100.0],
+}
+if len(args.mss) > 1:
+    raise ValueError("fiz funfar para um sistema so por enquanto")
+
+mss_id = args.mss[0]
+distances = distances_map[mss_id]
+
 print("Plotting scenarios of grid border as ", distances)
 for load in [0.2, 0.5]:
     for link in ["dl", "ul"]:
@@ -51,8 +65,8 @@ attributes_to_plot = [
     "imt_ul_inr"
 ]
 
-output_start = "output"
-print('OUTPUT_ROOT_FOLDER / f"{output_start}_dl"', OUTPUT_ROOT_FOLDER / f"{output_start}_dl")
+output_start = get_output_dir_start(mss_id, not args.adj)
+
 results_dl = Results.load_many_from_dir(
     OUTPUT_ROOT_FOLDER / f"{output_start}_dl",
     only_latest=True,
@@ -117,14 +131,11 @@ for attr in ["imt_dl_pfd_external", "imt_dl_pfd_external_aggregated"]:
 #     post_processor.get_plot_by_results_attribute_name(attr).show()
 
 # Ensure the "htmls" directory exists relative to the script directory
-output_dir = Path(__file__).parent / "../output"
-output_dir.mkdir(exist_ok=True)
-htmls_dir = output_dir / "htmls"
+htmls_dir = OUTPUT_ROOT_FOLDER / "htmls"
 htmls_dir.mkdir(exist_ok=True)
-selected_str = "a"
+selected_str = output_start
 specific_dir = htmls_dir / selected_str
 specific_dir.mkdir(exist_ok=True)
-# print("specific_dir", specific_dir)
 
 for attr in attributes_to_plot:
     plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type="ccdf")
@@ -132,6 +143,7 @@ for attr in attributes_to_plot:
         print(f"Warning: No plot found for attribute '{attr}'")
         continue
     plot.write_html(specific_dir / f"{attr}.html")
+    # plot.show()
 
 
 # # Now let's plot the beam per satellite results.
