@@ -1,10 +1,8 @@
-# TODO: better documentation on where this is from
 id: system-3.2110-2200MHz.340km
 
 metadata:
   referenced_documents:
-    - WP4C-Working-Document-4C-356
-  created_at: 24-07-2025
+    - WP4C-Working-Document-4C-356, Annex 7
 
 mss_d2d:
     # MSS_D2D system name
@@ -13,10 +11,14 @@ mss_d2d:
     # Possible values are "ACLR", "SPECTRAL_MASK" and "OFF"
     adjacent_ch_emissions: SPECTRAL_MASK # (PER SCENARIO)
     # chosen spectral Mask
+    # NOTE: original suggestion is M2101 antenna pattern as oob pattern
+    # however editor's note specifies that 1528 is still valid for oob
+    # In a later editor's note, it is specified that REC ITU-R SM.1541
+    # should model oob power emissions when missing specs
     spectral_mask: MSS
     # MSS_D2D system center frequency in MHz (PER SCENARIO)
     frequency: -1
-    # MSS_D2d system bandwidth in MHz (PER SCENARIO)
+    # MSS_D2d system bandwidth in MHz
     bandwidth: 5
     # MSS_D2D cell radius in network topology [m] (PER SCENARIO)
     cell_radius: 1
@@ -31,6 +33,8 @@ mss_d2d:
     # Antenna pattern from ITU-R S.1528
     # Possible values: "ITU-R-S.1528-Section1.2", "ITU-R-S.1528-LEO"
     antenna_pattern: ITU-R-S.1528-Taylor
+    # NOTE: doc specifies lambda = 0.15m
+    # we calculate based on frequency, giving out approx. 0.14m
     antenna_s1528:
         # Maximum Antenna gain in dBi
         antenna_gain: 34.1
