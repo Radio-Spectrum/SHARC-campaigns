@@ -1,10 +1,12 @@
-# TODO: better documentation on where this is from
 id: system-4.2110-2200MHz.690km
 
 metadata:
   referenced_documents:
-    - WP4C-Working-Document-4C-356
-  created_at: 24-07-2025
+    # FIXME/TODO/NOTE:
+    # documento DOES NOT provide enough information about using L_n = -35
+    # since document S.1528 does not provide enough information to use it
+    # as is
+    - WP4C-Working-Document-4C-356, Annex 7
 
 mss_d2d:
     # MSS_D2D system name
@@ -21,7 +23,13 @@ mss_d2d:
     # MSS_D2D cell radius in network topology [m] (PER SCENARIO)
     cell_radius: 1
     # Satellite power density in dBW/Hz
-    # CALC: 9.41 - 10 * log10(20e6)
+    # NOTE: for different BWs these values change
+    # NOTE: 50.41~55.41 EIRP per beam
+    # or -22.6~-17.6 EIRP spectral density
+    # or -90.4 PFD on the ground
+    # or tx power 9.41 dBW with power control +/- 10 dB
+    # CALC: (power/bw) -> 9.41 - 10 * log10(20e6) = -63.6
+    # OR: (EIRP/Hz / gain) -> -22.6 -41 = 63.6
     tx_power_density: -63.6
     # Polarization loss [dB] (PER SCENARIO)
     # P.619 suggests 3dB polarization loss as good constant value for monte carlo
@@ -31,19 +39,14 @@ mss_d2d:
     # Satellite antenna pattern
     # Antenna pattern from ITU-R S.1528
     # Possible values: "ITU-R-S.1528-Section1.2", "ITU-R-S.1528-LEO"
-    antenna_pattern: ITU-R-S.1528-Taylor
+    antenna_pattern: ITU-R-S.1528-Section1.2
+    # TODO: L_F is currently hardcoded to 0 in simulator
+    antenna_3_dB_bw: 0.375
+    l_s: -35
     antenna_s1528:
         # Maximum Antenna gain in dBi
-        antenna_gain: 34.1
-        ### The following parameters are used for S.1528-Taylor antenna pattern
-        # SLR is the side-lobe ratio of the pattern (dB), the difference in gain between the maximum
-        # gain and the gain at the peak of the first side lobe.
-        slr: 20.0
-        # Number of secondarylobes considered in the diagram (coincide with the roots of the Bessel function)
-        n_side_lobes: 2
-        # Radial (l_r) and transverse (l_t) sizes of the effective radiating area of the satellite transmitt antenna (m)
-        l_r: 1.6
-        l_t: 1.6
+        # NOTE: doc. specifies 41 dBi only at nadir, 46 at maximum steering angle
+        antenna_gain: 41
     sat_is_active_if: # (PER SCENARIO)
         # for a satellite to be active, it needs to respect ALL conditions
         conditions:
@@ -95,6 +98,6 @@ mss_d2d:
         # Longitude of the first ascending node in degrees
         long_asc_deg: 1.875
         # Phasing in degrees
-        phasing_deg: 1.636
+        phasing_deg: 97.5
 
 
