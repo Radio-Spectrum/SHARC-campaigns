@@ -3,7 +3,7 @@ id: system-4.2110-2200MHz.690km
 metadata:
   referenced_documents:
     # FIXME/TODO/NOTE:
-    # documento DOES NOT provide enough information about using L_n = -35
+    # document DOES NOT provide enough information about using L_n = -35
     # since document S.1528 does not provide enough information to use it
     # as is
     - WP4C-Working-Document-4C-356, Annex 7
@@ -42,7 +42,11 @@ mss_d2d:
     antenna_pattern: ITU-R-S.1528-Section1.2
     # TODO: L_F is currently hardcoded to 0 in simulator
     antenna_3_dB_bw: 0.375
-    l_s: -35
+    # FIXME:
+    # document DOES NOT provide enough information about using L_n = -35
+    # since document S.1528 does not provide enough information to use it
+    # as is
+    antenna_l_s: -35
     antenna_s1528:
         # Maximum Antenna gain in dBi
         # NOTE: doc. specifies 41 dBi only at nadir, 46 at maximum steering angle
