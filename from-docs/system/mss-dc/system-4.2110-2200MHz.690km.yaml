@@ -16,12 +16,13 @@ mss_d2d:
     spectral_mask: MSS
     # MSS_D2D system center frequency in MHz (PER SCENARIO)
     frequency: -1
-    # MSS_D2d system bandwidth in MHz (PER SCENARIO)
-    bandwidth: -1
+    # MSS_D2d system bandwidth in MHz
+    bandwidth: 20
     # MSS_D2D cell radius in network topology [m] (PER SCENARIO)
     cell_radius: 1
     # Satellite power density in dBW/Hz
-    tx_power_density: -55.2
+    # CALC: 9.41 - 10 * log10(20e6)
+    tx_power_density: -63.6
     # Polarization loss [dB] (PER SCENARIO)
     # P.619 suggests 3dB polarization loss as good constant value for monte carlo
     polarization_loss: 0

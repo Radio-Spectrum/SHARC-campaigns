@@ -17,7 +17,7 @@ mss_d2d:
     # MSS_D2D system center frequency in MHz (PER SCENARIO)
     frequency: -1
     # MSS_D2d system bandwidth in MHz (PER SCENARIO)
-    bandwidth: -1
+    bandwidth: 5
     # MSS_D2D cell radius in network topology [m] (PER SCENARIO)
     cell_radius: 1
     # Satellite power density in dBW/Hz
