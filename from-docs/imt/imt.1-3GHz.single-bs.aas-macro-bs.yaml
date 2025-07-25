@@ -20,7 +20,7 @@ imt:
     frequency: -1
     ###########################################################################
     # IMT bandwidth [MHz]
-    bandwidth: -1
+    bandwidth: 20
     ###########################################################################
     # IMT resource block bandwidth [MHz]
     rb_bandwidth: 0.180
@@ -186,7 +186,7 @@ imt:
         ###########################################################################
         # Number of UEs that are allocated to each cell within handover margin.
         # Remember that in macrocell network each base station has 3 cells (sectors)
-        k: 1
+        k: 3
         ###########################################################################
         # Multiplication factor that is used to ensure that the sufficient number
         # of UE's will distributed throughout ths system area such that the number
