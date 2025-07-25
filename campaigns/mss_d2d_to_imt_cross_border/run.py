@@ -1,10 +1,9 @@
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.utils.constants import ROOT_DIR, SHARC_SIM_ROOT_DIR
+from campaigns.utils.constants import SHARC_SIM_ROOT_DIR
 from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 import numpy as np
-from pathlib import Path
 
 CAMPAIGN_NAME = "mss_d2d_to_imt_cross_border"
 CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
@@ -103,9 +102,6 @@ def generate():
             for border in distances:
                 params.mss_d2d.beam_positioning.service_grid.grid_margin_from_border = border
                 params.general.output_dir = f"{CAMPAIGN_STR}/output_{link}/"
-                Path(params.general.output_dir).mkdir(
-                    exist_ok=True
-                )
 
                 postfix = f"mss_d2d_to_imt_cross_border_{border}km_{load}load_{link}"
                 params.general.output_dir_prefix = f"output_{postfix}"
