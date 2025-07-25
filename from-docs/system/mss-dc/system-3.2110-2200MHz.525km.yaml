@@ -1,18 +1,20 @@
-# TODO: better documentation on where this is from
-id: mss-dc.system-a
+id: system-3.2110-2200MHz.525km
 
 metadata:
   referenced_documents:
-    - WP4C-algum
-  created_at: 23-07-2025
+    - WP4C-Working-Document-4C-356, Annex 7
 
 mss_d2d:
     # MSS_D2D system name
-    name: SystemA
+    name: System3.2110-2200MHz.525km
     # Adjacent channel emissions type
     # Possible values are "ACLR", "SPECTRAL_MASK" and "OFF"
     adjacent_ch_emissions: SPECTRAL_MASK # (PER SCENARIO)
     # chosen spectral Mask
+    # NOTE: original suggestion is M2101 antenna pattern as oob pattern
+    # however editor's note specifies that 1528 is still valid for oob
+    # In a later editor's note, it is specified that REC ITU-R SM.1541
+    # should model oob power emissions when missing specs
     spectral_mask: MSS
     # MSS_D2D system center frequency in MHz (PER SCENARIO)
     frequency: -1
@@ -21,6 +23,10 @@ mss_d2d:
     # MSS_D2D cell radius in network topology [m] (PER SCENARIO)
     cell_radius: 1
     # Satellite power density in dBW/Hz
+    # NOTE:
+    # EIRP density @nadir = -20.1 dBW/Hz
+    # max gain = 34.1
+    # tx_power_density = -20.1 -34.1
     tx_power_density: -54.2
     # Polarization loss [dB] (PER SCENARIO)
     # P.619 suggests 3dB polarization loss as good constant value for monte carlo
@@ -31,6 +37,8 @@ mss_d2d:
     # Antenna pattern from ITU-R S.1528
     # Possible values: "ITU-R-S.1528-Section1.2", "ITU-R-S.1528-LEO"
     antenna_pattern: ITU-R-S.1528-Taylor
+    # NOTE: doc specifies lambda = 0.15m
+    # we calculate based on frequency, giving out approx. 0.14m
     antenna_s1528:
         # Maximum Antenna gain in dBi
         antenna_gain: 34.1
