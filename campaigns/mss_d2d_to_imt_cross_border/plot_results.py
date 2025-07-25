@@ -18,7 +18,7 @@ parser = get_cmd_parser()
 args = parser.parse_args()
 
 distances_map = {
-    "mss-dc.system-a": [36.726, 57.817, 78.909, 100.0],
+    "system-3.2110-2200MHz.525km": [36.726, 57.817, 78.909, 100.0],
     "system-3.2110-2200MHz.340km": [48.438, 65.625, 82.813, 100.0],
     "system-4.2110-2200MHz.690km": [23.784, 49.189, 74.595, 100.0],
 }
