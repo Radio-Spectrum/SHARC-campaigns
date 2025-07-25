@@ -122,7 +122,7 @@ def generate(
 
                 postfix = f"mss_d2d_to_imt_cross_border_{border}km_{load}load_{link}"
                 params.general.output_dir_prefix = f"output_{postfix}"
-                file = INPUTS_DIR / f"parameter_{postfix}.yaml"
+                file = INPUTS_DIR / f"parameter_{mss_id}_{"co" if co_channel else "adj"}_{postfix}.yaml"
 
                 # Create parent directories if they don't exist
                 dump_parameters(
@@ -142,14 +142,21 @@ if __name__ == "__main__":
         action="store_true",
         help="Whether to not run campaign, only generate parameters (true/false). Default: false",
     )
+    parser.add_argument(
+        "--dont-clear",
+        action="store_true",
+        help="Mark true if you wish to NOT remove previous parameter "
+            "files in the directory (true/false). Default: false",
+    )
     args = parser.parse_args()
 
     INPUTS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # removes all current inputs in directory
-    for item in INPUTS_DIR.iterdir():
-        if item.is_file() and item.name.endswith(".yaml"):
-            item.unlink()
+    if not args.dont_clear:
+        # removes all current inputs in directory
+        for item in INPUTS_DIR.iterdir():
+            if item.is_file() and item.name.endswith(".yaml"):
+                item.unlink()
 
     print(f"Outputting input files to {CAMPAIGN_DIR}")
 

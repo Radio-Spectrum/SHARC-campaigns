@@ -1,13 +1,13 @@
 import argparse
 
 OPTION_TO_SELECTED_SYS = {
-    "A": ["system-3.2110-2200MHz.525km"],
-    "3": ["system-3.2110-2200MHz.340km"],
-    "4": ["system-4.2110-2200MHz.690km"],
+    "3.1": ["system-3.2110-2200MHz.525km"],
+    "3.2": ["system-3.2110-2200MHz.340km"],
+    # "4": ["system-4.2110-2200MHz.690km"],
     "all": [
         "system-3.2110-2200MHz.525km",
-        "system-4.2110-2200MHz.690km",
         "system-3.2110-2200MHz.340km",
+        # "system-4.2110-2200MHz.690km",
     ]
 }
 
