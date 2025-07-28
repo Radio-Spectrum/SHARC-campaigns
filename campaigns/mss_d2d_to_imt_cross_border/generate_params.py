@@ -15,7 +15,7 @@ def generate(
 ):
     print(f"Generating inputs for {mss_id}, co_channel={co_channel}")
     general = {
-        "seed": 101,
+        "seed": 1026,
         ###########################################################################
         # Number of simulation snapshots
         ###########################################################################
@@ -38,8 +38,8 @@ def generate(
     # scenario
     params.imt.interfered_with = True
 
-    ul_imt_freq = 2160.0
-    dl_imt_freq = 1950.0
+    ul_imt_freq = 1950.0
+    dl_imt_freq = 2160.0
 
     params.general.enable_cochannel = co_channel
     params.general.enable_adjacent_channel = True
@@ -77,12 +77,15 @@ def generate(
     for link in ["dl", "ul"]:
         params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
         params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
-        params.mss_d2d.frequency = params.imt.frequency
+        params.mss_d2d.frequency = dl_imt_freq  # it's co-channel with the IMT DL - 2110-2170MHz
+        params.general.enable_cochannel = co_channel if link == "dl" else False
+        params.imt.adjacent_ch_reception = "ACS" if link == "ul" else "OFF"
 
-        if not co_channel:
-            params.mss_d2d.frequency += (
-                params.imt.bandwidth + params.mss_d2d.bandwidth
-            ) / 2
+        # Parameters used for P.619
+        # WARNING: Remeber to set the Foz lut in propagation/Dataset!
+        #params.mss_d2d.channel_model = "P619"
+        #params.mss_d2d.param_p619.earth_station_lat_deg = -25.5549751
+        #params.mss_d2d.param_p619.earth_station_alt_m = 200
 
         # Get cell radius
         params.mss_d2d.antenna_s1528.frequency = params.mss_d2d.frequency

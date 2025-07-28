@@ -95,6 +95,10 @@ imt:
         # Base station array ohmic loss  [dB]
         # NOTE: element gain includes ohmic loss
         ohmic_loss: 0.0
+        ###########################################################################
+        # Adjacent channel selectivity
+        adjacent_ch_selectivity: 46.0
+        ###########################################################################
         # Base Station Antenna parameters:
         antenna:
             array:
