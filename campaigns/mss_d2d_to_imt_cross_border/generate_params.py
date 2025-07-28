@@ -38,13 +38,8 @@ def generate(
     # scenario
     params.imt.interfered_with = True
 
-    params.imt.frequency = 2160.0
-    params.mss_d2d.frequency = 2160.0
-
-    if not co_channel:
-        params.mss_d2d.frequency += (
-            params.imt.bandwidth + params.mss_d2d.bandwidth
-        ) / 2
+    ul_imt_freq = 2160.0
+    dl_imt_freq = 1950.0
 
     params.general.enable_cochannel = co_channel
     params.general.enable_adjacent_channel = True
@@ -97,15 +92,22 @@ def generate(
     params.mss_d2d.cell_radius = int(cell_radius)
     print("Calculated cell radius: ", params.mss_d2d.cell_radius)
 
-    # distances = np.linspace(params.mss_d2d.cell_radius / 1e3, 100, 4)
-    # distances = [float(round(d, 3)) for d in distances]
-    distances = [100.000]
+    distances = np.linspace(params.mss_d2d.cell_radius / 1e3, 100, 4)
+    distances = [float(round(d, 3)) for d in distances]
+    # distances = [100.000]
     print("Scenarios of grid border as ", distances)
-    for load in [0.2]:#, 0.5]:
+    for load in [0.2, 0.5]:
         params.mss_d2d.beams_load_factor = load
 
         for link in ["dl", "ul"]:
             params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
+            params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
+            params.mss_d2d.frequency = params.imt.frequency
+
+            if not co_channel:
+                params.mss_d2d.frequency += (
+                    params.imt.bandwidth + params.mss_d2d.bandwidth
+                ) / 2
 
             for border in distances:
                 params.mss_d2d.beam_positioning.service_grid.grid_margin_from_border = border
