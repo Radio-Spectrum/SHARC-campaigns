@@ -49,7 +49,7 @@ if __name__ == "__main__":
         """
         dirname = result.output_directory
         pattern = re.compile(
-            r"output_mss_d2d_to_imt_cross_border_(\d+)km_(\d+)load_(.+)"
+            r"output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_([ud]l)_"
         )
         match = pattern.match(dirname)
         if not match:
@@ -57,8 +57,6 @@ if __name__ == "__main__":
 
         border_km, load_pct, link_type = match.groups()
 
-        link_type = link_type.uppercase()
-        load_pct = float(load_pct) * 100
         if load_pct == "0.2":
             return "dot"
         return "solid"

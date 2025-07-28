@@ -74,41 +74,44 @@ def generate(
     params.mss_d2d.sat_is_active_if.lat_long_inside_country.margin_from_border = \
         params.mss_d2d.beam_positioning.service_grid.eligible_sats_margin_from_border
 
-    # Get cell radius
-    params.mss_d2d.antenna_s1528.frequency = params.mss_d2d.frequency
-    antenna = AntennaS1528Taylor(
-        params.mss_d2d.antenna_s1528
-    )
-    off_axis = np.linspace(0, 20, int(1e6))
-    gains = antenna.calculate_gain(
-        off_axis_angle_vec=off_axis,
-        theta_vec=0,
-    )
-    angle_7dB_i = np.where(gains <= params.mss_d2d.antenna_s1528.antenna_gain - 7)[0][0]
-    angle_7dB = off_axis[angle_7dB_i]
-    cell_radius = np.tan(np.deg2rad(angle_7dB)) * params.mss_d2d.orbits[0].apogee_alt_km * 1e3
+    for link in ["dl", "ul"]:
+        params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
+        params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
+        params.mss_d2d.frequency = params.imt.frequency
 
-    # apprx. 36675.5
-    params.mss_d2d.cell_radius = int(cell_radius)
-    print("Calculated cell radius: ", params.mss_d2d.cell_radius)
+        if not co_channel:
+            params.mss_d2d.frequency += (
+                params.imt.bandwidth + params.mss_d2d.bandwidth
+            ) / 2
 
-    distances = np.linspace(params.mss_d2d.cell_radius / 1e3, 100, 4)
-    distances = [float(round(d, 3)) for d in distances]
-    # distances = [100.000]
-    print("Scenarios of grid border as ", distances)
-    for load in [0.2, 0.5]:
-        params.mss_d2d.beams_load_factor = load
+        # Get cell radius
+        params.mss_d2d.antenna_s1528.frequency = params.mss_d2d.frequency
+        # NOTE: max frequency yields smaller cell radius
+        # params.mss_d2d.antenna_s1528.frequency = max(ul_imt_freq, dl_imt_freq)
+        antenna = AntennaS1528Taylor(
+            params.mss_d2d.antenna_s1528
+        )
+        off_axis = np.linspace(0, 20, int(1e6))
+        gains = antenna.calculate_gain(
+            off_axis_angle_vec=off_axis,
+            theta_vec=0,
+        )
+        angle_7dB_i = np.where(gains <= params.mss_d2d.antenna_s1528.antenna_gain - 7)[0][0]
+        angle_7dB = off_axis[angle_7dB_i]
+        cell_radius = np.tan(np.deg2rad(angle_7dB)) * params.mss_d2d.orbits[0].apogee_alt_km * 1e3
 
-        for link in ["dl", "ul"]:
-            params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
-            params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
-            params.mss_d2d.frequency = params.imt.frequency
+        # apprx. 36675.5
+        params.mss_d2d.cell_radius = int(cell_radius)
+        print(f"[IMT TN {params.general.imt_link}]:")
+        print(f"\tCalculated cell radius: ", params.mss_d2d.cell_radius)
 
-            if not co_channel:
-                params.mss_d2d.frequency += (
-                    params.imt.bandwidth + params.mss_d2d.bandwidth
-                ) / 2
+        distances = np.linspace(params.mss_d2d.cell_radius / 1e3, 100, 4)
+        distances = [float(round(d, 3)) for d in distances]
+        # distances = [100.000]
+        print("\tScenarios of grid border as ", distances)
 
+        for load in [0.2, 0.5]:
+            params.mss_d2d.beams_load_factor = load
             for border in distances:
                 params.mss_d2d.beam_positioning.service_grid.grid_margin_from_border = border
                 output_start = get_output_dir_start(mss_id, co_channel)
@@ -128,7 +131,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num-of-drops", "-n",
         type=int,
-        default=int(1e5),
+        default=int(1e4),
         help="Number of drops to be simulated"
     )
     parser.add_argument(
@@ -155,3 +158,5 @@ if __name__ == "__main__":
             selected_sys,
             not args.adj,
         )
+    n_of_inputs = np.sum([item.name.endswith(".yaml") for item in INPUTS_DIR.iterdir()])
+    print("Number of input files: ", n_of_inputs)
