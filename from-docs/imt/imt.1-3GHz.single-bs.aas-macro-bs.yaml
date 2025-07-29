@@ -64,7 +64,7 @@ imt:
             # Inter-site distance or Cell Radius in single Base Station network topology [m]
             # You can either provide 'cell_radius' or 'intersite_distance' for this topology
             # The relationship used is cell_radius = intersite_distance * 2 / 3
-            cell_radius: 500
+            cell_radius: 400  # typical value to be used in sharing studies for urban macro 0.4 km 
             # intersite_distance: 1
             ###########################################################################
             # Number of clusters in single base station topology

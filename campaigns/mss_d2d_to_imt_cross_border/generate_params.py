@@ -74,18 +74,20 @@ def generate(
     params.mss_d2d.sat_is_active_if.lat_long_inside_country.margin_from_border = \
         params.mss_d2d.beam_positioning.service_grid.eligible_sats_margin_from_border
 
+    # Parameters used for P.619
+    # WARNING: Remember to set the lut in propagation/Dataset!
+    params.mss_d2d.channel_model = "P619"
+    params.mss_d2d.param_p619.earth_station_lat_deg = -25.5549751
+    params.mss_d2d.param_p619.earth_station_alt_m = 200
+    params.mss_d2d.param_p619.mean_clutter_height = "mid"
+    params.mss_d2d.param_p619.below_rooftop = 50
+
     for link in ["dl", "ul"]:
         params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
         params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
         params.mss_d2d.frequency = dl_imt_freq  # it's co-channel with the IMT DL - 2110-2170MHz
         params.general.enable_cochannel = co_channel if link == "dl" else False
         params.imt.adjacent_ch_reception = "ACS" if link == "ul" else "OFF"
-
-        # Parameters used for P.619
-        # WARNING: Remeber to set the Foz lut in propagation/Dataset!
-        #params.mss_d2d.channel_model = "P619"
-        #params.mss_d2d.param_p619.earth_station_lat_deg = -25.5549751
-        #params.mss_d2d.param_p619.earth_station_alt_m = 200
 
         # Get cell radius
         params.mss_d2d.antenna_s1528.frequency = params.mss_d2d.frequency
