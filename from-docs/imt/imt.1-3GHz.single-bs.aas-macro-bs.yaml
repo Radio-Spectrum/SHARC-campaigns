@@ -75,7 +75,7 @@ imt:
     # IMT and other services in adjacent band
     # Possible values: SINGLE_ELEMENT, BEAMFORMING
     adjacent_antenna_model: SINGLE_ELEMENT
-    # Base station parameters
+    # Base station parameters - Urban Macrocell
     bs:
         ###########################################################################
         # The load probability (or activity factor) models the statistical
