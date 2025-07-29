@@ -16,6 +16,13 @@ if __name__ == "__main__":
     post_processor = PostProcessor()
 
     parser = get_cmd_parser()
+    parser.add_argument(
+        "--plot_type",
+        type=str,
+        choices=["cdf", "ccdf"],
+        default="cdf",
+        help="Type of plot to generate. Choose 'cdf' or 'ccdf'. Default: 'cdf'"
+    )
     args = parser.parse_args()
 
     if len(args.mss) > 1:
@@ -30,8 +37,8 @@ if __name__ == "__main__":
         )
         match = pattern.match(dirname)
         if not match:
-            return "Unknown"        
-        
+            return "Unknown"
+
         border_km, load_pct, link_type = match.groups()
 
         link_type = link_type.upper()
@@ -98,9 +105,17 @@ if __name__ == "__main__":
 
     post_processor.add_results(all_results)
 
-    plots = post_processor.generate_ccdf_plots_from_results(
-        all_results
-    )
+    if args.plot_type == "cdf":
+        plots = post_processor.generate_cdf_plots_from_results(
+            all_results,
+        )
+    elif args.plot_type == "ccdf":
+        plots = post_processor.generate_ccdf_plots_from_results(
+            all_results,
+        )
+    else:
+        raise ValueError(f"Unknown plot type: {args.plot_type}. Choose 'cdf' or 'ccdf'.")
+
     post_processor.add_plots(plots)
 
     # Add a protection criteria line:
@@ -108,7 +123,7 @@ if __name__ == "__main__":
     perc_of_time = 0.01
 
     for attr in ["imt_dl_inr", "imt_ul_inr"]:
-        plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type='ccdf')
+        plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=args.plot_type)
         if plot is not None:
             plot.add_vline(protection_criteria, line_dash="dash", annotation=dict(
                 text="Protection criteria",
@@ -123,7 +138,7 @@ if __name__ == "__main__":
 
     pfd_protection_criteria = -109
     for attr in ["imt_dl_pfd_external", "imt_dl_pfd_external_aggregated"]:
-        plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type='ccdf')
+        plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=args.plot_type)
         if plot is not None:
             plot.add_vline(pfd_protection_criteria, line_dash="dash", annotation=dict(
                 text="PFD protection criteria",
@@ -146,12 +161,12 @@ if __name__ == "__main__":
     specific_dir.mkdir(exist_ok=True)
 
     for attr in attributes_to_plot:
-        plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type="ccdf")
+        plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=args.plot_type)
         if plot is None:
             print(f"Warning: No plot found for attribute '{attr}'")
             continue
-        # plot.write_html(specific_dir / f"{attr}.html")
-        plot.show()
+        plot.write_html(specific_dir / f"{attr}.html")
+        # plot.show()
 
 
     # # Now let's plot the beam per satellite results.
