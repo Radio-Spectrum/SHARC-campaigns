@@ -128,11 +128,11 @@ if __name__ == "__main__":
                 protection_criteria,
                 line_dash="dash", annotation=dict(
                     text="-6dB Protection criteria",
-                    font=dict(size=18),
+                    font=dict(size=20),
                     xref="x",
                     yref="paper",
                     x=protection_criteria + 0.2,  # Offset for visibility
-                    y=0.15
+                    y=0.85
                 )
             )
         else:
@@ -186,12 +186,12 @@ if __name__ == "__main__":
             gridwidth=1.5
         )
         plot.update_layout(
-            xaxis_title_font=dict(size=20),
-            yaxis_title_font=dict(size=20)
+            xaxis_title_font=dict(size=24),
+            yaxis_title_font=dict(size=24),
+            legend=dict(font=dict(size=20)),
+            template="plotly_white"
         )
-        plot.update_layout(
-            template="plotly_white",
-        )
+
         # Make grid lines darker
         if plot is None:
             print(f"Warning: No plot found for attribute '{attr}'")
