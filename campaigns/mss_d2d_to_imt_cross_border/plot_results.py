@@ -56,7 +56,7 @@ if __name__ == "__main__":
         """
         dirname = result.output_directory
         pattern = re.compile(
-            r"output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_([ud]l)_"
+            r".*/output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_([ud]l)_"
         )
         match = pattern.match(dirname)
         if not match:
@@ -120,19 +120,21 @@ if __name__ == "__main__":
 
     # Add a protection criteria line:
     protection_criteria = -6
-    perc_of_time = 0.01
 
     for attr in ["imt_dl_inr", "imt_ul_inr"]:
         plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=args.plot_type)
         if plot is not None:
-            plot.add_vline(protection_criteria, line_dash="dash", annotation=dict(
-                text="Protection criteria",
-                xref="x",
-                yref="paper",
-                x=protection_criteria + 1.0,  # Offset for visibility
-                y=0.95
-            ))
-            plot.add_hline(perc_of_time, line_dash="dash")
+            plot.add_vline(
+                protection_criteria,
+                line_dash="dash", annotation=dict(
+                    text="-6dB Protection criteria",
+                    font=dict(size=18),
+                    xref="x",
+                    yref="paper",
+                    x=protection_criteria + 0.2,  # Offset for visibility
+                    y=0.15
+                )
+            )
         else:
             print(f"Warning: No plot found for attribute '{attr}'")
 
@@ -142,6 +144,7 @@ if __name__ == "__main__":
         if plot is not None:
             plot.add_vline(pfd_protection_criteria, line_dash="dash", annotation=dict(
                 text="PFD protection criteria",
+                font=dict(size=18),
                 xref="x",
                 yref="paper",
                 x=pfd_protection_criteria + 1.0,  # Offset for visibility
@@ -162,6 +165,34 @@ if __name__ == "__main__":
 
     for attr in attributes_to_plot:
         plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=args.plot_type)
+        # Add plot outline and increase font size
+        plot.update_xaxes(
+            title="INR[dB]",
+            linewidth=1,
+            linecolor='black',
+            mirror=True,
+            ticks='inside',
+            showline=True,
+            gridcolor="#DCDCDC",
+            gridwidth=1.5
+        )
+        plot.update_yaxes(
+            linewidth=1,
+            linecolor='black',
+            mirror=True,
+            ticks='inside',
+            showline=True,
+            gridcolor="#DCDCDC",
+            gridwidth=1.5
+        )
+        plot.update_layout(
+            xaxis_title_font=dict(size=20),
+            yaxis_title_font=dict(size=20)
+        )
+        plot.update_layout(
+            template="plotly_white",
+        )
+        # Make grid lines darker
         if plot is None:
             print(f"Warning: No plot found for attribute '{attr}'")
             continue
