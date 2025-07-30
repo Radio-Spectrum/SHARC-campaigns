@@ -199,7 +199,7 @@ imt:
         k_m: 1
         ###########################################################################
         # Percentage of indoor UE's [%]
-        indoor_percent: 0.0
+        indoor_percent: 70.0
         ###########################################################################
         # Regarding the distribution of active UE's over the cell area, this
         # parameter states how the UEs will be distributed
