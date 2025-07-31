@@ -55,5 +55,5 @@ single_earth_station:
       gain: 39
       itu_r_s_465:
         # Diameter [m]
-        diameter: 12  # derived with efficiency 0.5
+        diameter: 5.5  # derived with efficiency 0.5
 
