@@ -7,11 +7,10 @@ id: eess.2200-2290MHz.system-B
 
 metadata:
   referenced_documents:
-    - 4C/196-E
-  created_at: 23-07-2025
+    - 4C/196-E - Annex 2 - Table 2
 
 single_earth_station:
-  frequency: 2200  # MHz
+  frequency: 2202  # MHz
   bandwidth: 4  # MHz
   # tx power density just so simulator runs
   tx_power_density: -200
@@ -22,11 +21,6 @@ single_earth_station:
   adjacent_ch_selectivity: 35
   # Channel model
   channel_model: FSPL
-  param_satellite_simple:
-    # Enable clutter loss
-    enable_clutter_loss: false
-    # Atmospheric loss in dB
-    atmospheric_loss: 0.65
   # NOTE: when using P.619 it is suggested that polarization loss = 3dB is good
   polarization_loss: 0
   # Earth Station parameters
@@ -62,4 +56,3 @@ single_earth_station:
       itu_r_s_465:
         # Diameter [m]
         diameter: 12  # derived with efficiency 0.5
-
