@@ -108,20 +108,28 @@ def generate_inputs():
 
         # position ES at reference
         eess_geom = params.single_earth_station.geometry
+        eess_geom.height = 15
         eess_geom.location.type = "FIXED"
         eess_geom.location.fixed.x = 0
         eess_geom.location.fixed.y = 0
+
+        eess_geom.azimuth.type = "UNIFORM_DIST"
+        eess_geom.azimuth.uniform_dist.max = 180.
+        eess_geom.azimuth.uniform_dist.min = -180.
 
         # Parameters used for P.619
         # WARNING: Remember to set the lut in propagation/Dataset!
         params.single_earth_station.season = "SUMMER"
         # params.single_earth_station.channel_model = "FSPL"
         params.single_earth_station.channel_model = "P619"
+        # 3dB polarization loss, as suggested by P.619
+        params.single_earth_station.polarization_loss = 3
+
         params.single_earth_station.param_p619.earth_station_lat_deg = params.imt.topology.central_latitude
         params.single_earth_station.param_p619.earth_station_alt_m = params.imt.topology.central_altitude
         # TODO: decide on these params:
         params.single_earth_station.param_p619.mean_clutter_height = "low"
-        params.single_earth_station.param_p619.below_rooftop = 50
+        params.single_earth_station.param_p619.below_rooftop = 0
 
         ##########
         # MSS DC Parameters
@@ -144,14 +152,8 @@ def generate_inputs():
             params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border
 
         # Set adjacent antenna pattern
-        # NOTE: currently adjacent antenna pattern is
-        # M2101 single element
-        # this may not be the best modelling
-        # TODO: have some way of defining this at parameter level?
-        # maybe have some modifier so that we may import `id:adjacent`?
-        # or some "parameter level" utility for mounting some
-        # kinds of parameter?
-        params.imt.bs.antenna.pattern = "ARRAY"
+        # Editor's note say that 1528 should still be used in adjacent studies
+        # params.imt.bs.antenna.pattern = "ARRAY"
 
         # Get cell radius based on co-channel antenna pattern
         params.imt.bs.antenna.itu_r_s_1528.frequency = params.imt.frequency
@@ -186,10 +188,6 @@ def generate_inputs():
             f"has been assumed for an efficiency of {n}."
         )
         antenna_model_param.diameter = diam
-
-        eess_geom.azimuth.type = "UNIFORM_DIST"
-        eess_geom.azimuth.uniform_dist.max = 180.
-        eess_geom.azimuth.uniform_dist.min = -180.
 
         for eess_elev in [
             5, 30, 60, 90
