@@ -79,14 +79,16 @@ def generate(
     params.mss_d2d.channel_model = "P619"
     params.mss_d2d.param_p619.earth_station_lat_deg = -25.5549751
     params.mss_d2d.param_p619.earth_station_alt_m = 200
-    params.mss_d2d.param_p619.mean_clutter_height = "mid"
-    params.mss_d2d.param_p619.below_rooftop = 50
+    params.mss_d2d.param_p619.mean_clutter_height = "low"
+
+    # Polarization loss - following Item 2.2 of the Rec. ITU-P.61
+    params.mss_d2d.polarization_loss = 3.0  # dB
 
     for link in ["dl", "ul"]:
         params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
         params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
         params.mss_d2d.frequency = params.imt.frequency  # always co-channel
-        params.general.enable_cochannel = co_channel if link == "dl" else False
+        params.mss_d2d.param_p619.below_rooftop = 0.0 if link == "dl" else 50.0
 
         # Get cell radius
         params.mss_d2d.antenna_s1528.frequency = params.mss_d2d.frequency
