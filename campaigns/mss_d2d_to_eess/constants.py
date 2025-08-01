@@ -14,7 +14,9 @@ SYS_ID_TO_READABLE = {
 
 def get_specific_pattern(
     elev: int | typing.Literal["UNIFORM"],
-    eess_id: str
+    eess_id: str,
+    mask: typing.Literal["mss", "3gpp", "spurious"],
+    mss_load_factor: float
 ):
     if isinstance(elev, int):
         pass
@@ -24,7 +26,7 @@ def get_specific_pattern(
         raise ValueError(
             f"Unexpected elevation value for pattern: {elev}"
         )
-    return f"{elev}elev_{eess_id}"
+    return f"{mask}_mask_{mss_load_factor}load_{elev}elev_{eess_id}"
 
 if __name__ == "__main__":
     print("CAMPAIGN_NAME", CAMPAIGN_NAME)

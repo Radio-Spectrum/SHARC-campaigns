@@ -92,8 +92,6 @@ def generate_inputs():
         # NOTE: needed for performance. Discards unnecessary calcs.
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        # NOTE: consider using 2197.5 MHz for directly adjacent simulation
-        params.imt.frequency = 2160.0
         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
 
         params.single_earth_station.frequency = 2200 + params.single_earth_station.bandwidth / 2
@@ -156,6 +154,7 @@ def generate_inputs():
         # params.imt.bs.antenna.pattern = "ARRAY"
 
         # Get cell radius based on co-channel antenna pattern
+        params.imt.frequency = 2197.5
         params.imt.bs.antenna.itu_r_s_1528.frequency = params.imt.frequency
         params.imt.bs.antenna.set_external_parameters(
             frequency=params.imt.frequency,
@@ -165,6 +164,7 @@ def generate_inputs():
             params.imt.bs.antenna.itu_r_s_1528,
             params.imt.topology.mss_dc.orbits[0].apogee_alt_km,
         )
+        print(f"A cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
 
         ##########
         # EESS Parameters
@@ -189,31 +189,57 @@ def generate_inputs():
         )
         antenna_model_param.diameter = diam
 
-        for eess_elev in [
-            5, 30, 60, 90
+        params.imt.spurious_emissions = -13
+        for load in [
+            0.2,
+            0.5,
         ]:
-            params.single_earth_station.geometry.elevation.type = "FIXED"
-            params.single_earth_station.geometry.elevation.fixed = eess_elev
-            specific = get_specific_pattern(eess_elev, eess_sys_id)
-            params.general.output_dir_prefix = OUTPUT_START_NAME + specific
+            params.imt.bs.load_probability = load
+            for mask in [
+                "MSS",
+                "3GPP E-UTRA",
+                "spurious"
+            ]:
+                readable_mask = {
+                    "MSS": "mss",
+                    "3GPP E-UTRA": "3gpp",
+                    "spurious": "spurious"
+                }[mask]
 
-            dump_parameters(
-                INPUTS_DIR / (PARAMETER_START_NAME + specific + ".yaml"),
-                params,
-            )
+                if mask == "spurious":
+                    # there is no need to simulate both masks since
+                    # for this freq only spurious emissions reach eess
+                    params.imt.spectral_mask = "3GPP E-UTRA"
+                    params.imt.frequency = 2167.5
+                else:
+                    params.imt.frequency = 2197.5
+                    params.imt.spectral_mask = mask
 
-        # also do uniform dist of elevation angles
-        params.single_earth_station.geometry.elevation.type = "UNIFORM_DIST"
-        params.single_earth_station.geometry.elevation.uniform_dist.min = 5
-        params.single_earth_station.geometry.elevation.uniform_dist.max = 90
+                for eess_elev in [
+                    5, 30, 60, 90
+                ]:
+                    params.single_earth_station.geometry.elevation.type = "FIXED"
+                    params.single_earth_station.geometry.elevation.fixed = eess_elev
+                    specific = get_specific_pattern(eess_elev, eess_sys_id, readable_mask, load)
+                    params.general.output_dir_prefix = OUTPUT_START_NAME + specific
 
-        specific = get_specific_pattern("uniform", eess_sys_id)
-        params.general.output_dir_prefix = OUTPUT_START_NAME + specific
+                    dump_parameters(
+                        INPUTS_DIR / (PARAMETER_START_NAME + specific + ".yaml"),
+                        params,
+                    )
 
-        dump_parameters(
-            INPUTS_DIR / (PARAMETER_START_NAME + specific + ".yaml"),
-            params,
-        )
+                # also do uniform dist of elevation angles
+                params.single_earth_station.geometry.elevation.type = "UNIFORM_DIST"
+                params.single_earth_station.geometry.elevation.uniform_dist.min = 5
+                params.single_earth_station.geometry.elevation.uniform_dist.max = 90
+
+                specific = get_specific_pattern("uniform", eess_sys_id, readable_mask, load)
+                params.general.output_dir_prefix = OUTPUT_START_NAME + specific
+
+                dump_parameters(
+                    INPUTS_DIR / (PARAMETER_START_NAME + specific + ".yaml"),
+                    params,
+                )
 
 def clear_inputs():
     print(f"Clearing inputs from dir '{INPUTS_DIR}'")
