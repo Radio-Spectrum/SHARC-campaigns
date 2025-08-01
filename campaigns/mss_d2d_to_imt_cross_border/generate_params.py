@@ -87,7 +87,17 @@ def generate(
     for link in ["dl", "ul"]:
         params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
         params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
-        params.mss_d2d.frequency = params.imt.frequency  # always co-channel
+        if co_channel:
+            params.mss_d2d.frequency = params.imt.frequency
+        else:
+            params.imt.adjacent_ch_reception = "ACS"
+            # IMT adjacent channel selectivity - Table 6.5.1-2 - 3GPP TR 38.863
+            if link == "ul":
+                params.imt.bs.adjacent_ch_selectivity = 46.0  # dB
+            else:
+                params.imt.ue.adjacent_ch_selectivity = 33.0  # dB
+            # Set MSS D2D frequency to be adjacent to IMT
+            params.mss_d2d.frequency = params.imt.frequency + params.imt.bandwidth / 2 + params.mss_d2d.bandwidth / 2
         params.mss_d2d.param_p619.below_rooftop = 0.0 if link == "dl" else 50.0
 
         # Get cell radius
