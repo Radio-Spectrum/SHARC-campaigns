@@ -2,7 +2,7 @@ import os
 from sharc.results import Results
 from sharc.post_processor import PostProcessor
 
-from campaigns.mss_d2d_to_eess.constants import CAMPAIGN_DIR, SYS_ID_TO_READABLE, get_specific_pattern
+from campaigns.mss_d2d_to_eess.constants import CAMPAIGN_DIR, SYS_ID_TO_READABLE, get_specific_pattern, MSS_ID_TO_READABLE
 
 auto_open = True
 
@@ -48,45 +48,55 @@ def linestyle_getter(results):
     str
         The line style to use for plotting (e.g., 'dash' or 'solid').
     """
-    if "system-D" in results.output_directory:
-        return "dash"
-    return "solid"
+    i = 0
+    styles = ["solid", "dot", "dash", "dashdot"]
+    if "spurious_mask" in results.output_directory:
+        i = i + 1
+    if "340km" in results.output_directory:
+        i = i + 2
+    return styles[i]
 
 
 post_processor.add_results_linestyle_getter(linestyle_getter)
 
-for sys_name in [
-    "eess.2200-2290MHz.system-B",
-    "eess.2200-2290MHz.system-D",
+for mss_dc in [
+    "imt.2110-2200MHz.mss-dc.system3-525km",
+    "imt.2110-2200MHz.mss-dc.system3-340km",
 ]:
-    readable_sys = SYS_ID_TO_READABLE[sys_name]
-    for load in [
-        0.2,
-        0.5,
-        1
+    readable_mss = MSS_ID_TO_READABLE[mss_dc]
+    for sys_name in [
+        "eess.2200-2290MHz.system-B",
+        "eess.2200-2290MHz.system-D",
     ]:
-        readable_load = f"Load = {load * 100}%"
-        for mask in [
-            "mss",
-            "3gpp",
-            "spurious",
+        readable_sys = SYS_ID_TO_READABLE[sys_name]
+        for load in [
+            0.2,
+            0.5,
+            1
         ]:
-            readable_mask = {
-                "mss": "Mask = ITU-R SM.1541; @2197.5",
-                "3gpp": "Mask = 3GPP E-UTRA; @2197.5",
-                "spurious": "Mask = -13 dBm/MHz; @2167.5",
-            }[mask]
-            for elev in [5, 30, 60, 90, "uniform"]:
-                if elev == "uniform":
-                    readable_elev = "Elev = Unif. Dist."
-                else:
-                    readable_elev = f"Elev = {elev}º"
-                # IMT-MSS-D2D-DL to EESS
-                post_processor\
-                    .add_plot_legend_pattern(
-                        dir_name_contains=get_specific_pattern(elev, sys_name, mask, load),
-                        legend=f"{readable_sys}, {readable_elev}; MSS {readable_load}, {readable_mask}"
-                    )
+            readable_load = f"Load = {load * 100}%"
+            for mask in [
+                "mss",
+                "spurious",
+            ]:
+                readable_mask = {
+                    "mss": "@2197.5",
+                    "spurious": "@2167.5",
+                }[mask]
+                for elev in [5, 30, 60, 90, "uniform"]:
+                    if elev == "uniform":
+                        readable_elev = "Elev = Unif. Dist."
+                    else:
+                        readable_elev = f"Elev = {elev}º"
+                    # IMT-MSS-D2D-DL to EESS
+                    post_processor\
+                        .add_plot_legend_pattern(
+                            dir_name_contains=get_specific_pattern(
+                                elev, sys_name, mss_dc, mask, load
+                            ),
+                            legend=f"{readable_sys}; {readable_mss}, {readable_load}, {readable_mask}"
+                            # legend=f"{readable_sys}, {readable_elev}; {readable_mss}, {readable_load}, {readable_mask}"
+                        )
 # ^: typing.List[Results]
 
 plots = post_processor.generate_ccdf_plots_from_results(

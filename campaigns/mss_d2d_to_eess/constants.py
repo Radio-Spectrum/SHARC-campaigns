@@ -12,9 +12,15 @@ SYS_ID_TO_READABLE = {
     "eess.2200-2290MHz.system-D": "EESS D",
 }
 
+MSS_ID_TO_READABLE = {
+    "imt.2110-2200MHz.mss-dc.system3-525km": "MSS DC @525km",
+    "imt.2110-2200MHz.mss-dc.system3-340km": "MSS DC @340km",
+}
+
 def get_specific_pattern(
     elev: int | typing.Literal["UNIFORM"],
     eess_id: str,
+    imt_mss_dc_id: str,
     mask: typing.Literal["mss", "3gpp", "spurious"],
     mss_load_factor: float
 ):
@@ -26,7 +32,7 @@ def get_specific_pattern(
         raise ValueError(
             f"Unexpected elevation value for pattern: {elev}"
         )
-    return f"{mask}_mask_{mss_load_factor}load_{elev}elev_{eess_id}"
+    return f"{mask}_mask_{mss_load_factor}load_{elev}elev_{eess_id}_{imt_mss_dc_id}"
 
 if __name__ == "__main__":
     print("CAMPAIGN_NAME", CAMPAIGN_NAME)
