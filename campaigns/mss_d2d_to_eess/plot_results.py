@@ -1,5 +1,5 @@
-import os
-from sharc.results import Results
+import numpy as np
+from sharc.results import Results, SampleList
 from sharc.post_processor import PostProcessor
 
 from campaigns.mss_d2d_to_eess.constants import CAMPAIGN_DIR, SYS_ID_TO_READABLE, get_specific_pattern, MSS_ID_TO_READABLE
@@ -33,6 +33,12 @@ cdf_results = Results.load_many_from_dir(
     only_latest=True,
     only_samples=samples_for_cdf)
 
+for res in ccdf_results:
+    # converting dBm to dB
+    # TODO: update this after fixing unit problems at the SHARC simulator
+    res.system_dl_interf_power_per_mhz = SampleList(np.array(
+            res.system_dl_interf_power_per_mhz
+        ) - 30)
 
 def linestyle_getter(results):
     """
