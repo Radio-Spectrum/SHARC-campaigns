@@ -165,7 +165,42 @@ HTMLS_DIR.mkdir(exist_ok=True)
 print(f"Saving plots in {HTMLS_DIR}")
 for attr, plot_type in attributes_to_plot:
     file = HTMLS_DIR / f"{attr}.html"
-    post_processor\
-        .get_plot_by_results_attribute_name(attr, plot_type=plot_type)\
-        .write_html(file=file, include_plotlyjs="cdn", auto_open=auto_open)
+    plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=plot_type)
+    # Add plot outline and increase font size
+    plot.update_xaxes(
+        linewidth=1,
+        linecolor='black',
+        mirror=True,
+        ticks='inside',
+        showline=True,
+        gridcolor="#DCDCDC",
+        gridwidth=1.5
+    )
+    plot.update_yaxes(
+        linewidth=1,
+        linecolor='black',
+        mirror=True,
+        ticks='inside',
+        showline=True,
+        gridcolor="#DCDCDC",
+        gridwidth=1.5
+    )
+    plot.update_layout(
+        xaxis_title_font=dict(size=24),
+        yaxis_title_font=dict(size=24),
+        template="plotly_white"
+    )
+    plot.update_layout(
+        legend=dict(
+            font=dict(size=18),
+            x=0.01,
+            y=0.05,
+            xanchor='left',
+            yanchor='bottom',
+            bgcolor='rgba(255,255,255,0.7)',
+            bordercolor='black',
+            borderwidth=1
+        )
+    )
+    plot.write_html(file=file, include_plotlyjs="cdn", auto_open=auto_open)
 
