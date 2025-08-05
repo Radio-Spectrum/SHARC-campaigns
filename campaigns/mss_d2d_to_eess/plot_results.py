@@ -149,6 +149,9 @@ system_dl_interf_power_per_mhz.add_hline(perc_time, line_dash="dash", annotation
     x=protection_criteria + 0.5, y=perc_time + 0.01,
     font=dict(size=12, color="blue")
 ))
+system_dl_interf_power_per_mhz.update_xaxes(
+    title_text="dB[W/MHz]",
+)
 
 
 attributes_to_plot = [
@@ -174,7 +177,9 @@ for attr, plot_type in attributes_to_plot:
         ticks='inside',
         showline=True,
         gridcolor="#DCDCDC",
-        gridwidth=1.5
+        gridwidth=1.5,
+        title_font=dict(size=16),
+        tickfont=dict(size=16),
     )
     plot.update_yaxes(
         linewidth=1,
@@ -192,9 +197,11 @@ for attr, plot_type in attributes_to_plot:
     )
     plot.update_layout(
         legend=dict(
-            font=dict(size=18),
-            x=0.01,
-            y=0.05,
+            font=dict(size=14),
+            x=0.2,
+            y=-0.5,
+            # xanchor='left',
+            orientation='h',
             xanchor='left',
             yanchor='bottom',
             bgcolor='rgba(255,255,255,0.7)',
