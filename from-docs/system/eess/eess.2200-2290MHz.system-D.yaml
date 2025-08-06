@@ -1,0 +1,59 @@
+#### EESS Parameters @2GHz
+# Single Earth Station representing an EESS Earth Station in the 2.0 GHz band.
+# Referce data comes from the REPLY LIAISON STATEMENT TO WORKING PARTY 4C ON
+# WRC-27 AGENDA ITEMS 1.12, 1.13, 1.14 AND 1.15 - Document 4C/196-E
+# System D is specified in the document 4C/196-E - Annex 2 - Table 2
+id: eess.2200-2290MHz.system-D
+
+metadata:
+  referenced_documents:
+    - 4C/196-E - Annex 2 - Table 2
+
+single_earth_station:
+  frequency: 2202  # MHz
+  bandwidth: 6  # MHz
+  # tx power density just so simulator runs
+  tx_power_density: -200
+  # also just so simulator runs
+  noise_temperature: 120
+  # This is based in pratical data found in other documents.
+  # 35-45dBs are generally assumed. We take 35 as a worst case.
+  adjacent_ch_selectivity: 35
+  # Channel model
+  channel_model: FSPL
+  # NOTE: when using P.619 it is suggested that polarization loss = 3dB is good
+  polarization_loss: 0
+  # Earth Station parameters
+  geometry:
+    height: 7
+    azimuth:
+      # Type of elevation.
+      type: UNIFORM_DIST
+      uniform_dist:
+        max: 180
+        min: -180
+    # Elevation angle [degrees]
+    elevation:
+      # Type of elevation.
+      type: FIXED
+      fixed: 90
+    # Station 2d location [meters]:
+    location:
+      type: FIXED
+      fixed:
+        x: 0
+        y: 0
+  antenna:
+      ###########################################################################
+      # Choose the antenna pattern. Can be one of:
+      # "OMNI", "ITU-R F.699", "ITU-R S.465", "ITU-R S.580", "MODIFIED ITU-R S.465",
+      # "ITU-R S.1855", "ITU-R S.672"
+      # since 20deg beamwidth would already cover every area
+      pattern: ITU-R S.465
+      ###########################################################################
+      # Station peak receive antenna gain [dBi]
+      gain: 39
+      itu_r_s_465:
+        # Diameter [m]
+        diameter: 5.5  # derived with efficiency 0.5
+
