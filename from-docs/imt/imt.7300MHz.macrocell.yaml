@@ -1,0 +1,108 @@
+#### IMT Macrocell Parameters @7.3GHz
+# IMT system operating in macrocell topology for coexistence/sharing studies
+# Based on Annex 4.2 of Document 5D/413-E and Attachment 6
+
+id: imt.7300MHz.macrocell
+
+metadata:
+  referenced_documents:
+    - Annex 4.2 of 5D/413-E 
+    - Attachment 6 on IMT/MSS sharing in 7125–8400 MHz
+  created_at: 2025-08-08
+
+imt:
+  minimum_separation_distance_bs_ue: 35           # Minimum 2D distance between BS and UE [m]
+  interfered_with: FALSE                          # TRUE = IMT is victim; FALSE = IMT is interferer
+  frequency: 7300.0                               # IMT center frequency [MHz]
+  bandwidth: 100                                  # Total bandwidth [MHz]
+  rb_bandwidth: 0.180                             # Resource Block bandwidth [MHz]
+  adjacent_antenna_model: SINGLE_ELEMENT          # Adjacent antenna model: SINGLE_ELEMENT or BEAMFORMING
+  spectral_mask: IMT-2020                         # Spectral mask type: IMT-2020 or 3GPP E-UTRA
+  spurious_emissions: -13                         # Spurious emission level [dBm/MHz]
+  guard_band_ratio: 0.1                           # Ratio of bandwidth reserved for guard band
+  channel_model: UMa                              # Channel model used: FSPL, CI, UMa, etc.
+  shadowing: TRUE                                 # Enable log-normal shadowing
+
+  topology:
+    type: MACROCELL                               # Layout type: MACROCELL, SINGLE_BS, etc.
+    macrocell:
+      intersite_distance: 600                     # Distance between base station sites [m]
+      wrap_around: FALSE                          # Enable wrap-around layout
+      num_clusters: 1                             # Number of macrocell clusters
+
+  bs:
+    load_probability: 20                          # BS activity factor [%]
+    conducted_power: 22                           # BS power per antenna element [dBm]
+    height: 18                                    # BS antenna height [m]
+    noise_figure: 6                               # BS receiver noise figure [dB]
+    ohmic_loss: 0                                 # Cable/connector ohmic loss [dB]
+
+    antenna:
+      pattern: ARRAY                              # Use antenna array model
+      array:
+        vertical_beamsteering_range: !!python/tuple [90.0, 100.0]
+        normalization: FALSE                      # Apply gain normalization (if TRUE)
+        element_pattern: M2101                    # Element pattern: M2101, F1336, or FIXED
+        minimum_array_gain: -200                  # Minimum allowed array gain [dBi]
+        downtilt: 6                               # Mechanical downtilt angle [degrees]
+        element_max_g: 6.4                        # Max element gain [dBi]
+        element_phi_3db: 90                       # Horizontal 3dB beamwidth [deg]
+        element_theta_3db: 65                     # Vertical 3dB beamwidth [deg]
+        n_rows: 8                                 # Rows in the array
+        n_columns: 16                             # Columns in the array
+        element_horiz_spacing: 0.5                # Horizontal spacing [in wavelengths]
+        element_vert_spacing: 2.1                 # Vertical spacing [in wavelengths]
+        element_am: 30                            # Front-to-back ratio [dB]
+        element_sla_v: 30                         # Vertical sidelobe attenuation [dB]
+        multiplication_factor: 12                 # Pattern scaling factor
+
+        subarray:
+          is_enabled: true                        # Enable subarray support
+          n_rows: 3                               # Subarray rows
+          element_vert_spacing: 0.7               # Vertical spacing in subarray [d/lambda]
+          eletrical_downtilt: 3.0                 # Electrical downtilt for subarray [deg]
+
+  ue:
+    k: 3                                          # Number of UEs per sector (3 sectors for macro)
+    k_m: 1                                        # UE replication factor
+    indoor_percent: 70.0                          # Percentage of indoor UEs [%]
+    distribution_type: UNIFORM_IN_CELL                    # UE spatial distribution
+    distribution_distance: RAYLEIGH               # Distance model for UEs
+    distribution_azimuth: NORMAL                  # Azimuth angle distribution for UEs
+    tx_power_control: ON                          # Enable UE transmit power control
+    p_o_pusch: -92.2                              # Target power per RB [dBm]
+    alpha: 0.8                                    # Path loss compensation factor
+    p_cmax: 23                                    # Max UE transmit power [dBm]
+    power_dynamic_range: 56                       # Power control dynamic range [dB]
+    height: 1.5                                   # UE antenna height [m]
+    noise_figure: 13                              # UE noise figure [dB]
+    ohmic_loss: 0                                 # UE ohmic loss [dB]
+    body_loss: 4                                  # UE body loss [dB]
+
+    antenna:
+      pattern: ARRAY                              # Use antenna array model
+      array:
+        normalization: FALSE                      # Whether to normalize antenna pattern
+        normalization_file: antenna/beamforming_normalization/ue_norm.npz
+        element_pattern: FIXED                    # Element pattern (FIXED = omnidirectional)
+        minimum_array_gain: -200                  # Minimum allowed gain [dBi]
+        element_max_g: -4                         # Max element gain [dBi]
+        element_phi_3db: 180                      # Horizontal 3dB beamwidth [deg]
+        element_theta_3db: 360                    # Vertical 3dB beamwidth [deg]
+        n_rows: 1                                 # Number of rows
+        n_columns: 1                              # Number of columns
+        element_horiz_spacing: 0.5                # Horizontal spacing [d/lambda]
+        element_vert_spacing: 0.5                 # Vertical spacing [d/lambda]
+        element_am: 25                            # Front-to-back ratio [dB]
+        element_sla_v: 25                         # Vertical sidelobe attenuation [dB]
+        multiplication_factor: 12                 # Pattern scaling factor
+
+  downlink:
+    attenuation_factor: 0.6                       # Downlink link-to-system mapping factor
+    sinr_min: -10                                 # Minimum SINR for downlink [dB]
+    sinr_max: 30                                  # Maximum SINR for downlink [dB]
+
+  uplink:
+    attenuation_factor: 0.4                       # Uplink link-to-system mapping factor
+    sinr_min: -10                                 # Minimum SINR for uplink [dB]
+    sinr_max: 22                                  # Maximum SINR for uplink [dB]

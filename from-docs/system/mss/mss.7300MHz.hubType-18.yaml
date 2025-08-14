@@ -1,0 +1,53 @@
+#### EESS Parameters @7.3GHz
+# Single Earth Station representing an EESS Earth Station in the 7.3 GHz band.
+# Custom example using P.452 channel model with fixed parameters.
+
+id: mss.7300MHz.hubType-18
+
+
+metadata:
+  referenced_documents:
+    - Custom parameters based on ITU-R P.452 and practical assumptions
+
+single_earth_station:
+  frequency: 7300             # MHz
+  bandwidth: 1                # MHz
+  tx_power_density: 0         # dBW/Hz
+  noise_temperature: 300      # K
+  adjacent_ch_selectivity: 20.0  # dB
+  polarization_loss: 0        # Assumed no polarization loss
+
+  geometry:
+    height: 1
+    azimuth:
+      type: FIXED
+      fixed: 180              # degrees
+    elevation:
+      type: FIXED
+      fixed: 30               # degrees
+    location:
+      type: FIXED
+      fixed:
+        x: 0
+        y: 1600                # meters
+
+  antenna:
+    pattern: OMNI            # Omnidirectional pattern
+    gain: 4                # dBi
+
+  channel_model: P452
+  param_p452:
+    atmospheric_pressure: 1017     # hPa
+    air_temperature: 293.15        # K
+    N0: 352.58                     # Surface refractivity
+    delta_N: 60                    # Refractivity gradient
+    percentage_p: "RANDOM_GLOBAL"  # Time percentage  "RANDOM_GLOBAL" or "RANDOM" or a number 
+    Dct: 101                       # Distance to coast over land [km]
+    Dcr: 100                       # Distance to coast over sea [km]
+    Hte: 6                        # Tx antenna effective height [m]
+    Hre: 1                         # Rx antenna effective height [m]
+    tx_lat: -15.79                # Tx latitude [deg]
+    rx_lat: -15.85                # Rx latitude [deg]
+    polarization: horizontal      # "horizontal" or "vertical"
+    clutter_loss: TRUE            # Enable clutter loss
+    clutter_type: one_end         # "one_end" or "two_end"
