@@ -66,7 +66,7 @@ imt:
     k: 3                                          # Number of UEs per sector (3 sectors for macro)
     k_m: 1                                        # UE replication factor
     indoor_percent: 70.0                          # Percentage of indoor UEs [%]
-    distribution_type: UNIFORM_IN_CELL                    # UE spatial distribution
+    distribution_type: UNIFORM_IN_CELL            # UE spatial distribution
     distribution_distance: RAYLEIGH               # Distance model for UEs
     distribution_azimuth: NORMAL                  # Azimuth angle distribution for UEs
     tx_power_control: ON                          # Enable UE transmit power control

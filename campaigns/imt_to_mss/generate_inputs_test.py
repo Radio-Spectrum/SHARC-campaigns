@@ -4,7 +4,7 @@ from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
 from campaigns.imt_to_mss.constants import CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR
 
-SEED = 82
+SEED = 81
 
 # Configurações
 CLUTTER_TYPES = ['both_ends']
@@ -12,7 +12,7 @@ ALLOWED_CLUTTER_TYPES = {'one_end', 'both_ends'}
 
 general = {
     "seed": SEED,
-    "num_snapshots": 3000,
+    "num_snapshots": 10,
     "overwrite_output": False,
     "output_dir": f"{CAMPAIGN_STR}/output/",
     "output_dir_prefix": "to-update",
@@ -65,16 +65,16 @@ def generate_inputs():
 
     # Parâmetros da campanha
     Ro = 1600
-    y_values = [Ro + 1000, Ro + 2000, Ro + 5000, Ro + 10000 ]
+    y_values = [Ro + 1000]
     load_probabilities = [50]
-    p_modes = [0.2, 20,"RANDOM_GLOBAL"]  # 
+    p_modes = [0.2, 20]  # 0.2 será "20pct" nos nomes de arquivo
     total = 0
 
     for imt_link in ["UPLINK", "DOWNLINK"]:
         general["imt_link"] = imt_link
         imt_link_tag = imt_link.lower()
 
-        for imt_id in ["imt.7300MHz.macrocell","imt.7300MHz.microcell"]:
+        for imt_id in ["imt.7300MHz.macrocell"]:
             for mss_id in ["mss.7300MHz.hubType-18"]:
                 for y, load_pct, p_mode, clutter_type in product(
                     y_values, load_probabilities, p_modes, clutter_types
@@ -106,7 +106,7 @@ def generate_inputs():
                     params.imt.bs.load_probability = load_pct / 100.0
 
                     # Configurar parâmetros P.452
-                    p_tag= _p_mode_tag(p_mode) if isinstance(p_mode, (int, float)) else p_mode
+                    p_tag= _p_mode_tag(p_mode)
                     params.single_earth_station.param_p452.percentage_p = p_mode
                     params.single_earth_station.param_p452.clutter_loss = True
                     params.single_earth_station.param_p452.clutter_type = clutter_type
