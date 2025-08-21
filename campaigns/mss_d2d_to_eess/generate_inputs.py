@@ -96,7 +96,11 @@ def generate_inputs():
             # NOTE: needed for performance. Discards unnecessary calcs.
             params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-            params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
+            params.imt.adjacent_ch_emissions = "ACLR"
+            # We set this as the EIRP value already includes the adjacent emissions
+            params.imt.bs.adjacent_ch_leak_ratio = 0
+            # dBW based on the EIRP for first adjacent band: -55.6 dBW/Hz
+            params.imt.bs.conducted_power = 41.4
 
             params.single_earth_station.frequency = 2200 + params.single_earth_station.bandwidth / 2
             # NOTE: it seems that ACS was not used in previous iterations
@@ -174,6 +178,13 @@ def generate_inputs():
             )
             print(f"A cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
 
+            # Change the antenna patternn to MSS Adjacent
+            params.imt.bs.antenna.pattern = "MSS Adjacent"
+            params.imt.bs.antenna.mss_adjacent.frequency = params.imt.frequency
+            params.imt.bs.antenna.set_external_parameters(
+                frequency=params.imt.frequency,
+            )
+
             ##########
             # EESS Parameters
             if params.single_earth_station.antenna.pattern == "ITU-R S.465":
@@ -205,7 +216,7 @@ def generate_inputs():
                 params.imt.bs.load_probability = load
                 for mask in [
                     "MSS",
-                    "spurious"
+                    # "spurious"
                 ]:
                     readable_mask = {
                         "MSS": "mss",
