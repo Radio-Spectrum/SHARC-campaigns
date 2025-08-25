@@ -1,5 +1,15 @@
 # TODO: have an actual source of truth for equipment independent of topology
 # it may not even be possible though, considering SHARC's architecture
+
+
+# SG4 - 4C
+# Chair report -> 356 Annex 7
+#   - DL 2160  - 2200 Co-Channel and Adjacent Channel Emissions (ANATEL) 
+#   - Look into Table X3
+#       - Olhar documento 154
+#       - Olhar documento 184(G)
+#      
+# Verificar as contribui'coes do draft 
 id: imt.2110-2200MHz.mss-dc.system3-340km
 
 metadata:

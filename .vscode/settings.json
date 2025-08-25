@@ -1,0 +1,7 @@
+{
+  "python.defaultInterpreterPath": "C:\\Users\\Daniel\\Documents\\Git\\SHARC\\.venv\\Scripts\\python.exe",
+  "terminal.integrated.env.windows": {
+    "PYTHONPATH": "C:\\Users\\Daniel\\Documents\\Git\\SHARC\\SHARC-campaigns"
+  },
+  "python-envs.pythonProjects": []
+}

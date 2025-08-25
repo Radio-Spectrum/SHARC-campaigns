@@ -5,7 +5,7 @@ metadata:
   imt.7300MHz.macrocell:
     referenced_documents:
     - Annex 4.2 of 5D/413-E
-    - "Attachment 6 on IMT/MSS sharing in 7125\u20138400 MHz"
+    - "Attachment 6 on IMT/MSS sharing in 7125\xE2\u20AC\u201C8400 MHz"
     created_at: 2025-08-08
   mss.7300MHz.hubType-18:
     referenced_documents:
@@ -141,8 +141,8 @@ single_earth_station:
     clutter_loss: true
     clutter_type: both_ends
 general:
-  seed: 82
-  num_snapshots: 3000
+  seed: 83
+  num_snapshots: 100000
   overwrite_output: false
   output_dir: campaigns/imt_to_mss/output/
   output_dir_prefix: output_imt_to_mss_downlink_imt-7300MHz-macrocell_mss-7300MHz-hubType-18_y3600_load50_p-20_clt-both_ends

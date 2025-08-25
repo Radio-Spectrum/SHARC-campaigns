@@ -1,0 +1,17 @@
+Scenario,Distance,INR @ 0.03%,Margin,INR @ 0.1%,Margin,INR @ 20%,Margin
+Urban Macro DL,1 km,-1.83 dB,-4.17 dB,-3.96 dB,-3.04 dB,-23.81 dB,13.31 dB
+Urban Macro DL,2 km,-11.06 dB,5.06 dB,-13.82 dB,6.82 dB,-30.82 dB,20.32 dB
+Urban Macro DL,5 km,-26.36 dB,20.36 dB,-28.52 dB,21.52 dB,-42.95 dB,32.45 dB
+Urban Macro DL,10 km,-38.42 dB,32.42 dB,-40.33 dB,33.33 dB,-54.07 dB,43.57 dB
+Urban Macro UL,1 km,-45.58 dB,39.58 dB,-47.68 dB,40.68 dB,-60.43 dB,49.93 dB
+Urban Macro UL,2 km,-52.47 dB,46.47 dB,-54.59 dB,47.59 dB,-66.65 dB,56.15 dB
+Urban Macro UL,5 km,-65.61 dB,59.61 dB,-67.19 dB,60.19 dB,-78.24 dB,67.74 dB
+Urban Macro UL,10 km,-76.84 dB,70.84 dB,-78.57 dB,71.57 dB,-89.21 dB,78.71 dB
+Urban Micro DL,1 km,-10.33 dB,4.33 dB,-12.62 dB,5.62 dB,-26.27 dB,15.77 dB
+Urban Micro DL,2 km,-17.39 dB,11.39 dB,-19.94 dB,12.94 dB,-32.51 dB,22.01 dB
+Urban Micro DL,5 km,-30.49 dB,24.49 dB,-32.52 dB,25.52 dB,-44.12 dB,33.62 dB
+Urban Micro DL,10 km,-41.80 dB,35.80 dB,-43.71 dB,36.71 dB,-55.10 dB,44.60 dB
+Urban Micro UL,1 km,-47.91 dB,41.91 dB,-51.56 dB,44.56 dB,-66.48 dB,55.98 dB
+Urban Micro UL,2 km,-55.05 dB,49.05 dB,-58.03 dB,51.03 dB,-72.65 dB,62.15 dB
+Urban Micro UL,5 km,-68.13 dB,62.13 dB,-70.29 dB,63.29 dB,-84.09 dB,73.59 dB
+Urban Micro UL,10 km,-79.65 dB,73.65 dB,-81.21 dB,74.21 dB,-95.01 dB,84.51 dB
