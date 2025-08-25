@@ -4,7 +4,7 @@ from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
 from campaigns.imt_to_mss.constants import CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR
 
-SEED = 82
+SEED = 83
 
 # Configurações
 CLUTTER_TYPES = ['both_ends']
@@ -12,7 +12,7 @@ ALLOWED_CLUTTER_TYPES = {'one_end', 'both_ends'}
 
 general = {
     "seed": SEED,
-    "num_snapshots": 3000,
+    "num_snapshots": 100000,
     "overwrite_output": False,
     "output_dir": f"{CAMPAIGN_STR}/output/",
     "output_dir_prefix": "to-update",
