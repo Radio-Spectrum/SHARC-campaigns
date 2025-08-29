@@ -1,0 +1,43 @@
+#### MSS Parameters @2.5GHz
+# Single Earth Station representing an MSS Earth Station in the 2. 5GHz band.
+
+id: mss.2500MHz.hibleo-xl-1
+
+metadata:
+  referenced_documents:
+    - MSS Earth Station based on Document 4C/166-E - 30 September 2024
+
+single_earth_station:
+  frequency: 2499.385          # MHz - center frequency of the forward link at the edge of the band
+  bandwidth: 1.23              # MHz
+  tx_power_density: -500       # dBW/Hz - no info - system description only for receiver
+  noise_temperature: 295       # K
+  adjacent_ch_selectivity: 15  # dB
+  # NOTE: ACS is given as a mask.
+  # Calculating your own ACS would let you not overstate rx interference
+
+  polarization_loss: 0         # dB
+  # NOTE: consider using 3dB polarization loss with P.619
+
+  geometry:
+    height: 1.5
+    azimuth:
+      type: UNIFORM_DIST
+      uniform_dist:
+        min: -180
+        max: 180
+    elevation:
+      type: UNIFORM_DIST
+      uniform_dist:
+        min: 10                # minimum elevation for Hibleo-X communication
+        max: 90
+    location:
+      type: FIXED
+      fixed:                   # positioned at the reference point
+        x: 0.0
+        y: 0.0
+
+  antenna:
+    pattern: OMNI
+    gain: 2.7                  # dBi
+
