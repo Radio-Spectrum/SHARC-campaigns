@@ -1,6 +1,5 @@
 from itertools import product
 import numpy as np
-from warnings import warn
 
 from sharc.parameters.antenna.parameters_antenna_s1528 import ParametersAntennaS1528
 from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
@@ -52,7 +51,9 @@ def calculate_equivalent_acs(
     """
     Returns the equivalent ACS considering the freqs and bws
     """
-    warn("TODO: Calculate equivalent/average ACS for MSS user terminals against current mss d2d")
+    # NOTE: this function probably should not be here, but somehow
+    # together with from-docs equipment definition
+
     ue_lim_s = ue_f_MHz - ue_bw_MHz / 2
     ue_lim_e = ue_f_MHz + ue_bw_MHz / 2
     other_lim_s = other_f_MHz - other_bw_MHz / 2
@@ -67,17 +68,112 @@ def calculate_equivalent_acs(
         raise ValueError(
             "Expected adjacent channel to calculate for ACS"
         )
+    if other_lim_s >= ue_lim_e:
+        df_s = other_lim_s - ue_lim_e
+        df_e = other_lim_e - ue_lim_e
+    elif other_lim_e <= ue_lim_s:
+        df_s = ue_lim_s - other_lim_e
+        df_e = ue_lim_s - other_lim_s
 
     mask_lims = np.array([
-        0,
+        0.,
         ue_bw_MHz,
-        # is this the actual lim?
-        4 * ue_bw_MHz,
+        3 * ue_bw_MHz,
+        np.inf,
     ])
     mask_vals_dBc = np.array([
-        15, 25, 30
+        15., 25., 30.
     ])
-    return None
+
+    mask_bins_overlap_MHz = np.zeros_like(mask_vals_dBc)
+    for i in range(len(mask_lims) - 1):
+        win_s = max(mask_lims[i], df_s)
+        win_e = min(mask_lims[i + 1], df_e)
+        mask_bins_overlap_MHz[i] = max(win_e - win_s, 0)
+
+    equivalent_attenuation = -10 * np.log10(
+        np.sum(mask_bins_overlap_MHz * 10 ** (-0.1 * mask_vals_dBc))
+        / other_bw_MHz
+    )
+
+    return float(equivalent_attenuation)
+
+
+def test_calculate_equivalent_acs():
+    """
+    Tests and plots mask calculation for this system acs
+    """
+    # NOTE: this function probably should not be here, but somehow
+    # together with from-docs equipment definition
+
+    plot = False
+    # plot = True
+    if plot:
+        import matplotlib.pyplot as plt
+        mask_lims = np.array([
+            1.23/2 + 0.,
+            1.23/2 + 1.23,
+            1.23/2 + 3 * 1.23,
+            10,
+        ])
+        mask_lims = np.concatenate((
+            -mask_lims[::-1],
+            mask_lims
+        ))
+        mask_lims = np.repeat(mask_lims, 2)
+        mask_lims[::2] -= 1e-4
+        mask_lims = mask_lims[1:-1]
+        mask_vals_dBc = -np.array([
+            0, 15., 25., 30.
+        ])
+        mask_vals_dBc = np.roll(np.repeat(mask_vals_dBc, 2), -1)
+        mask_vals_dBc = np.concatenate((
+            mask_vals_dBc[::-1],
+            mask_vals_dBc
+        ))
+        mask_vals_dBc = mask_vals_dBc[1:-1]
+
+        plt.plot(
+            mask_lims,
+            mask_vals_dBc
+        )
+        plt.scatter(
+            mask_lims,
+            mask_vals_dBc
+        )
+        plt.xlim(-15, 15)
+        plt.ylim(-35, 0.1)
+        plt.grid(True)
+        plt.show()
+    print("hey")
+    acs = calculate_equivalent_acs(
+        2500 - 1.23/2, 1.23,
+        2500 + 1.23/2, 1.23,
+    )
+
+    if abs(acs - 15) > 1e-5:
+        raise Exception(f"{acs} != 15")
+
+    acs = calculate_equivalent_acs(
+        2500 - 1.23/2, 1.23,
+        2500 + 1.23/2 + 1.23, 1.23,
+    )
+
+    if abs(acs - 25) > 1e-5:
+        raise Exception(f"{acs} != 25")
+
+    acs = calculate_equivalent_acs(
+        2500 - 1.23/2, 1.23,
+        2500 + 5/2, 5,
+    )
+
+    # PSD = 0 dBW/MHz
+    # => attenuated = 10 * log10(1.23*10**(-1.5) + (2 * 1.23) * 10**(-2.5) + (5 - 3.69)*10**(-3))
+    # => non_attenuated = 10*log10(5)
+    # attenuation = -(attenuated - non_attenuated) = 20.1786252944
+
+    if abs(acs - 20.1786252944) > 1e-5:
+        raise Exception(f"{acs} != 20.1786252944")
 
 
 def generate_inputs():
@@ -152,8 +248,7 @@ def generate_inputs():
 
         params.single_earth_station.param_p619.earth_station_lat_deg = params.imt.topology.central_latitude
         params.single_earth_station.param_p619.earth_station_alt_m = params.imt.topology.central_altitude
-        warn("TODO: decide on P619 clutter parameters 'mean_clutter_height' and 'below_rooftop'")
-        # TODO: decide on these params:
+        # NOTE: we chose rural/low cluttered environment since MSS UEs are normally there
         params.single_earth_station.param_p619.mean_clutter_height = "low"
         params.single_earth_station.param_p619.below_rooftop = 0
 
@@ -210,10 +305,10 @@ def generate_inputs():
 
         # also do uniform dist of elevation angles
         params.single_earth_station.geometry.elevation.type = "UNIFORM_DIST"
-        params.single_earth_station.geometry.elevation.uniform_dist.min = 5.
+        params.single_earth_station.geometry.elevation.uniform_dist.min = 10.
         params.single_earth_station.geometry.elevation.uniform_dist.max = 90.
 
-        for mss_dc_load in product(
+        for mss_dc_load in (
             MSS_DC_LOAD_FACTOR
         ):
             params.imt.bs.load_probability = mss_dc_load
@@ -244,5 +339,6 @@ def clear_inputs():
             item.unlink()
 
 if __name__ == "__main__":
+    # test_calculate_equivalent_acs()
     clear_inputs()
     generate_inputs()
