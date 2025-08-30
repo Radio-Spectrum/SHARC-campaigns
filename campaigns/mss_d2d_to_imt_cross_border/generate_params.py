@@ -101,7 +101,7 @@ def generate(
         params.mss_d2d.param_p619.below_rooftop = 0.0 if link == "dl" else 50.0
 
         # Get cell radius - fix to the DL frequency
-        params.mss_d2d.antenna_s1528.frequency = dl_imt_freq
+        params.mss_d2d.antenna_s1528.frequency = params.mss_d2d.frequency
         # NOTE: max frequency yields smaller cell radius
         # params.mss_d2d.antenna_s1528.frequency = max(ul_imt_freq, dl_imt_freq)
         antenna = AntennaS1528Taylor(
