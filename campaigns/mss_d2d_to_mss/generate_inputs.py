@@ -6,7 +6,11 @@ from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.mss_d2d_to_mss.constants import CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR, get_specific_pattern
+from campaigns.mss_d2d_to_mss.constants import (
+    CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR,
+    IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
+    get_specific_pattern
+)
 
 SEED = 82
 
@@ -185,21 +189,6 @@ def generate_inputs():
     factory = ParametersFactory()
     total = 0
 
-    # MSS DC as IMT
-    IMT_MSS_DC_IDS = [
-        "imt.2110-2200MHz.mss-dc.system3-525km",
-        "imt.2110-2200MHz.mss-dc.system3-340km",
-    ]
-    MSS_DC_LOAD_FACTOR = [
-        0.2,
-        0.5,
-    ]
-    # MSS victim earth station/user terminal
-    SINGLE_ES_MSS_IDS = [
-        "mss.2500MHz.hibleo-x",
-        "mss.2500MHz.hibleo-xl-1",
-        "mss.2500MHz.ast-ng-c-3",
-    ]
     for imt_id, single_es_id in product(IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS):
         print(f"[Building params for {imt_id} -> {single_es_id}]")
 
@@ -309,7 +298,7 @@ def generate_inputs():
         params.single_earth_station.geometry.elevation.uniform_dist.max = 90.
 
         for mss_dc_load in (
-            MSS_DC_LOAD_FACTOR
+            MSS_DC_LOAD_FACTORS
         ):
             params.imt.bs.load_probability = mss_dc_load
             specific = get_specific_pattern(
