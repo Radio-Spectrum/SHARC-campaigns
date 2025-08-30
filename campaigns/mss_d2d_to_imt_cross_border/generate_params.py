@@ -135,8 +135,12 @@ def generate(
                 output_start = get_output_dir_start(mss_id, co_channel)
                 params.general.output_dir = f"{CAMPAIGN_STR}/{output_start}_{link}/"
 
-                for bs_azimuth in [0, 120, 240, "RANDOM"]:
-                    params.imt.topology.single_bs.azimuth = bs_azimuth
+                for bs_azimuth in [0.0, 120.0, 240.0, "RANDOM"]:
+                    params.imt.topology.single_bs.azimuth = [0.0]
+                    if bs_azimuth == "RANDOM":
+                        params.imt.topology.single_bs.azimuth = "RANDOM"
+                    else:
+                        params.imt.topology.single_bs.azimuth[0] = bs_azimuth
 
                     postfix = f"mss_d2d_to_imt_cross_border_{border}km_{load}load_{bs_azimuth}az_{link}"
                     params.general.output_dir_prefix = f"output_{postfix}"
