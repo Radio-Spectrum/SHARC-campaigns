@@ -33,18 +33,18 @@ if __name__ == "__main__":
     def legend_gen(dirname):
         print(dirname)
         pattern = re.compile(
-            r"output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_([ud]l)_"
+            r"output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_(\d+\.\d+|RANDOM)az_([ud]l)_"
         )
         match = pattern.match(dirname)
         if not match:
             return "Unknown"
 
-        border_km, load_pct, link_type = match.groups()
+        border_km, load_pct, az, link_type = match.groups()
 
         link_type = link_type.upper()
         load_pct = float(load_pct) * 100
 
-        return f"{load_pct}% load, {border_km} km border, IMT TN {link_type}"
+        return f"{load_pct}% load, {border_km} km border, IMT-BS azimuth[deg] {az}, IMT TN {link_type}"
 
     post_processor.add_plot_legend_generator(legend_gen)
 
@@ -56,13 +56,13 @@ if __name__ == "__main__":
         """
         dirname = result.output_directory
         pattern = re.compile(
-            r".*/output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_([ud]l)_"
+            r".*/output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_(\d+\.\d+|RANDOM)az_([ud]l)_"
         )
         match = pattern.match(dirname)
         if not match:
             return "solid"
 
-        border_km, load_pct, link_type = match.groups()
+        border_km, load_pct, az, link_type = match.groups()
 
         if load_pct == "0.2":
             return "dot"
@@ -196,6 +196,7 @@ if __name__ == "__main__":
         if plot is None:
             print(f"Warning: No plot found for attribute '{attr}'")
             continue
+        print(f"Saving plot for attribute '{attr}' to {specific_dir / f'{attr}.html'}")
         plot.write_html(specific_dir / f"{attr}.html")
         # plot.show()
 
