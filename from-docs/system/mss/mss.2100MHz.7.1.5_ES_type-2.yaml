@@ -36,10 +36,3 @@ single_earth_station:
   antenna:
     pattern: OMNI  # Pattern defined by characteristics
     gain: 10 # Antenna gain defined in document table
-    
-  channel_model: P619
-  param_p619:
-    earth_station_alt_m: 1200
-    earth_station_lat_deg: -15.7801
-    earth_station_long_diff_deg: 0.0
-    season: SUMMER

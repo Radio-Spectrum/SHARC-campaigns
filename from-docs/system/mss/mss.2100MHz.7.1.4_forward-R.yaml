@@ -37,9 +37,3 @@ single_earth_station:
     pattern: OMNI  # Custom pattern for Hibleo-X MSS UE
     gain: 6.36 # Gain calculated by G/T = -18 dBi defined in document table 4B
     
-  channel_model: P619
-  param_p619:
-    earth_station_alt_m: 1200
-    earth_station_lat_deg: -15.7801
-    earth_station_long_diff_deg: 0.0
-    season: SUMMER
