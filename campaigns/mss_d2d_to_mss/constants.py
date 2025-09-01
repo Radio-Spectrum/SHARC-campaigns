@@ -31,7 +31,7 @@ SINGLE_ES_MSS_IDS = [
 ]
 
 MSS_ES_TO_READABLE = {
-    "mss.2500MHz.hibleo-x": "OMNI",
+    "mss.2500MHz.hibleo-x": "Hibleo-X",
     "mss.2500MHz.hibleo-xl-1": "Hibleo-XL-1",
     "mss.2500MHz.ast-ng-c-3": "AST-NG-C-3",
 
