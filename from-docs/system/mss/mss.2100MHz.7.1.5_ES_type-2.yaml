@@ -19,12 +19,14 @@ single_earth_station:
     height: 1
     azimuth:
       type: UNIFORM_DIST
-      min: -180
-      max: 180
+      uniform_dist:
+        min: -180
+        max: 180
     elevation:
       type: UNIFORM_DIST
-      min: 10  # minimum elevation for 7.1.4 forward system R communication
-      max: 90
+      uniform_dist:
+        min: 10  # minimum elevation for 7.1.4 forward system R communication
+        max: 90
     location:
       type: FIXED
       fixed:  # positioned at the reference point

@@ -21,15 +21,23 @@ MSS_DC_LOAD_FACTORS = [
 ]
 # MSS victim earth station/user terminal
 SINGLE_ES_MSS_IDS = [
+
     "mss.2500MHz.hibleo-x",
     "mss.2500MHz.hibleo-xl-1",
     "mss.2500MHz.ast-ng-c-3",
+
+    # "mss.2100MHz.7.1.4-forward-R", # 2100 MHz band systems
+    # "mss.2100MHz.7.1.5-ES-type-2"
 ]
 
 MSS_ES_TO_READABLE = {
-    "mss.2500MHz.hibleo-x": "Hibleo-X",
+    "mss.2500MHz.hibleo-x": "OMNI",
     "mss.2500MHz.hibleo-xl-1": "Hibleo-XL-1",
     "mss.2500MHz.ast-ng-c-3": "AST-NG-C-3",
+
+    #"mss.2100MHz.7.1.4-forward-R": "OMNI", # 2100 MHz band systems
+    #"mss.2100MHz.7.1.5-ES-type-2": "OMNI"
+
 }
 
 IMT_MSS_DC_ID_TO_READABLE = {
