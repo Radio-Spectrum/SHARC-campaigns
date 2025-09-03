@@ -66,9 +66,9 @@ if __name__ == "__main__":
         border_km, load_pct, link_type = match.groups()
 
         if load_pct == "0.1":
-            return "dot"
+            return "solid"
         elif load_pct == "0.2":
-            return "dash"
+            return "dashdot"
         elif load_pct == "0.5":
             return "longdash"
         else:
@@ -236,6 +236,23 @@ if __name__ == "__main__":
             yaxis_title_font=dict(size=24),
             legend=dict(font=dict(size=20)),
             template="plotly_white"
+        )
+        plot.update_layout(
+            legend=dict(
+                orientation="v",
+                x=.6,
+                y=.1,
+                xanchor="right",
+                yanchor="bottom",
+                bgcolor="rgba(255,255,255,0.7)",
+                bordercolor="black",
+                borderwidth=1,
+                font=dict(size=20)
+            )
+        )
+        plot.update_layout(
+            width=900,
+            height=1000
         )
 
         # Make grid lines darker
