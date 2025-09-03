@@ -1,0 +1,91 @@
+# NOTE: these parameters can be used for 2300-2400MHz or 2500-2690MHz
+id: imt.2300-2690MHz.mss-dc.system3-340km
+
+metadata:
+  referenced_documents:
+    - WP4C-Working-Document-4C-356, Annex 7
+  notes:
+    - If imt mss dc is `interfered_with`, imt_link should always be `UPLINK`
+    - If imt mss dc is not `interfered_with`, imt_link should always be `DOWNLINK`
+
+# In order to know what values should be altered per scenario,
+# look for [PER SCENARIO] tags
+imt:
+    # [PER SCENARIO]:
+    interfered_with: TRUE # Whether imt is victim [bool]
+    # [PER SCENARIO]:
+    frequency: -1         # Center frequency [MHz]
+    bandwidth: 5          # Total bandwidth [MHz]
+    rb_bandwidth: 0.1     # Resource block bandwidth [MHz]
+
+    adjacent_ch_reception: "OFF"         # how to model adj. chann. reception (rx filter imperfections)
+    adjacent_ch_emissions: SPECTRAL_MASK # how to model adj. chann. emissions (oob emissions)
+    spectral_mask: MSS                   # IMT spectrum emission mask
+    spurious_emissions: -13.0            # spurious emissions to be used in spectral mask [dBm/MHz]
+
+    guard_band_ratio: 0 # guard band ratio, ratio in [0-1]
+
+    topology:                          # Network topology parameters
+        # [PER SCENARIO]:
+        central_latitude: 0  # ref. lat. for local coord. system [deg]
+        # [PER SCENARIO]:
+        central_longitude: 0 # ref. long. for local coord. system [deg]
+        # [PER SCENARIO]:
+        central_altitude: 200          # ref. alt. for local coord. system [m]
+
+        type: MSS_DC
+        mss_dc:
+            orbits:
+                - n_planes: 48          # Number of planes
+                  inclination_deg: 53.0 # Inclination in degrees
+                  perigee_alt_km: 340.0 # Perigee in km
+                  apogee_alt_km: 340.0  # Apogee in km
+                  sats_per_plane: 110   # Number of satellites per plane
+                  long_asc_deg: 0.0     # Longitude of the first ascending node in degrees
+                  phasing_deg: 1.636    # Phasing in degrees
+            # [PER SCENARIO]:
+            sat_is_active_if:
+                conditions: # for a satellite to be active, it needs to respect ALL conditions
+                    - MINIMUM_ELEVATION_FROM_ES # sane default condition for sat. to be active
+                minimum_elevation_from_es: 5    # minimum elevation for sat. to be active [deg]
+
+    bs: # Base station parameters - MSS DC satellite
+        # [PER SCENARIO]:
+        load_probability: 1.0  # BS activity factor (per beam) ratio in [0-1]
+        conducted_power: 44.8  # -52.2 [dB/Hz] + 10log(5*1e6)[Hz] + 30.0  [dBm/bandwidth]
+        height: 340000         # BS antenna height [m]
+        # [PER SCENARIO]:
+        noise_figure: 5        # BS receiver noise figure [dB]
+        ohmic_loss: 0          # Cable/connector ohmic loss [dB]
+        antenna:
+            # NOTE: doc specifies lambda = 0.15m
+            # we calculate based on frequency
+            pattern: ITU-R-S.1528-Taylor # Antenna pattern
+            gain: 34.1          # Maximum Antenna gain [dBi]
+            itu_r_s_1528:       # Parameters for S.1528 antenna pattern
+                slr: 20.0       # SLR is the side-lobe ratio of the pattern [dB]
+                n_side_lobes: 2 # Number of secondary lobes considered in the diagram
+                l_r: 1.6        # Radial size of effective radiating area of antenna [m]
+                l_t: 1.6        # Transverse size of effective radiating area of antenna [m]
+
+    # User Equipment parameters:
+    # NOTE: not overly important since MSS DC UE is not supposed to be simulated through here
+    ue:
+        # NOTE: we should use 1 here only for performance reasons
+        k: 1                               # How many UEs per BS sector
+        k_m: 1                             # Multiplication factor to ensure k UEs per sector
+        indoor_percent: 0.0                # Percentage of indoor UEs
+        distribution_type: UNIFORM_IN_CELL # UE distribution that guarantees k UEs per sector
+        tx_power_control: OFF              # Whether to use power control on the UL [bool]
+        height: 1.5                        # UE height [m]
+        antenna:
+            pattern: OMNI
+            gain: -3
+            array:
+                n_rows: 1
+                n_columns: 1
+
+    channel_model: FSPL    # Channel model to be used for intra-imt calcs
+
+    # [PER SCENARIO]:
+    noise_temperature: 290 # Receiver noise temperature [K]
