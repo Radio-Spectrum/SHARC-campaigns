@@ -65,9 +65,14 @@ if __name__ == "__main__":
 
         border_km, load_pct, link_type = match.groups()
 
-        if load_pct == "0.2":
+        if load_pct == "0.1":
             return "dot"
-        return "solid"
+        elif load_pct == "0.2":
+            return "dash"
+        elif load_pct == "0.5":
+            return "longdash"
+        else:
+            return "solid"
 
     post_processor.add_results_linestyle_getter(linestyle_getter)
 
