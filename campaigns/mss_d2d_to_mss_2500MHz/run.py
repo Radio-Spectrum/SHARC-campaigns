@@ -2,8 +2,8 @@ import argparse
 import sys
 from sharc.run_multiple_campaigns_mut_thread import run_campaign
 
-from campaigns.mss_d2d_to_mss.generate_inputs import clear_inputs, generate_inputs, test_calculate_equivalent_acs
-from campaigns.mss_d2d_to_mss.constants import CAMPAIGN_NAME, INPUTS_DIR
+from campaigns.mss_d2d_to_mss_2500MHz.generate_inputs import clear_inputs, generate_inputs, test_calculate_equivalent_acs
+from campaigns.mss_d2d_to_mss_2500MHz.constants import CAMPAIGN_NAME, INPUTS_DIR
 
 def main():
     parser = argparse.ArgumentParser(description="MSS D2D to MSS campaign runner")
