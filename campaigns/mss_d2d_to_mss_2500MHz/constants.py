@@ -34,8 +34,8 @@ MSS_ES_TO_READABLE = {
 }
 
 IMT_MSS_DC_ID_TO_READABLE = {
-    "imt.2110-2200MHz.mss-dc.system3-525km": "MSS DC @525km",
-    "imt.2110-2200MHz.mss-dc.system3-340km": "MSS DC @340km",
+    "imt.2300-2690MHz.mss-dc.system3-525km": "MSS DC @525km",
+    "imt.2300-2690MHz.mss-dc.system3-340km": "MSS DC @340km",
 }
 
 
