@@ -1,6 +1,7 @@
 """Script to process and plot results for MSS D2D to IMT cross-border campaign."""
 
 import re
+import numpy as np
 from pathlib import Path
 import plotly.graph_objects as go
 from sharc.results import Results
@@ -44,7 +45,7 @@ if __name__ == "__main__":
         link_type = link_type.upper()
         load_pct = float(load_pct) * 100
 
-        return f"{load_pct}% load, {border_km} km border, IMT TN {link_type}"
+        return f"{load_pct}% lf, {border_km} km excl. zone, IMT-{link_type}"
 
     post_processor.add_plot_legend_generator(legend_gen)
 
@@ -100,6 +101,46 @@ if __name__ == "__main__":
     # ^: typing.List[Results]
     all_results = [*results_ul, *results_dl]
 
+    # Print the percentiles for UL INR
+    inr_protection_criteria = -6
+    print(f"INR Protection Criteria: {inr_protection_criteria} dB")
+    percentiles = [99.5, 99.9, 99.99, 100]
+    for res in all_results:
+        pattern = re.compile(
+            r".*/output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_([ud]l)_"
+        )
+        match = pattern.match(res.output_directory)
+        if match:
+            border_km, load_pct, link_type = match.groups()
+        else:
+            print(f"Could not parse dirname: {res.output_directory}")
+            continue
+
+        if hasattr(res, "imt_ul_inr") and link_type == "ul":
+            inr_values = res.imt_ul_inr
+            if len(inr_values) == 0:
+                print(f"No UL INR values for border={border_km}km, load={load_pct}%, link_type={link_type}")
+                continue
+            # percentile_values = {p: round(np.percentile(inr_values, p), 2) for p in percentiles}
+            percentile_values = np.percentile(inr_values, percentiles)
+            print(f"UL INR Percentiles for border={border_km}km, load={float(load_pct) * 100}, link_type={link_type}: {percentile_values}")
+            print(f"UL INR Exceedence values for Margin={border_km}km, Load={float(load_pct) * 100}, Link Type={link_type.upper()}")
+            print("Percentile, Exceedance (dB)")
+            for i, p in enumerate(percentiles):
+                print(f"p{p}, {np.round(percentile_values[i] - inr_protection_criteria, 2)}")
+        elif hasattr(res, "imt_dl_inr") and link_type == "dl":
+            inr_values = res.imt_dl_inr
+            if len(inr_values) == 0:
+                print(f"No DL INR values for border={border_km}km, load={load_pct}, link_type={link_type}")
+                continue
+            # percentile_values = {p: round(np.percentile(inr_values, p), 2) for p in percentiles}
+            percentile_values = np.percentile(inr_values, percentiles)
+            print(f"DL INR Percentiles for Margin={border_km}km, Load={float(load_pct) * 100}%, Link Type={link_type}: {percentile_values}")
+            print(f"DL INR Exceedence values for Margin={border_km}km, Load={float(load_pct) * 100}, Link Type={link_type.upper()}")
+            print("Percentile, Exceedance (dB)")
+            for i, p in enumerate(percentiles):
+                print(f"p{p}, {np.round(percentile_values[i] - inr_protection_criteria, 2)}")
+
     # If set to True the plots will be opened in the browser automatically
     auto_open = False
 
@@ -119,24 +160,24 @@ if __name__ == "__main__":
     post_processor.add_plots(plots)
 
     # Add a protection criteria line:
-    protection_criteria = -6
+    # protection_criteria = -6
 
-    for attr in ["imt_dl_inr", "imt_ul_inr"]:
-        plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=args.plot_type)
-        if plot is not None:
-            plot.add_vline(
-                protection_criteria,
-                line_dash="dash", annotation=dict(
-                    text="-6dB Protection criteria",
-                    font=dict(size=20),
-                    xref="x",
-                    yref="paper",
-                    x=protection_criteria + 0.2,  # Offset for visibility
-                    y=0.85
-                )
-            )
-        else:
-            print(f"Warning: No plot found for attribute '{attr}'")
+    # for attr in ["imt_dl_inr", "imt_ul_inr"]:
+    #     plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=args.plot_type)
+    #     if plot is not None:
+    #         plot.add_vline(
+    #             protection_criteria,
+    #             line_dash="dash", annotation=dict(
+    #                 text="-6dB Protection criteria",
+    #                 font=dict(size=20),
+    #                 xref="x",
+    #                 yref="paper",
+    #                 x=protection_criteria + 0.2,  # Offset for visibility
+    #                 y=0.85
+    #             )
+    #         )
+    #     else:
+    #         print(f"Warning: No plot found for attribute '{attr}'")
 
     pfd_protection_criteria = -109
     for attr in ["imt_dl_pfd_external", "imt_dl_pfd_external_aggregated"]:

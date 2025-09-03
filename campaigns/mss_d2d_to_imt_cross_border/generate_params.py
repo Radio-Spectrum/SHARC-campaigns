@@ -121,12 +121,14 @@ def generate(
         print(f"[IMT TN {params.general.imt_link}]:")
         print(f"\tCalculated cell radius: ", params.mss_d2d.cell_radius)
 
-        distances = np.linspace(params.mss_d2d.cell_radius / 1e3, 100, 4)
-        distances = [float(round(d, 3)) for d in distances]
-        # distances = [100.000]
+        min_margin = round(params.mss_d2d.cell_radius / 1e3, 0)
+        distances = [min_margin, 2 * min_margin]
         print("\tScenarios of grid border as ", distances)
 
-        for load in [0.2, 0.5]:
+        # Point the IMT-BS to east - worst case scenario
+        params.imt.topology.single_bs.azimuth = [0.0]
+
+        for load in [0.1, 0.2, 0.5]:
             params.mss_d2d.beams_load_factor = load
             for border in distances:
                 params.mss_d2d.beam_positioning.service_grid.grid_margin_from_border = border
