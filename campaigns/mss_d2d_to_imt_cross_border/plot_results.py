@@ -31,6 +31,11 @@ if __name__ == "__main__":
 
     mss_id = args.mss[0]
 
+    if mss_id == "3.1":
+        orbit_altitude_km = 525
+    else:
+        orbit_altitude_km = 340
+
     def legend_gen(dirname):
         print(dirname)
         pattern = re.compile(
@@ -109,6 +114,8 @@ if __name__ == "__main__":
     # Print the percentiles for UL INR
     inr_protection_criteria = -6
     print(f"INR Protection Criteria: {inr_protection_criteria} dB")
+    print(f"System3 - altitude {orbit_altitude_km}km")
+    print("Altitude, IMT Link, Margin, Load, Percentile, Exceedance (dB)")
     percentiles = [99.5, 99.9, 99.99, 100]
     for res in all_results:
         pattern = re.compile(
@@ -128,11 +135,7 @@ if __name__ == "__main__":
                 continue
             # percentile_values = {p: round(np.percentile(inr_values, p), 2) for p in percentiles}
             percentile_values = np.percentile(inr_values, percentiles)
-            print(f"UL INR Percentiles for border={border_km}km, load={float(load_pct) * 100}, link_type={link_type}: {percentile_values}")
-            print(f"UL INR Exceedence values for Margin={border_km}km, Load={float(load_pct) * 100}, Link Type={link_type.upper()}")
-            print("Percentile, Exceedance (dB)")
-            for i, p in enumerate(percentiles):
-                print(f"p{p}, {np.round(percentile_values[i] - inr_protection_criteria, 2)}")
+
         elif hasattr(res, "imt_dl_inr") and link_type == "dl":
             inr_values = res.imt_dl_inr
             if len(inr_values) == 0:
@@ -140,11 +143,11 @@ if __name__ == "__main__":
                 continue
             # percentile_values = {p: round(np.percentile(inr_values, p), 2) for p in percentiles}
             percentile_values = np.percentile(inr_values, percentiles)
-            print(f"DL INR Percentiles for Margin={border_km}km, Load={float(load_pct) * 100}%, Link Type={link_type}: {percentile_values}")
-            print(f"DL INR Exceedence values for Margin={border_km}km, Load={float(load_pct) * 100}, Link Type={link_type.upper()}")
-            print("Percentile, Exceedance (dB)")
-            for i, p in enumerate(percentiles):
-                print(f"p{p}, {np.round(percentile_values[i] - inr_protection_criteria, 2)}")
+
+        # print(f"{link_type.upper()} INR Percentiles for Margin={border_km}km, Load={float(load_pct) * 100}%, Link Type={link_type}: {percentile_values}")
+        # print(f"{link_type.upper()} INR Exceedence values for Margin={border_km}km, Load={float(load_pct) * 100}, Link Type={link_type.upper()}")
+        for i, p in enumerate(percentiles):
+            print(f"{orbit_altitude_km}km, {link_type.upper()}, {border_km}km, {float(load_pct)}%, p{p}, {np.round(percentile_values[i] - inr_protection_criteria, 2)}")
 
     # If set to True the plots will be opened in the browser automatically
     auto_open = False
