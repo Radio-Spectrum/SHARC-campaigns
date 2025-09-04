@@ -38,8 +38,8 @@ def generate(
     # scenario
     params.imt.interfered_with = True
 
-    ul_imt_freq = 1950.0
-    dl_imt_freq = 2160.0
+    ul_imt_freq = 1930.0
+    dl_imt_freq = 2120.0
 
     params.general.enable_cochannel = co_channel
     params.general.enable_adjacent_channel = True
@@ -88,7 +88,7 @@ def generate(
         params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
         params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
         if co_channel:
-            params.mss_d2d.frequency = params.imt.frequency
+            params.mss_d2d.frequency = params.imt.frequency - 7.5 # Brings DC-MSS to 2110-2120 DL or 1920-1930 ULband
         else:
             params.imt.adjacent_ch_reception = "ACS"
             # IMT adjacent channel selectivity - Table 6.5.1-2 - 3GPP TR 38.863
@@ -97,11 +97,13 @@ def generate(
             else:
                 params.imt.ue.adjacent_ch_selectivity = 33.0  # dB
             # Set MSS D2D frequency to be adjacent to IMT
-            params.mss_d2d.frequency = params.imt.frequency + params.imt.bandwidth / 2 + params.mss_d2d.bandwidth / 2
+            params.imt.frequency = params.imt.frequency + params.mss_d2d.bandwidth
+            params.mss_d2d.frequency = params.imt.frequency
         params.mss_d2d.param_p619.below_rooftop = 0.0 if link == "dl" else 50.0
 
         # Get cell radius
-        params.mss_d2d.antenna_s1528.frequency = params.mss_d2d.frequency
+        # params.mss_d2d.antenna_s1528.frequency = params.mss_d2d.frequency
+        params.mss_d2d.antenna_s1528.frequency = 2000.0  # fix lambda=0.15m
         # NOTE: max frequency yields smaller cell radius
         # params.mss_d2d.antenna_s1528.frequency = max(ul_imt_freq, dl_imt_freq)
         antenna = AntennaS1528Taylor(
