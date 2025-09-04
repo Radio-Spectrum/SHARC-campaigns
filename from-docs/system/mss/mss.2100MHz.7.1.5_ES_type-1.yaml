@@ -1,7 +1,7 @@
 #### MSS Parameters @7.3GHz
 # Single Earth Station representing an MSS Earth Station in the 2.1GHz band.
 
-id: mss.2100MHz.7.1.5-ES-type-2
+id: mss.2100MHz.7.1.5-ES-type-1
 
 metadata:
   referenced_documents:
