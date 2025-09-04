@@ -37,7 +37,6 @@ if __name__ == "__main__":
         orbit_altitude_km = 340
 
     def legend_gen(dirname):
-        print(dirname)
         pattern = re.compile(
             r"output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_([ud]l)_"
         )
@@ -116,7 +115,7 @@ if __name__ == "__main__":
     print(f"INR Protection Criteria: {inr_protection_criteria} dB")
     print(f"System3 - altitude {orbit_altitude_km}km")
     print("Altitude, IMT Link, Margin, Load, Percentile, Exceedance (dB)")
-    percentiles = [99.5, 99.9, 99.99, 100]
+    percentiles = [99.5, 99.9]
     for res in all_results:
         pattern = re.compile(
             r".*/output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_([ud]l)_"
@@ -133,19 +132,14 @@ if __name__ == "__main__":
             if len(inr_values) == 0:
                 print(f"No UL INR values for border={border_km}km, load={load_pct}%, link_type={link_type}")
                 continue
-            # percentile_values = {p: round(np.percentile(inr_values, p), 2) for p in percentiles}
-            percentile_values = np.percentile(inr_values, percentiles)
 
         elif hasattr(res, "imt_dl_inr") and link_type == "dl":
             inr_values = res.imt_dl_inr
             if len(inr_values) == 0:
                 print(f"No DL INR values for border={border_km}km, load={load_pct}, link_type={link_type}")
                 continue
-            # percentile_values = {p: round(np.percentile(inr_values, p), 2) for p in percentiles}
-            percentile_values = np.percentile(inr_values, percentiles)
 
-        # print(f"{link_type.upper()} INR Percentiles for Margin={border_km}km, Load={float(load_pct) * 100}%, Link Type={link_type}: {percentile_values}")
-        # print(f"{link_type.upper()} INR Exceedence values for Margin={border_km}km, Load={float(load_pct) * 100}, Link Type={link_type.upper()}")
+        percentile_values = np.percentile(inr_values, percentiles)
         for i, p in enumerate(percentiles):
             print(f"{orbit_altitude_km}km, {link_type.upper()}, {border_km}km, {float(load_pct)}%, p{p}, {np.round(percentile_values[i] - inr_protection_criteria, 2)}")
 
@@ -265,6 +259,20 @@ if __name__ == "__main__":
         plot.write_html(specific_dir / f"{attr}.html")
         # plot.show()
 
+        # Get percentiles values from the plot data
+        print(f"Attribute: {attr}")
+        print(f"Legend, Exceedance (dB)")
+        for trace in plot.data:
+            if 'x' in trace and 'y' in trace:
+                x_values = np.array(trace['x'])
+                y_values = np.array(trace['y'])
+                if len(y_values) == 0:
+                    continue
+
+                # Calculate percentiles - just 100% here - we want the exceedande at max
+                for p in [1.0]:
+                    percentile_value = np.interp(p, y_values, x_values)
+                    print(f"{trace.name.replace(',', ';')}, {percentile_value - inr_protection_criteria:.2f} dB")
 
     # # Now let's plot the beam per satellite results.
     # # We do it manually as PostProcessor does not support histograms yet.
