@@ -209,19 +209,21 @@ def generate_inputs():
         # NOTE: needed for performance. Discards unnecessary calcs.
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        params.imt.frequency = 2500 + params.imt.bandwidth / 2
+        # lower bound of closest DL MSS DC band
+        params.imt.frequency = 2620 + params.imt.bandwidth / 2
+        # upper bound of MSS UE rx band
         params.single_earth_station.frequency = 2500 - params.single_earth_station.bandwidth / 2
 
         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
-        params.single_earth_station.adjacent_ch_reception = "ACS"
-        params.single_earth_station.adjacent_ch_selectivity = calculate_equivalent_acs(
-            params.single_earth_station.frequency,
-            params.single_earth_station.bandwidth,
-            params.imt.frequency,
-            params.imt.bandwidth,
-        )
-
         params.imt.spurious_emissions = -13
+        params.single_earth_station.adjacent_ch_reception = "OFF"
+        # params.single_earth_station.adjacent_ch_selectivity = calculate_equivalent_acs(
+        #     params.single_earth_station.frequency,
+        #     params.single_earth_station.bandwidth,
+        #     params.imt.frequency,
+        #     params.imt.bandwidth,
+        # )
+
 
         # Geometry
         ## Refernce latitude and longitude taken from Cuiaba station
