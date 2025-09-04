@@ -34,5 +34,5 @@ single_earth_station:
         y: 0.0
 
   antenna:
-    pattern: OMNI  # Pattern defined by characteristics
+    pattern: MSS Adjacent  # Custom pattern for Hibleo-X MSS UE
     gain: 10 # Antenna gain defined in document table

@@ -209,19 +209,26 @@ def generate_inputs():
         # NOTE: needed for performance. Discards unnecessary calcs.
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        params.imt.frequency = 2500 + params.imt.bandwidth / 2
-        params.single_earth_station.frequency = 2500 - params.single_earth_station.bandwidth / 2
-
         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
-        params.single_earth_station.adjacent_ch_reception = "ACS"
-        params.single_earth_station.adjacent_ch_selectivity = calculate_equivalent_acs(
-            params.single_earth_station.frequency,
-            params.single_earth_station.bandwidth,
-            params.imt.frequency,
-            params.imt.bandwidth,
-        )
+        params.imt.adjacent_ch_emissions = "ACLR"
+        # We set this as the EIRP value already includes the adjacent emissions
+        params.imt.bs.adjacent_ch_leak_ratio = 0
+        # dBW based on the EIRP for first adjacent band: -55.6 dBW/Hz
+        params.imt.bs.conducted_power = 41.4
 
-        params.imt.spurious_emissions = -13
+        params.imt.frequency = 2170 + params.imt.bandwidth / 2
+
+        params.single_earth_station.frequency = 2160 - params.single_earth_station.bandwidth / 2
+
+        params.single_earth_station.adjacent_ch_reception = "ACS"
+        # params.single_earth_station.adjacent_ch_selectivity = calculate_equivalent_acs(
+        #     params.single_earth_station.frequency,
+        #     params.single_earth_station.bandwidth,
+        #     params.imt.frequency,
+        #     params.imt.bandwidth,
+        # )
+
+        # params.imt.spurious_emissions = -13
 
         # Geometry
         ## Refernce latitude and longitude taken from Cuiaba station
