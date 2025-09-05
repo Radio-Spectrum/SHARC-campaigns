@@ -10,7 +10,7 @@ from pathlib import Path
 if __name__ == "__main__":
     # print("INPUTS_DIR", INPUTS_DIR)
     names = [
-        "parameter_mss_d2d_to_eess_mss_mask_1load_uniform_elev_eess.2200-2290MHz.system-D.yaml"
+        "parameter_mss_d2d_to_eess_mss_mask_0.2load_uniform_elev_eess.2200-2290MHz.system-B_imt.2110-2200MHz.mss-dc.system3-340km.yaml"
     ]
     for param_name in names:
         param_file = INPUTS_DIR / param_name
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         params.beam_radius = parameters.imt.topology.mss_dc.cell_radius
         params.frequency = parameters.imt.frequency
         # params.beams_load_factor = parameters.imt.bs.load_probability
-        params.beams_load_factor = 1.0
+        params.beams_load_factor = 0.5
         if parameters.imt.bs.antenna.pattern != "ITU-R-S.1528-Taylor":
             raise ValueError("Antenna pattern not supported by this plot script")
         params.antenna_pattern = "ITU-R-S.1528-Taylor"
