@@ -87,18 +87,17 @@ def generate(
     for link in ["dl", "ul"]:
         params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
         params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
-        if co_channel:
-            params.mss_d2d.frequency = params.imt.frequency - 7.5 # Brings DC-MSS to 2110-2120 DL or 1920-1930 ULband
-        else:
+        params.mss_d2d.frequency = params.imt.frequency - 7.5 # Brings DC-MSS to 2110-2120 DL or 1920-1930 ULband
+        if not co_channel:
             params.imt.adjacent_ch_reception = "ACS"
             # IMT adjacent channel selectivity - Table 6.5.1-2 - 3GPP TR 38.863
             if link == "ul":
                 params.imt.bs.adjacent_ch_selectivity = 46.0  # dB
             else:
                 params.imt.ue.adjacent_ch_selectivity = 33.0  # dB
-            # Set MSS D2D frequency to be adjacent to IMT
+            # Set IMT frequency to be adjacent to DC-MSS
             params.imt.frequency = params.imt.frequency + params.mss_d2d.bandwidth
-            params.mss_d2d.frequency = params.imt.frequency
+
         params.mss_d2d.param_p619.below_rooftop = 0.0 if link == "dl" else 50.0
 
         # Get cell radius
@@ -133,6 +132,8 @@ def generate(
         for load in [0.1, 0.2, 0.5]:
             params.mss_d2d.beams_load_factor = load
             for border in distances:
+                # add per drop rand rotation + transl. to grid
+                params.mss_d2d.beam_positioning.service_grid.transform_grid_randomly = True
                 params.mss_d2d.beam_positioning.service_grid.grid_margin_from_border = border
                 output_start = get_output_dir_start(mss_id, co_channel)
                 params.general.output_dir = f"{CAMPAIGN_STR}/{output_start}_{link}/"
