@@ -24,6 +24,7 @@ general = {
     "imt_link": "DOWNLINK",
 }
 
+
 def get_taylor_cell_radius(
     params_s1528: ParametersAntennaS1528,
     sat_alt_km: float,
@@ -45,6 +46,7 @@ def get_taylor_cell_radius(
     cell_radius = np.tan(np.deg2rad(angle_7dB)) * sat_alt_km * 1e3
 
     return int(cell_radius)
+
 
 def calculate_equivalent_acs(
     ue_f_MHz,
@@ -209,29 +211,23 @@ def generate_inputs():
         # NOTE: needed for performance. Discards unnecessary calcs.
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
+        params.imt.frequency = 2500 + params.imt.bandwidth / 2
+        params.single_earth_station.frequency = 2500 - \
+            params.single_earth_station.bandwidth / 2
+
         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
-        params.imt.adjacent_ch_emissions = "ACLR"
-        # We set this as the EIRP value already includes the adjacent emissions
-        params.imt.bs.adjacent_ch_leak_ratio = 0
-        # dBW based on the EIRP for first adjacent band: -55.6 dBW/Hz
-        params.imt.bs.conducted_power = 41.4
-
-        params.imt.frequency = 2170 + params.imt.bandwidth / 2
-
-        params.single_earth_station.frequency = 2160 - params.single_earth_station.bandwidth / 2
-
         params.single_earth_station.adjacent_ch_reception = "ACS"
-        # params.single_earth_station.adjacent_ch_selectivity = calculate_equivalent_acs(
-        #     params.single_earth_station.frequency,
-        #     params.single_earth_station.bandwidth,
-        #     params.imt.frequency,
-        #     params.imt.bandwidth,
-        # )
+        params.single_earth_station.adjacent_ch_selectivity = calculate_equivalent_acs(
+            params.single_earth_station.frequency,
+            params.single_earth_station.bandwidth,
+            params.imt.frequency,
+            params.imt.bandwidth,
+        )
 
-        # params.imt.spurious_emissions = -13
+        params.imt.spurious_emissions = -13
 
         # Geometry
-        ## Refernce latitude and longitude taken from Cuiaba station
+        # Refernce latitude and longitude taken from Cuiaba station
         params.imt.topology.central_latitude = -15.3300
         params.imt.topology.central_longitude = -56.0400
         params.imt.topology.central_altitude = 165
@@ -271,9 +267,11 @@ def generate_inputs():
             "Brazil", "Argentina", "Bolivia", "Chile", "Peru", "Paraguay", "Uruguay"
         ]
         # this is distance in km so that actual best satellite is used for each grid point
-        angle_dist_between_planes = 360 / params.imt.topology.mss_dc.orbits[0].n_planes
+        angle_dist_between_planes = 360 / \
+            params.imt.topology.mss_dc.orbits[0].n_planes
         margin = -np.ceil((angle_dist_between_planes / 2) * 111)
-        params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = int(margin)
+        params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = int(
+            margin)
 
         # Beam is active if satellite
         params.imt.topology.mss_dc.sat_is_active_if.conditions = [
@@ -297,7 +295,14 @@ def generate_inputs():
             params.imt.bs.antenna.itu_r_s_1528,
             params.imt.topology.mss_dc.orbits[0].apogee_alt_km,
         )
-        print(f"\tA cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
+        print(
+            f"\tA cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
+
+        params.imt.bs.antenna.pattern = "MSS Adjacent"
+        params.imt.bs.antenna.mss_adjacent.frequency = params.imt.frequency
+        params.imt.bs.antenna.set_external_parameters(
+            frequency=params.imt.frequency,
+        )
 
         # also do uniform dist of elevation angles
         params.single_earth_station.geometry.elevation.type = "UNIFORM_DIST"
@@ -319,11 +324,12 @@ def generate_inputs():
                 params,
             )
 
-
     print(f"\nFiles generated on this run: {total}\n")
     if INPUTS_DIR.exists():
-        n_of_inputs = np.sum([item.name.endswith(".yaml") for item in INPUTS_DIR.iterdir()])
+        n_of_inputs = np.sum([item.name.endswith(".yaml")
+                             for item in INPUTS_DIR.iterdir()])
         print("Total number of input files: ", n_of_inputs)
+
 
 def clear_inputs():
     """Removes all current inputs in inputs directory"""
@@ -333,6 +339,7 @@ def clear_inputs():
     for item in INPUTS_DIR.iterdir():
         if item.is_file() and item.name.endswith(".yaml"):
             item.unlink()
+
 
 if __name__ == "__main__":
     # test_calculate_equivalent_acs()

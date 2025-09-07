@@ -13,7 +13,7 @@ single_earth_station:
   tx_power_density: 0  # dBW/Hz - no info - system description only for receiver
   noise_temperature: 150  # K
   adjacent_ch_selectivity: 20.0  # dB
-  polarization_loss: 3  #
+  polarization_loss: 0  #
 
   geometry:
     height: 1
@@ -34,5 +34,5 @@ single_earth_station:
         y: 0.0
 
   antenna:
-    pattern: MSS Adjacent  # Custom pattern for Hibleo-X MSS UE
+    pattern: OMNI  # Custom pattern for Hibleo-X MSS UE
     gain: 10 # Antenna gain defined in document table
