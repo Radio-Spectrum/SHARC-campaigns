@@ -13,8 +13,7 @@ auto_open = False
 
 post_processor = PostProcessor()
 
-# Samples to plot CCDF from
-
+# Attributes to plot (CDF + CCDF)
 attributes_to_plot = [
     ("imt_system_antenna_gain", "cdf"),
     ("imt_system_path_loss", "cdf"),
@@ -23,99 +22,101 @@ attributes_to_plot = [
     ("system_inr", "ccdf"),
 ]
 
-samples_for_ccdf = [attr[0] for attr in attributes_to_plot if attr[1] == "ccdf"]
+samples_for_ccdf = [attr[0]
+                    for attr in attributes_to_plot if attr[1] == "ccdf"]
 samples_for_cdf = [attr[0] for attr in attributes_to_plot if attr[1] == "cdf"]
 
+# Load CCDF results
 ccdf_results = Results.load_many_from_dir(
     CAMPAIGN_DIR / "output",
-    # filter_fn=lambda x: "mss_d2d_to_eess" in x,
     only_latest=True,
-    only_samples=samples_for_ccdf)
+    only_samples=samples_for_ccdf
+)
 
+# Load CDF results
 cdf_results = Results.load_many_from_dir(
     CAMPAIGN_DIR / "output",
-    # filter_fn=lambda x: "mss_d2d_to_eess" in x,
     only_latest=True,
-    only_samples=samples_for_cdf)
+    only_samples=samples_for_cdf
+)
 
-# for res in cdf_results:
-#     print("res.output_directory", res.output_directory)
-
+# --- Unit fixes ---
 for res in ccdf_results:
-    # converting dBm to dB
-    # TODO: update this after fixing unit problems at the SHARC simulator
-    res.system_dl_interf_power_per_mhz = SampleList(np.array(
-            res.system_dl_interf_power_per_mhz
-        ) - 30)
+    # Convert dBm → dB[W] for power
+    if hasattr(res, "system_dl_interf_power_per_mhz"):
+        res.system_dl_interf_power_per_mhz = SampleList(
+            np.array(res.system_dl_interf_power_per_mhz) - 30
+        )
+
+    # Convert INR to dB (dimensionless) if simulator exported it like dBm
+    if hasattr(res, "system_inr"):
+        arr = np.array(res.system_inr)
+        # INR should be around -20 .. +20 dB normally
+        if arr.max() > 50:  # looks like dBm offset
+            res.system_inr = SampleList(arr - 30)
+
 
 def linestyle_getter(results):
-    """
-    Determine the line style for plotting based on the results' output directory.
-
-    Parameters
-    ----------
-    results : Results
-        The results object containing the output directory information.
-
-    Returns
-    -------
-    str
-        The line style to use for plotting (e.g., 'dash' or 'solid').
-    """
+    """Choose line style based on folder name."""
     i = 0
     styles = ["solid", "dot", "dash", "dashdot"]
     if "spurious_mask" in results.output_directory:
-        i = i + 1
+        i += 1
     if "340km" in results.output_directory:
-        i = i + 2
+        i += 2
     return styles[i]
 
 
 post_processor.add_results_linestyle_getter(linestyle_getter)
 
+# Legend labels
 for mss_dc_id, mss_es_id, load_factor in product(
-   IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS , MSS_DC_LOAD_FACTORS
+    IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS, MSS_DC_LOAD_FACTORS
 ):
     readable_mss = IMT_MSS_DC_ID_TO_READABLE[mss_dc_id]
     readable_sys = MSS_ES_TO_READABLE[mss_es_id]
     readable_load = f"Load = {load_factor * 100}%"
-    # IMT-MSS-D2D-DL to EESS
-    post_processor\
-        .add_plot_legend_pattern(
-            dir_name_contains=get_specific_pattern(
-                mss_dc_id, mss_es_id, load_factor
-            ),
-            legend=f"{readable_sys}; {readable_mss}, {readable_load}"
-        )
-# ^: typing.List[Results]
+    post_processor.add_plot_legend_pattern(
+        dir_name_contains=get_specific_pattern(
+            mss_dc_id, mss_es_id, load_factor),
+        legend=f"{readable_sys}; {readable_mss}, {readable_load}"
+    )
 
-plots = post_processor.generate_ccdf_plots_from_results(
-    ccdf_results
-)
-
+# Generate plots
+plots = post_processor.generate_ccdf_plots_from_results(ccdf_results)
 post_processor.add_plots(plots)
 
-plots = post_processor.generate_cdf_plots_from_results(
-    cdf_results
-)
-
+plots = post_processor.generate_cdf_plots_from_results(cdf_results)
 post_processor.add_plots(plots)
 
 system_dl_interf_power_per_mhz = post_processor.get_plot_by_results_attribute_name(
-    "system_dl_interf_power_per_mhz", plot_type="ccdf")
+    "system_dl_interf_power_per_mhz", plot_type="ccdf"
+)
 if system_dl_interf_power_per_mhz is not None:
     system_dl_interf_power_per_mhz.update_xaxes(
         title_text="dB[W/MHz]",
+    )
+
+system_inr_plot = post_processor.get_plot_by_results_attribute_name(
+    "system_inr", plot_type="ccdf"
+)
+if system_inr_plot is not None:
+    system_inr_plot.update_xaxes(
+        title_text="INR [dB]",
     )
 
 
 HTMLS_DIR = CAMPAIGN_DIR / "output" / "htmls"
 HTMLS_DIR.mkdir(exist_ok=True)
 print(f"Saving plots in {HTMLS_DIR}")
+
 for attr, plot_type in attributes_to_plot:
     file = HTMLS_DIR / f"{attr}-{plot_type}.html"
-    plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=plot_type)
-    # Add plot outline and increase font size
+    plot = post_processor.get_plot_by_results_attribute_name(
+        attr, plot_type=plot_type)
+    if plot is None:
+        continue
+
     plot.update_xaxes(
         linewidth=1,
         linecolor='black',
@@ -146,7 +147,6 @@ for attr, plot_type in attributes_to_plot:
             font=dict(size=14),
             x=0.2,
             y=-0.5,
-            # xanchor='left',
             orientation='h',
             xanchor='left',
             yanchor='bottom',
@@ -155,5 +155,5 @@ for attr, plot_type in attributes_to_plot:
             borderwidth=1
         )
     )
+
     plot.write_html(file=file, include_plotlyjs="cdn", auto_open=auto_open)
-    # plot.show()
