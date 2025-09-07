@@ -225,7 +225,7 @@ def generate_inputs():
         #     params.imt.bandwidth,
         # )
 
-        params.imt.spurious_emissions = -13
+        # params.imt.spurious_emissions = -13
 
         # Geometry
         # Refernce latitude and longitude taken from Cuiaba station
