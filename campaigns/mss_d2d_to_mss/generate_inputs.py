@@ -216,11 +216,10 @@ def generate_inputs():
         # We set this as the EIRP value already includes the adjacent emissions
         params.imt.bs.adjacent_ch_leak_ratio = 0
         # dBW based on the EIRP for first adjacent band: -55.6 dBW/Hz
-        params.imt.bs.conducted_power = 41.4
+        params.imt.bs.conducted_power = 42.128
 
-        params.imt.frequency = 2150 + params.imt.bandwidth / 2
-        params.single_earth_station.frequency = 2160 - \
-            params.single_earth_station.bandwidth / 2
+        params.imt.frequency = 2172.5 + params.imt.bandwidth
+        params.single_earth_station.frequency = 2172.5
 
         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
         params.single_earth_station.adjacent_ch_reception = "ACS"
@@ -295,7 +294,7 @@ def generate_inputs():
         # Set adjacent antenna pattern
 
         # Get cell radius based on co-channel antenna pattern
-        params.imt.bs.antenna.itu_r_s_1528.frequency = params.imt.frequency
+        params.imt.bs.antenna.itu_r_s_1528.frequency = 2000
         params.imt.bs.antenna.set_external_parameters(
             frequency=params.imt.frequency,
         )
