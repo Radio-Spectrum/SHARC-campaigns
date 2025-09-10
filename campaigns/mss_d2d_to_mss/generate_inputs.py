@@ -270,6 +270,7 @@ def generate_inputs():
 
         # Beam pointing
         params.imt.topology.mss_dc.beam_positioning.type = "SERVICE_GRID"
+        params.mss_d2d.beam_positioning.service_grid.transform_grid_randomly = True
         params.imt.topology.mss_dc.beam_positioning.service_grid.country_names = [
             "Brazil", "Argentina", "Bolivia", "Chile", "Peru", "Paraguay", "Uruguay"
         ]
