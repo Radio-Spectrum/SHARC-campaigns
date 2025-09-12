@@ -15,16 +15,17 @@ general = {
     # Number of simulation snapshots
     ###########################################################################
     "num_snapshots": 10000,
-    ###########################################################################,
+    # ,
     # if FALSE, then a new output directory is created,
     "overwrite_output": False,
-    ###########################################################################,
+    # ,
     # output destination folder - this is relative SHARC/sharc directory,
     "output_dir": f"{CAMPAIGN_STR}/output/",
     "output_dir_prefix": "to-update",
     "system": "SINGLE_EARTH_STATION",
     "imt_link": "DOWNLINK",
 }
+
 
 def get_taylor_cell_radius(
     params_s1528: ParametersAntennaS1528,
@@ -48,6 +49,7 @@ def get_taylor_cell_radius(
 
     return int(cell_radius)
 
+
 def estimate_eess_antenna_diameter(
     frequency,
     antenna_gain,
@@ -60,6 +62,7 @@ def estimate_eess_antenna_diameter(
     return float(np.round(
         lmbda * np.sqrt(G / n) / np.pi, decimals=2
     ))
+
 
 def generate_inputs():
     OUTPUT_START_NAME = f"output_{CAMPAIGN_NAME}_"
@@ -98,12 +101,13 @@ def generate_inputs():
 
             params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
 
-            params.single_earth_station.frequency = 2200 + params.single_earth_station.bandwidth / 2
+            params.single_earth_station.frequency = 2200 + \
+                params.single_earth_station.bandwidth / 2
             # NOTE: it seems that ACS was not used in previous iterations
             params.single_earth_station.adjacent_ch_reception = "ACS"
 
             # Geometry
-            ## Refernce latitude and longitude taken from Cuiaba station
+            # Refernce latitude and longitude taken from Cuiaba station
             params.imt.topology.central_latitude = -15.3300
             params.imt.topology.central_longitude = -56.0400
             params.imt.topology.central_altitude = 165
@@ -142,9 +146,11 @@ def generate_inputs():
                 "Brazil", "Argentina", "Bolivia", "Chile", "Peru", "Paraguay", "Uruguay"
             ]
             # this is distance in km so that actual best satellite is used for each grid point
-            angle_dist_between_planes = 360 / params.imt.topology.mss_dc.orbits[0].n_planes
+            angle_dist_between_planes = 360 / \
+                params.imt.topology.mss_dc.orbits[0].n_planes
             margin = -np.ceil((angle_dist_between_planes / 2) * 111)
-            params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = int(margin)
+            params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = int(
+                margin)
 
             # Beam is active if satellite
             params.imt.topology.mss_dc.sat_is_active_if.conditions = [
@@ -163,16 +169,17 @@ def generate_inputs():
 
             # Get cell radius based on co-channel antenna pattern
             params.imt.frequency = 2197.5
-            params.imt.bs.antenna.itu_r_s_1528.frequency = params.imt.frequency
+            params.imt.bs.antenna.itu_r_s_1528.frequency = 2000
             params.imt.bs.antenna.set_external_parameters(
-                frequency=params.imt.frequency,
+                frequency=2000,
             )
             # params.imt.validate("propagating-imt")
             params.imt.topology.mss_dc.beam_radius = get_taylor_cell_radius(
                 params.imt.bs.antenna.itu_r_s_1528,
                 params.imt.topology.mss_dc.orbits[0].apogee_alt_km,
             )
-            print(f"A cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
+            print(
+                f"A cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
 
             ##########
             # EESS Parameters
@@ -232,9 +239,11 @@ def generate_inputs():
                     params.general.output_dir_prefix = OUTPUT_START_NAME + specific
 
                     dump_parameters(
-                        INPUTS_DIR / (PARAMETER_START_NAME + specific + ".yaml"),
+                        INPUTS_DIR / (PARAMETER_START_NAME +
+                                      specific + ".yaml"),
                         params,
                     )
+
 
 def clear_inputs():
     print(f"Clearing inputs from dir '{INPUTS_DIR}'")
@@ -242,6 +251,7 @@ def clear_inputs():
     for item in INPUTS_DIR.iterdir():
         if item.is_file() and item.name.endswith(".yaml"):
             item.unlink()
+
 
 if __name__ == "__main__":
     clear_inputs()
