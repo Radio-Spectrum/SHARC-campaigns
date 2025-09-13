@@ -39,18 +39,21 @@ mss_d2d:
     antenna_pattern: ITU-R-S.1528-Taylor
     # NOTE: doc specifies lambda = 0.15m
     # we calculate based on frequency, giving out approx. 0.14m
-    antenna_s1528:
+    antenna:
         # Maximum Antenna gain in dBi
-        antenna_gain: 34.1
-        ### The following parameters are used for S.1528-Taylor antenna pattern
-        # SLR is the side-lobe ratio of the pattern (dB), the difference in gain between the maximum
-        # gain and the gain at the peak of the first side lobe.
-        slr: 20.0
-        # Number of secondarylobes considered in the diagram (coincide with the roots of the Bessel function)
-        n_side_lobes: 2
-        # Radial (l_r) and transverse (l_t) sizes of the effective radiating area of the satellite transmitt antenna (m)
-        l_r: 1.6
-        l_t: 1.6
+        gain: 34.1
+        itu_r_s_1528:
+            ### The following parameters are used for S.1528-Taylor antenna pattern
+            # SLR is the side-lobe ratio of the pattern (dB), the difference in gain between the maximum
+            # gain and the gain at the peak of the first side lobe.
+            slr: 20.0
+            # Number of secondarylobes considered in the diagram (coincide with the roots of the Bessel function)
+            n_side_lobes: 2
+            # Radial (l_r) and transverse (l_t) sizes of the effective radiating area of the satellite transmitt antenna (m)
+            l_r: 1.6
+            l_t: 1.6
+            # Frequency of operation (MHz) - used to calculate wavelength
+            frequency: 2000
     sat_is_active_if: # (PER SCENARIO)
         # for a satellite to be active, it needs to respect ALL conditions
         conditions:
