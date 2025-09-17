@@ -1,5 +1,5 @@
-#### EESS Parameters @7.3GHz
-# Single Earth Station representing an EESS Earth Station in the 7.3 GHz band.
+#### MSS Parameters @7.3GHz
+# Single Earth Station representing an MSS Earth Station in the 7.3 GHz band.
 # Custom example using P.452 channel model with fixed parameters.
 
 id: mss.7300MHz.hubType-18

@@ -125,7 +125,7 @@ imt:
         load_probability: 1.0
         ###########################################################################
         # Conducted power per antenna element [dBm/bandwidth]
-        conducted_power: 41.4  # -55.6 [dB/Hz] + 10log(5*1e6)[Hz] + 30.0
+        conducted_power: 39.98  # -22.9 [dB/Hz] + 10log(5*1e6)[Hz] - 34.1 + 30.0
         ###########################################################################
         # Base station height [m]
         height: 340000 # VALUE NOT USED
