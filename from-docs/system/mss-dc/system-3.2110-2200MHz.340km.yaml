@@ -27,7 +27,7 @@ mss_d2d:
     # EIRP density @nadir = -20.1 dBW/Hz
     # max gain = 34.1
     # tx_power_density = -20.1 -34.1
-    tx_power_density: -54.2
+    tx_power_density: -57.0
     # Polarization loss [dB] (PER SCENARIO)
     # P.619 suggests 3dB polarization loss as good constant value for monte carlo
     polarization_loss: 0
