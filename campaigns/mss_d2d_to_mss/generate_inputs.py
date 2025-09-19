@@ -1,5 +1,6 @@
 from itertools import product
 import numpy as np
+from pathlib import Path
 
 from sharc.parameters.antenna.parameters_antenna_s1528 import ParametersAntennaS1528
 from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
@@ -11,6 +12,8 @@ from campaigns.mss_d2d_to_mss.constants import (
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
     get_specific_pattern
 )
+
+INPUTS_DIR = Path(INPUTS_DIR)
 
 SEED = 82
 
@@ -70,7 +73,6 @@ def calculate_equivalent_acs(
     ) or (
         ue_lim_s < other_lim_e < ue_lim_e
     ):
-        # may not be needed?
         raise ValueError(
             "Expected adjacent channel to calculate for ACS"
         )
@@ -111,47 +113,6 @@ def test_calculate_equivalent_acs():
     """
     # NOTE: this function probably should not be here, but somehow
     # together with from-docs equipment definition
-
-    plot = False
-    # plot = True
-    if plot:
-        import matplotlib.pyplot as plt
-        mask_lims = np.array([
-            1.23/2 + 0.,
-            1.23/2 + 1.23,
-            1.23/2 + 3 * 1.23,
-            10,
-        ])
-        mask_lims = np.concatenate((
-            -mask_lims[::-1],
-            mask_lims
-        ))
-        mask_lims = np.repeat(mask_lims, 2)
-        mask_lims[::2] -= 1e-4
-        mask_lims = mask_lims[1:-1]
-        mask_vals_dBc = -np.array([
-            0, 15., 25., 30.
-        ])
-        mask_vals_dBc = np.roll(np.repeat(mask_vals_dBc, 2), -1)
-        mask_vals_dBc = np.concatenate((
-            mask_vals_dBc[::-1],
-            mask_vals_dBc
-        ))
-        mask_vals_dBc = mask_vals_dBc[1:-1]
-
-        plt.plot(
-            mask_lims,
-            mask_vals_dBc
-        )
-        plt.scatter(
-            mask_lims,
-            mask_vals_dBc
-        )
-        plt.xlim(-15, 15)
-        plt.ylim(-35, 0.1)
-        plt.grid(True)
-        plt.show()
-    print("hey")
     acs = calculate_equivalent_acs(
         2500 - 1.23/2, 1.23,
         2500 + 1.23/2, 1.23,
@@ -173,11 +134,6 @@ def test_calculate_equivalent_acs():
         2500 + 5/2, 5,
     )
 
-    # PSD = 0 dBW/MHz
-    # => attenuated = 10 * log10(1.23*10**(-1.5) + (2 * 1.23) * 10**(-2.5) + (5 - 3.69)*10**(-3))
-    # => non_attenuated = 10*log10(5)
-    # attenuation = -(attenuated - non_attenuated) = 20.1786252944
-
     if abs(acs - 20.1786252944) > 1e-5:
         raise Exception(f"{acs} != 20.1786252944")
 
@@ -191,6 +147,12 @@ def generate_inputs():
     factory = ParametersFactory()
     total = 0
 
+    imt_freq_power_map = {
+        2147.5: 14.008,
+        2152.5: 24.028,
+        2157.5: 42.048
+    }
+
     for imt_id, single_es_id in product(IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS):
         print(f"[Building params for {imt_id} -> {single_es_id}]")
 
@@ -202,44 +164,24 @@ def generate_inputs():
             {"general": general}
         ).build()
 
-        ##########
-        # Scenario
-
         params.general.enable_adjacent_channel = True
         params.general.enable_cochannel = False
         params.imt.interfered_with = False
         # NOTE: needed for performance. Discards unnecessary calcs.
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
         params.imt.adjacent_ch_emissions = "ACLR"
         # We set this as the EIRP value already includes the adjacent emissions
         params.imt.bs.adjacent_ch_leak_ratio = 0
-        # dBW based on the EIRP for first adjacent band: -55.6 dBW/Hz
-        params.imt.bs.conducted_power = 42.128
 
-        params.imt.frequency = 2172.5 + params.imt.bandwidth
-        params.single_earth_station.frequency = 2172.5
-
-        params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
         params.single_earth_station.adjacent_ch_reception = "ACS"
+        params.single_earth_station.frequency = 2160 + params.single_earth_station.bandwidth
 
-        # params.single_earth_station.adjacent_ch_selectivity = calculate_equivalent_acs(
-        #     params.single_earth_station.frequency,
-        #     params.single_earth_station.bandwidth,
-        #     params.imt.frequency,
-        #     params.imt.bandwidth,
-        # )
-
-        # params.imt.spurious_emissions = -13
-
-        # Geometry
         # Refernce latitude and longitude taken from Cuiaba station
         params.imt.topology.central_latitude = -15.3300
         params.imt.topology.central_longitude = -56.0400
         params.imt.topology.central_altitude = 165
 
-        # Channel Model
         params.single_earth_station.season = "SUMMER"
         params.single_earth_station.channel_model = "P619"
         # 3dB polarization loss, as suggested by P.619
@@ -265,15 +207,13 @@ def generate_inputs():
         es_geom.elevation.uniform_dist.max = 90.
         es_geom.elevation.uniform_dist.min = 5.
 
-        ##########
-        # MSS DC Parameters
-
-        # Beam pointing
         params.imt.topology.mss_dc.beam_positioning.type = "SERVICE_GRID"
-        params.mss_d2d.beam_positioning.service_grid.transform_grid_randomly = True
-        params.imt.topology.mss_dc.beam_positioning.service_grid.country_names = [
+        params.imt.topology.mss_dc.beam_positioning.service_grid.transform_grid_randomly = True
+        country_list = [
             "Brazil", "Argentina", "Bolivia", "Chile", "Peru", "Paraguay", "Uruguay"
         ]
+        params.imt.topology.mss_dc.beam_positioning.service_grid.country_names = country_list
+
         # this is distance in km so that actual best satellite is used for each grid point
         angle_dist_between_planes = 360 / \
             params.imt.topology.mss_dc.orbits[0].n_planes
@@ -286,18 +226,14 @@ def generate_inputs():
             "LAT_LONG_INSIDE_COUNTRY",
             "MINIMUM_ELEVATION_FROM_ES",
         ]
-        params.imt.topology.mss_dc.sat_is_active_if.lat_long_inside_country.country_names = [
-            "Brazil", "Argentina", "Bolivia", "Chile", "Peru", "Paraguay", "Uruguay"
-        ]
+        params.imt.topology.mss_dc.sat_is_active_if.lat_long_inside_country.country_names = country_list
         params.imt.topology.mss_dc.sat_is_active_if.lat_long_inside_country.margin_from_border = \
             params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border
-
-        # Set adjacent antenna pattern
 
         # Get cell radius based on co-channel antenna pattern
         params.imt.bs.antenna.itu_r_s_1528.frequency = 2000
         params.imt.bs.antenna.set_external_parameters(
-            frequency=params.imt.frequency,
+            frequency=2000,
         )
         params.imt.topology.mss_dc.beam_radius = get_taylor_cell_radius(
             params.imt.bs.antenna.itu_r_s_1528,
@@ -307,35 +243,38 @@ def generate_inputs():
             f"\tA cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
 
         params.imt.bs.antenna.pattern = "MSS Adjacent"
-        params.imt.bs.antenna.mss_adjacent.frequency = params.imt.frequency
-        params.imt.bs.antenna.set_external_parameters(
-            frequency=params.imt.frequency,
-        )
 
         # also do uniform dist of elevation angles
         params.single_earth_station.geometry.elevation.type = "UNIFORM_DIST"
         params.single_earth_station.geometry.elevation.uniform_dist.min = 10.
         params.single_earth_station.geometry.elevation.uniform_dist.max = 90.
 
-        for mss_dc_load in (
-            MSS_DC_LOAD_FACTORS
-        ):
+        for mss_dc_load, imt_freq in product(MSS_DC_LOAD_FACTORS, imt_freq_power_map.keys()):
+            params.imt.frequency = imt_freq
+            params.imt.bs.conducted_power = imt_freq_power_map[imt_freq]
             params.imt.bs.load_probability = mss_dc_load
-            specific = get_specific_pattern(
+
+            params.imt.bs.antenna.mss_adjacent.frequency = imt_freq
+            params.imt.bs.antenna.set_external_parameters(
+                frequency=imt_freq,
+            )
+
+            base_specific = get_specific_pattern(
                 imt_id, single_es_id, mss_dc_load
             )
+            specific = f"{base_specific}_freq{imt_freq}"
+
             params.general.output_dir_prefix = OUTPUT_START_NAME + specific
 
-            total += 1
             dump_parameters(
                 INPUTS_DIR / (PARAMETER_START_NAME + specific + ".yaml"),
                 params,
             )
+            total += 1
 
     print(f"\nFiles generated on this run: {total}\n")
     if INPUTS_DIR.exists():
-        n_of_inputs = np.sum([item.name.endswith(".yaml")
-                             for item in INPUTS_DIR.iterdir()])
+        n_of_inputs = len(list(INPUTS_DIR.glob("*.yaml")))
         print("Total number of input files: ", n_of_inputs)
 
 
