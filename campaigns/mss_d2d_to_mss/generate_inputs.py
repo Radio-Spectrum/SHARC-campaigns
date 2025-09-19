@@ -1,6 +1,7 @@
 from itertools import product
 import numpy as np
 from pathlib import Path
+import datetime
 
 from sharc.parameters.antenna.parameters_antenna_s1528 import ParametersAntennaS1528
 from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
@@ -18,12 +19,15 @@ INPUTS_DIR = Path(INPUTS_DIR)
 # Seed for reproducibility
 SEED = 82
 
+now = datetime.datetime.now()
+timestamp = now.strftime("%Y_%m_%d_%H_%M_%S")
+
 # General parameters for the simulation campaign
 general = {
     "seed": SEED,
-    "num_snapshots": 1000,
+    "num_snapshots": 10000,
     "overwrite_output": False,
-    "output_dir": f"{CAMPAIGN_STR}/output/",
+    "output_dir": f"{CAMPAIGN_STR}/output/simulation{timestamp}",
     "output_dir_prefix": "to-update",
     "system": "SINGLE_EARTH_STATION",
     "imt_link": "DOWNLINK",
