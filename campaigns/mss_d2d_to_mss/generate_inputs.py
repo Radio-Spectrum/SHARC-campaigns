@@ -15,8 +15,10 @@ from campaigns.mss_d2d_to_mss.constants import (
 
 INPUTS_DIR = Path(INPUTS_DIR)
 
+# Seed for reproducibility
 SEED = 82
 
+# General parameters for the simulation campaign
 general = {
     "seed": SEED,
     "num_snapshots": 1000,
@@ -33,19 +35,25 @@ def get_taylor_cell_radius(
     sat_alt_km: float,
     attempt_max_angle: float = 10.0,
     attempt_resolution: int = int(1e6)
-):
+) -> int:
+    """
+    Calculates the satellite beam's cell radius on the ground.
+
+    The radius is based on the angle where the antenna gain drops by 7 dB.
+    """
     antenna = AntennaS1528Taylor(
         params_s1528
     )
     off_axis = np.linspace(0, attempt_max_angle, attempt_resolution)
     gains = antenna.calculate_gain(
         off_axis_angle_vec=off_axis,
-        # theta is set to 0 since it makes no difference
-        # when antenna pattern is circular
+        # theta is 0 since the pattern is circular
         theta_vec=0,
     )
+    # Find the angle where gain drops by 7 dB
     angle_7dB_i = np.where(gains <= params_s1528.antenna_gain - 7)[0][0]
     angle_7dB = off_axis[angle_7dB_i]
+    # Calculate radius using trigonometry
     cell_radius = np.tan(np.deg2rad(angle_7dB)) * sat_alt_km * 1e3
 
     return int(cell_radius)
@@ -58,11 +66,9 @@ def calculate_equivalent_acs(
     other_bw_MHz,
 ):
     """
-    Returns the equivalent ACS considering the freqs and bws
+    Calculates the equivalent Adjacent Channel Selectivity (ACS) based on
+    a spectral mask model.
     """
-    # NOTE: this function probably should not be here, but somehow
-    # together with from-docs equipment definition
-
     ue_lim_s = ue_f_MHz - ue_bw_MHz / 2
     ue_lim_e = ue_f_MHz + ue_bw_MHz / 2
     other_lim_s = other_f_MHz - other_bw_MHz / 2
@@ -76,6 +82,7 @@ def calculate_equivalent_acs(
         raise ValueError(
             "Expected adjacent channel to calculate for ACS"
         )
+        
     if other_lim_s >= ue_lim_e:
         df_s = other_lim_s - ue_lim_e
         df_e = other_lim_e - ue_lim_e
@@ -83,6 +90,7 @@ def calculate_equivalent_acs(
         df_s = ue_lim_s - other_lim_e
         df_e = ue_lim_s - other_lim_s
 
+    # Spectral mask definitions
     mask_lims = np.array([
         0.,
         ue_bw_MHz,
@@ -93,12 +101,14 @@ def calculate_equivalent_acs(
         15., 25., 30.
     ])
 
+    # Calculate the overlap between the interfering signal and each mask bin
     mask_bins_overlap_MHz = np.zeros_like(mask_vals_dBc)
     for i in range(len(mask_lims) - 1):
         win_s = max(mask_lims[i], df_s)
         win_e = min(mask_lims[i + 1], df_e)
         mask_bins_overlap_MHz[i] = max(win_e - win_s, 0)
 
+    # Integrate the power contributions from each bin to find total attenuation
     equivalent_attenuation = -10 * np.log10(
         np.sum(mask_bins_overlap_MHz * 10 ** (-0.1 * mask_vals_dBc))
         / other_bw_MHz
@@ -108,16 +118,11 @@ def calculate_equivalent_acs(
 
 
 def test_calculate_equivalent_acs():
-    """
-    Tests and plots mask calculation for this system acs
-    """
-    # NOTE: this function probably should not be here, but somehow
-    # together with from-docs equipment definition
+    """Tests the calculate_equivalent_acs function with known scenarios."""
     acs = calculate_equivalent_acs(
         2500 - 1.23/2, 1.23,
         2500 + 1.23/2, 1.23,
     )
-
     if abs(acs - 15) > 1e-5:
         raise Exception(f"{acs} != 15")
 
@@ -125,7 +130,6 @@ def test_calculate_equivalent_acs():
         2500 - 1.23/2, 1.23,
         2500 + 1.23/2 + 1.23, 1.23,
     )
-
     if abs(acs - 25) > 1e-5:
         raise Exception(f"{acs} != 25")
 
@@ -133,13 +137,12 @@ def test_calculate_equivalent_acs():
         2500 - 1.23/2, 1.23,
         2500 + 5/2, 5,
     )
-
     if abs(acs - 20.1786252944) > 1e-5:
         raise Exception(f"{acs} != 20.1786252944")
 
 
 def generate_inputs():
-    """Generates all campaign input files"""
+    """Generates all input YAML configuration files for the campaign."""
     OUTPUT_START_NAME = f"output_{CAMPAIGN_NAME}_"
     PARAMETER_START_NAME = f"parameter_{CAMPAIGN_NAME}_"
 
@@ -147,12 +150,14 @@ def generate_inputs():
     factory = ParametersFactory()
     total = 0
 
+    # Map of IMT frequencies to conducted power in dBW
     imt_freq_power_map = {
         2147.5: 14.008,
         2152.5: 24.028,
         2157.5: 42.048
     }
 
+    # Loop through all combinations of systems, load factors, and frequencies
     for imt_id, single_es_id in product(IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS):
         print(f"[Building params for {imt_id} -> {single_es_id}]")
 
@@ -166,47 +171,49 @@ def generate_inputs():
 
         params.general.enable_adjacent_channel = True
         params.general.enable_cochannel = False
+        
+        # Configure IMT as the interferer
         params.imt.interfered_with = False
-        # NOTE: needed for performance. Discards unnecessary calcs.
+        # Performance optimization: discard unnecessary SINR calculations
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
         params.imt.adjacent_ch_emissions = "ACLR"
-        # We set this as the EIRP value already includes the adjacent emissions
         params.imt.bs.adjacent_ch_leak_ratio = 0
 
+        # Configure Single Earth Station as the victim
         params.single_earth_station.adjacent_ch_reception = "ACS"
         params.single_earth_station.frequency = 2160 + params.single_earth_station.bandwidth
 
-        # Refernce latitude and longitude taken from Cuiaba station
+        # Reference latitude and longitude taken from Cuiaba station
         params.imt.topology.central_latitude = -15.3300
         params.imt.topology.central_longitude = -56.0400
         params.imt.topology.central_altitude = 165
 
         params.single_earth_station.season = "SUMMER"
         params.single_earth_station.channel_model = "P619"
-        # 3dB polarization loss, as suggested by P.619
-        params.single_earth_station.polarization_loss = 3
+        params.single_earth_station.polarization_loss = 3 # 3dB loss as suggested by P.619
 
         params.single_earth_station.param_p619.earth_station_lat_deg = params.imt.topology.central_latitude
         params.single_earth_station.param_p619.earth_station_alt_m = params.imt.topology.central_altitude
-        # NOTE: we chose rural/low cluttered environment since MSS UEs are normally there
+        # MSS UEs are typically in rural/low cluttered environments
         params.single_earth_station.param_p619.mean_clutter_height = "low"
         params.single_earth_station.param_p619.below_rooftop = 0
 
-        # position ES at reference
+        # Position ES at the reference location
         es_geom = params.single_earth_station.geometry
         es_geom.location.type = "FIXED"
         es_geom.location.fixed.x = 0
         es_geom.location.fixed.y = 0
 
+        # Randomize ES antenna pointing
         es_geom.azimuth.type = "UNIFORM_DIST"
         es_geom.azimuth.uniform_dist.max = 180.
         es_geom.azimuth.uniform_dist.min = -180.
-
         es_geom.elevation.type = "UNIFORM_DIST"
         es_geom.elevation.uniform_dist.max = 90.
         es_geom.elevation.uniform_dist.min = 5.
 
+        # Configure IMT satellite beam positioning over South America
         params.imt.topology.mss_dc.beam_positioning.type = "SERVICE_GRID"
         params.imt.topology.mss_dc.beam_positioning.service_grid.transform_grid_randomly = True
         country_list = [
@@ -214,14 +221,13 @@ def generate_inputs():
         ]
         params.imt.topology.mss_dc.beam_positioning.service_grid.country_names = country_list
 
-        # this is distance in km so that actual best satellite is used for each grid point
+        # Calculate margin to ensure the best satellite is used for each grid point
         angle_dist_between_planes = 360 / \
             params.imt.topology.mss_dc.orbits[0].n_planes
         margin = -np.ceil((angle_dist_between_planes / 2) * 111)
-        params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = int(
-            margin)
+        params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = int(margin)
 
-        # Beam is active if satellite
+        # A beam is active if the satellite is over the service area
         params.imt.topology.mss_dc.sat_is_active_if.conditions = [
             "LAT_LONG_INSIDE_COUNTRY",
             "MINIMUM_ELEVATION_FROM_ES",
@@ -232,19 +238,15 @@ def generate_inputs():
 
         # Get cell radius based on co-channel antenna pattern
         params.imt.bs.antenna.itu_r_s_1528.frequency = 2000
-        params.imt.bs.antenna.set_external_parameters(
-            frequency=2000,
-        )
+        params.imt.bs.antenna.set_external_parameters(frequency=2000)
         params.imt.topology.mss_dc.beam_radius = get_taylor_cell_radius(
             params.imt.bs.antenna.itu_r_s_1528,
             params.imt.topology.mss_dc.orbits[0].apogee_alt_km,
         )
-        print(
-            f"\tA cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
+        print(f"\tA cell radius of {params.imt.topology.mss_dc.beam_radius} m will be used")
 
         params.imt.bs.antenna.pattern = "MSS Adjacent"
 
-        # also do uniform dist of elevation angles
         params.single_earth_station.geometry.elevation.type = "UNIFORM_DIST"
         params.single_earth_station.geometry.elevation.uniform_dist.min = 10.
         params.single_earth_station.geometry.elevation.uniform_dist.max = 90.
@@ -255,17 +257,14 @@ def generate_inputs():
             params.imt.bs.load_probability = mss_dc_load
 
             params.imt.bs.antenna.mss_adjacent.frequency = imt_freq
-            params.imt.bs.antenna.set_external_parameters(
-                frequency=imt_freq,
-            )
+            params.imt.bs.antenna.set_external_parameters(frequency=imt_freq)
 
-            base_specific = get_specific_pattern(
-                imt_id, single_es_id, mss_dc_load
-            )
+            # Generate unique name for this specific parameter set
+            base_specific = get_specific_pattern(imt_id, single_es_id, mss_dc_load)
             specific = f"{base_specific}_freq{imt_freq}"
-
             params.general.output_dir_prefix = OUTPUT_START_NAME + specific
 
+            # Write the parameters to a YAML file
             dump_parameters(
                 INPUTS_DIR / (PARAMETER_START_NAME + specific + ".yaml"),
                 params,
@@ -279,7 +278,7 @@ def generate_inputs():
 
 
 def clear_inputs():
-    """Removes all current inputs in inputs directory"""
+    """Removes all YAML files from the inputs directory."""
     INPUTS_DIR.mkdir(parents=True, exist_ok=True)
     print(f"Clearing inputs from dir '{INPUTS_DIR}'")
 
