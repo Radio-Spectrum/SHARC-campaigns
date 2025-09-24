@@ -101,18 +101,18 @@ def generate(
         params.mss_d2d.param_p619.below_rooftop = 0.0 if link == "dl" else 50.0
 
         # Get cell radius
-        params.mss_d2d.antenna_s1528.frequency = params.mss_d2d.frequency
+        params.mss_d2d.antenna.itu_r_s_1528.frequency = params.mss_d2d.frequency
         # NOTE: max frequency yields smaller cell radius
-        # params.mss_d2d.antenna_s1528.frequency = max(ul_imt_freq, dl_imt_freq)
+        # params.mss_d2d.antenna.itu_r_s_1528.frequency = max(ul_imt_freq, dl_imt_freq)
         antenna = AntennaS1528Taylor(
-            params.mss_d2d.antenna_s1528
+            params.mss_d2d.antenna.itu_r_s_1528
         )
         off_axis = np.linspace(0, 20, int(1e6))
         gains = antenna.calculate_gain(
             off_axis_angle_vec=off_axis,
             theta_vec=0,
         )
-        angle_7dB_i = np.where(gains <= params.mss_d2d.antenna_s1528.antenna_gain - 7)[0][0]
+        angle_7dB_i = np.where(gains <= params.mss_d2d.antenna.itu_r_s_1528.antenna_gain - 7)[0][0]
         angle_7dB = off_axis[angle_7dB_i]
         cell_radius = np.tan(np.deg2rad(angle_7dB)) * params.mss_d2d.orbits[0].apogee_alt_km * 1e3
 

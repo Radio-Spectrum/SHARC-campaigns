@@ -3,13 +3,16 @@ import argparse
 OPTION_TO_SELECTED_SYS = {
     "3.1": ["system-3.2110-2200MHz.525km"],
     "3.2": ["system-3.2110-2200MHz.340km"],
+    "3.3": ["system-3.2300-2690MHz.525km"],
     # "4": ["system-4.2110-2200MHz.690km"],
     "all": [
         "system-3.2110-2200MHz.525km",
         "system-3.2110-2200MHz.340km",
         # "system-4.2110-2200MHz.690km",
+        "system-3.2300-2690MHz.525km"
     ]
 }
+
 
 def sys_alias_to_id(alias):
     try:
@@ -18,6 +21,7 @@ def sys_alias_to_id(alias):
         raise argparse.ArgumentTypeError(
             f"Invalid alias '{alias}'. Choose from {list(OPTION_TO_SELECTED_SYS.keys())}"
         )
+
 
 def get_cmd_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="MSS D2D to IMT cross border")
