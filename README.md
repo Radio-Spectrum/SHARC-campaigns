@@ -18,7 +18,7 @@ Project structure:
 ├── from-docs
 │   ├── imt
 │   │   ├── imt.frequency.topology.equipment-spec.yaml
-│   │   └── imt.1-3GHz.single-bs.aas-macro-bs.yaml
+│   │   └── imt.1-3GHz.single-bs.aas-urban-macro-bs.yaml
 │   └── system
 │       └── mss-dc
 │           └── system-A.some-other.stuff
