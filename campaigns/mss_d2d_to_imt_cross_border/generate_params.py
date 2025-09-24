@@ -27,7 +27,7 @@ def generate(
     factory = ParametersFactory()
 
     params = factory.load_from_id(
-            "imt.1-3GHz.single-bs.aas-macro-bs"
+            "imt.1-3GHz.single-bs.aas-urban-macro-bs"
         ).load_from_id(
             mss_id
         ).load_from_dict(

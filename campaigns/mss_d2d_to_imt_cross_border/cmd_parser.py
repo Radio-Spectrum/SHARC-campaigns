@@ -13,6 +13,12 @@ OPTION_TO_SELECTED_SYS = {
     ]
 }
 
+OPTION_TO_SELECTED_IMT_DEPLOYMENT = {
+    "urban": "imt.1-3GHz.single-bs.aas-urban-macro-bs",
+    "suburban": "imt.1-3GHz.single-bs.aas-suburban-macro-bs",
+    "rural": "imt.1-3GHz.single-bs.aas-rural-macro-bs"
+}
+
 
 def sys_alias_to_id(alias):
     try:
