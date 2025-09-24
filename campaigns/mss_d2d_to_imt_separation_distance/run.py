@@ -1,7 +1,7 @@
 from sharc.run_multiple_campaigns_mut_thread import run_campaign
 from campaigns.utils.constants import SHARC_SIM_ROOT_DIR
 
-CAMPAIGN_NAME = "mss_d2d_to_imt_cross_border"
+CAMPAIGN_NAME = "mss_d2d_to_imt_separation_distance"
 CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 
 CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
@@ -16,4 +16,3 @@ if __name__ == "__main__":
     # It will look for the campaign directory under the specified name and
     # start the necessary processes.
     run_campaign(CAMPAIGN_NAME)
-
