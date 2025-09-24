@@ -9,6 +9,7 @@ from campaigns.mss_d2d_to_imt_cross_border.cmd_parser import get_cmd_parser, OPT
 from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 import numpy as np
+import re
 
 
 EARTH_RADIUS_KM = EARTH_RADIUS / 1e3
@@ -34,6 +35,11 @@ def generate(
 
     for imt_deployment_id in OPTION_TO_SELECTED_IMT_DEPLOYMENT[args.imt_deployment]:
         print(f"Using IMT deployment: {imt_deployment_id}")
+        # Extract "urban", "suburban", or "rural" from the IMT deployment ID
+        match = re.search(r'\b(urban|suburban|rural)\b', imt_deployment_id)
+        imt_deployment_name = match.group(1) if match else None
+        print(f"IMT deployment name: {imt_deployment_name}")
+
 
         params = factory.load_from_id(
             imt_deployment_id
@@ -166,7 +172,7 @@ def generate(
             #     params.mss_d2d.orbits[0].apogee_alt_km * 1e3
             # params.mss_d2d.cell_radius = int(cell_radius)
             print("\tDC-MSS spot-beam radius [km]: ", params.mss_d2d.cell_radius)
-            print("\t IMT cell radius [m]: ", params.imt.topology.single_bs.cell_radius)
+            print("\tIMT cell radius [m]: ", params.imt.topology.single_bs.cell_radius)
 
             # distances = np.linspace(params.mss_d2d.cell_radius / 1e3, 100, 4)
             # distances = [float(round(d, 3)) for d in distances]
@@ -211,19 +217,19 @@ def generate(
                 if separation_dist_km < 0:
                     print(
                         f"\tWarning: Negative separation distance {separation_dist_km} km. This means IMT cell is overlapping MSS D2D cell.")
-                    postfix = f"mss_d2d_to_imt_separation_distance_{separation_dist_km}km_{args.imt_deployment}_{link}".replace("-", "neg")
+                    postfix = f"mss_d2d_to_imt_separation_distance_{separation_dist_km}km_{imt_deployment_name}_{link}".replace("-", "neg")
                 else:
-                    postfix = f"mss_d2d_to_imt_separation_distance_{separation_dist_km}km_{args.imt_deployment}_{link}"
+                    postfix = f"mss_d2d_to_imt_separation_distance_{separation_dist_km}km_{imt_deployment_name}_{link}"
                 params.general.output_dir_prefix = f"output_{postfix}"
                 file = INPUTS_DIR / \
                     f"parameter_{mss_id}_{"co" if co_channel else "adj"}_{postfix}.yaml"
 
                 print(f"\tSaving parameters to file: {file}")
 
-                # # Create parent directories if they don't exist
-                # dump_parameters(
-                #     file, params
-                # )
+                # Create parent directories if they don't exist
+                dump_parameters(
+                    file, params
+                )
 
 
 if __name__ == "__main__":
