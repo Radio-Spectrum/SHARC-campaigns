@@ -14,7 +14,7 @@ OUTPUT_ROOT_FOLDER = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 
 # OUTPUT_FOLDER_REGEX_PATTERN = r"output_mss_d2d_to_imt_separation_distance_(\d+\.\d+)km_(ul|dl)_"
 # OUTPUT_FOLDER_REGEX_PATTERN = r"output_mss_d2d_to_imt_separation_distance_(\d+)km_(ul|dl)_"
-OUTPUT_FOLDER_REGEX_PATTERN = r"output_mss_d2d_to_imt_separation_distance_((?:neg\d+\.)?\d+)km_(ul|dl)_"
+OUTPUT_FOLDER_REGEX_PATTERN = r"output_mss_d2d_to_imt_separation_distance_((?:neg\d+\.)?\d+)km_(urban|suburban|rural)_(ul|dl)_"
 
 SEPARATION_DISTANCES_KM = ['neg0.4'] + list((str(s) for s in [0, 1, 5, 10, 20]))
 
@@ -58,10 +58,11 @@ if __name__ == "__main__":
             print("Warning: Directory name does not match expected pattern.")
             return "Unknown"
 
-        sep_dist, link_type = match.groups()
+        sep_dist, link_type, deployment = match.groups()
         link_type = link_type.upper()
+        deployment = deployment.upper()
 
-        legend_str = f"{sep_dist}km separation dist., IMT TN {link_type}".replace("neg", "-")
+        legend_str = f"{sep_dist}km separation dist., IMT TN {link_type} - {deployment}".replace("neg", "-")
 
         print("Generated legend:", legend_str)
 
@@ -77,16 +78,17 @@ if __name__ == "__main__":
         """
         dirname = result.output_directory
         pattern = re.compile(
-            OUTPUT_FOLDER_REGEX_PATTERN
+            r".*" + OUTPUT_FOLDER_REGEX_PATTERN
         )
         match = pattern.match(dirname)
         if not match:
             return "solid"
 
-        sep_dist, _ = match.groups()
+        _, deployment, _ = match.groups()
 
-        for idx, val in enumerate(SEPARATION_DISTANCES_KM):
-            if sep_dist == val:
+        for idx, val in enumerate(["urban", "suburban", "rural"]):
+            print(val, deployment)
+            if val == deployment:
                 return styles[idx % len(styles)]
 
         return "solid"
