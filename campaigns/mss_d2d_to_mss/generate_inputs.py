@@ -186,7 +186,7 @@ def generate_inputs():
 
         # Configure Single Earth Station as the victim
         params.single_earth_station.adjacent_ch_reception = "ACS"
-        params.single_earth_station.frequency = 2160 + params.single_earth_station.bandwidth
+        params.single_earth_station.frequency = 2160 + params.imt.bandwidth/2
 
         # Reference latitude and longitude taken from Cuiaba station
         params.imt.topology.central_latitude = -15.3300
