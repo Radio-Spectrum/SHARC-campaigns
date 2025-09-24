@@ -14,9 +14,14 @@ OPTION_TO_SELECTED_SYS = {
 }
 
 OPTION_TO_SELECTED_IMT_DEPLOYMENT = {
-    "urban": "imt.1-3GHz.single-bs.aas-urban-macro-bs",
-    "suburban": "imt.1-3GHz.single-bs.aas-suburban-macro-bs",
-    "rural": "imt.1-3GHz.single-bs.aas-rural-macro-bs"
+    "urban": ["imt.1-3GHz.single-bs.aas-urban-macro-bs"],
+    "suburban": ["imt.1-3GHz.single-bs.aas-suburban-macro-bs"],
+    "rural": ["imt.1-3GHz.single-bs.aas-rural-macro-bs"],
+    "all": [
+        "imt.1-3GHz.single-bs.aas-urban-macro-bs",
+        "imt.1-3GHz.single-bs.aas-suburban-macro-bs",
+        "imt.1-3GHz.single-bs.aas-rural-macro-bs",
+    ]
 }
 
 
@@ -44,6 +49,15 @@ def get_cmd_parser() -> argparse.ArgumentParser:
         type=sys_alias_to_id,
         default="all",
         help=f"Name of mss system to use. Choose one of {supported_mss_sys_name}"
+    )
+
+    supported_imt_deployment = list(OPTION_TO_SELECTED_IMT_DEPLOYMENT.keys())
+    parser.add_argument(
+        "--imt_deployment",
+        type=str,
+        choices=supported_imt_deployment,
+        default="urban",
+        help=f"IMT deployment scenario to use. Choose one of {supported_imt_deployment}"
     )
 
     return parser
