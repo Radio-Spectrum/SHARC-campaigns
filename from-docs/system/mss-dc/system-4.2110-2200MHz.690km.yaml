@@ -47,10 +47,10 @@ mss_d2d:
     # since document S.1528 does not provide enough information to use it
     # as is
     antenna_l_s: -35
-    antenna_s1528:
+    antenna:
         # Maximum Antenna gain in dBi
         # NOTE: doc. specifies 41 dBi only at nadir, 46 at maximum steering angle
-        antenna_gain: 41
+        gain: 41
     sat_is_active_if: # (PER SCENARIO)
         # for a satellite to be active, it needs to respect ALL conditions
         conditions:
