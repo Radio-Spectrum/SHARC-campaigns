@@ -132,7 +132,7 @@ imt:
                 ###########################################################################
                 # mechanical downtilt [degrees]
                 # NOTE: consider defining it to 90 degrees in case of indoor simulations
-                downtilt: 6
+                downtilt: 6.0
                 ###########################################################################
                 # BS/UE maximum transmit/receive element gain [dBi]
                 # default: element_max_g = 5, for M.2101
