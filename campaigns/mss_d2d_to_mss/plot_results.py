@@ -12,7 +12,7 @@ from campaigns.mss_d2d_to_mss.constants import (
     get_specific_pattern,
 )
 
-folder = "Co-channel_simulation_new"
+folder = "change_it"
 
 # Note: For saving static images, ensure you have kaleido installed.
 # You can install it with: pip install kaleido
@@ -31,7 +31,6 @@ attributes_to_plot = [
     ("system_ul_interf_power_per_mhz", "cdf"),
     ("system_pfd", "cdf"),
     ("system_dl_interf_power_per_mhz", "ccdf"),
-    # Added plots from the latest request
     ("system_ul_interf_power_per_mhz", "ccdf"),
     ("system_pfd", "ccdf"),
 ]
@@ -120,22 +119,22 @@ if system_inr_plot is not None:
         title_text="INR [dB]",
     )
     # Add protection criteria lines
-    # system_inr_plot.add_vline(
-    #     x=-12.2,
-    #     line_width=2,
-    #     line_dash="dash",
-    #     line_color="black",
-    #     annotation_text="Protection Criteria: -12.2 dB",
-    #     annotation_position="top right",
-    #     annotation_font_size=14,
-    # )
-    system_inr_plot.add_hline(
-        y=0.1,
-        line_width=1.5,
-        line_dash="dot",
-        line_color="red",
-        annotation_text="10% of time",
-        annotation_position="bottom right",
+    system_inr_plot.add_vline(
+        x=-12.2,
+        line_width=2,
+        line_dash="dash",
+        line_color="black",
+        annotation_text="Protection Criteria: -12.2 dB",
+        annotation_position="top right",
+        annotation_font_size=14,
+    )
+    system_inr_plot.add_vline(
+        x=-6,
+        line_width=2,
+        line_dash="dash",
+        line_color="green",
+        annotation_text="Protection Criteria: -6 dB",
+        annotation_position="top left",
         annotation_font_size=14,
     )
     system_inr_plot.add_hline(
