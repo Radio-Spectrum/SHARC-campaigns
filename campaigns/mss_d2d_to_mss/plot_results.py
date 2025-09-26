@@ -12,7 +12,9 @@ from campaigns.mss_d2d_to_mss.constants import (
     get_specific_pattern,
 )
 
-folder = "change_it"
+folder_name = "--name--"
+
+folder = f"results_adj_channel/{folder_name}"
 
 # Note: For saving static images, ensure you have kaleido installed.
 # You can install it with: pip install kaleido
@@ -125,14 +127,14 @@ if system_inr_plot is not None:
         line_dash="dash",
         line_color="black",
         annotation_text="Protection Criteria: -12.2 dB",
-        annotation_position="top right",
+        annotation_position="top left",
         annotation_font_size=14,
     )
     system_inr_plot.add_vline(
         x=-6,
         line_width=2,
         line_dash="dash",
-        line_color="green",
+        line_color="black",
         annotation_text="Protection Criteria: -6 dB",
         annotation_position="top left",
         annotation_font_size=14,
@@ -193,7 +195,7 @@ def style_plot(plot: Figure) -> Figure:
 # --- SAVING PLOTS AND IMAGES ---
 
 # Create a single directory for all results
-RESULTS_DIR = CAMPAIGN_DIR / "output" / folder /"results"
+RESULTS_DIR = CAMPAIGN_DIR / "output" / folder / folder_name
 RESULTS_DIR.mkdir(exist_ok=True, parents=True)
 print(f"Saving all outputs in: {RESULTS_DIR}")
 
