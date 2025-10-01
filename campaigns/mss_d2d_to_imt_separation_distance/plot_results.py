@@ -16,7 +16,7 @@ OUTPUT_ROOT_FOLDER = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 # OUTPUT_FOLDER_REGEX_PATTERN = r"output_mss_d2d_to_imt_separation_distance_(\d+)km_(ul|dl)_"
 OUTPUT_FOLDER_REGEX_PATTERN = r"output_mss_d2d_to_imt_separation_distance_((?:neg\d+\.)?\d+)km_(urban|suburban|rural)_(ul|dl)_"
 
-SEPARATION_DISTANCES_KM = ['neg0.4'] + list((str(s) for s in [0, 1, 5, 10, 20]))
+SEPARATION_DISTANCES_KM = ['neg0.4'] + list((str(s) for s in [0, 1, 5, 10, 20, 50, 100]))
 
 if __name__ == "__main__":
     post_processor = PostProcessor()

@@ -181,7 +181,7 @@ def generate(
 
             # Separation distances to be tested - this is the separation between the IMT and MSS D2D cell edges
             for separation_dist_km in [np.ceil(-params.mss_d2d.cell_radius / 1e3),
-                                       -params.imt.topology.single_bs.cell_radius / 1e3, 0, 1, 5, 10, 20]:
+                                       -params.imt.topology.single_bs.cell_radius / 1e3, 0, 1, 5, 10, 20, 50, 100]:
 
                 # Define the exclusion radius around the BS
                 exclusion_radius_km = separation_dist_km + params.mss_d2d.cell_radius / 1e3 + \
