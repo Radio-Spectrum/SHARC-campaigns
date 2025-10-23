@@ -188,9 +188,10 @@ def generate_inputs():
         params.single_earth_station.adjacent_ch_reception = "ACS"
         params.single_earth_station.frequency = 2160 + params.imt.bandwidth/2
 
-        # Reference latitude and longitude taken from Cuiaba station
+        # Reference latitude and longitude taken from Paraguay station
+        # Foz do Iguaçu reference location
         params.imt.topology.central_latitude = -25.5549751
-        params.imt.topology.central_longitude = -54.576686
+        params.imt.topology.central_longitude = -54.5852
         params.imt.topology.central_altitude = 200
 
         params.single_earth_station.season = "SUMMER"
@@ -221,7 +222,7 @@ def generate_inputs():
         params.imt.topology.mss_dc.beam_positioning.type = "SERVICE_GRID"
         params.imt.topology.mss_dc.beam_positioning.service_grid.transform_grid_randomly = True
         country_list = [
-            "Brazil", "Argentina", "Paraguay"
+            "Brazil", "Argentina",
         ]
         params.imt.topology.mss_dc.beam_positioning.service_grid.country_names = country_list
 
@@ -256,6 +257,10 @@ def generate_inputs():
         params.single_earth_station.geometry.elevation.type = "UNIFORM_DIST"
         params.single_earth_station.geometry.elevation.uniform_dist.min = 10.
         params.single_earth_station.geometry.elevation.uniform_dist.max = 90.
+
+        # Set border margin to the beams radius.
+        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_margin_from_border = \
+            params.imt.topology.mss_dc.beam_radius / 1e3
 
         for mss_dc_load, imt_freq in product(MSS_DC_LOAD_FACTORS, imt_freq_power_map.keys()):
             params.imt.frequency = imt_freq
