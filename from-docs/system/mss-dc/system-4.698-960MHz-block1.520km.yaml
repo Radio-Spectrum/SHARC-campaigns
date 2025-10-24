@@ -1,0 +1,66 @@
+id: system-4.698-960MHz-block1.520km
+# FIXME: places where something needs to be changed to run the scenario properly
+# TODO: places where it would be interesting to implement changes for simulation
+# OPTIONS: places where you should choose between one or other options
+
+metadata:
+  referenced_documents:
+    - WP4C-Working-Document-4C-356, Annex 7
+
+#################################################################
+################# calculating tx_power_density ##################
+# Calculation
+#     we're given EIRP, peak_gain, tx_power and BW
+#     tx_power_density = tx_power - BW  (dB)
+#     OR
+#     since  should be EIRP = peak_gain + tx_power  (dB)
+#     tx_power_density = (EIRP - peak_gain) - BW  (dB)
+# OPTIONS:
+#     tx_pow = 1.17 (for 3 MHz BW) =>  tx_pow_density: -63.6 [dBW/Hz]
+#     tx_pow = 3.39 (for 5 MHz BW) =>  tx_pow_density: -63.6 [dBW/Hz]
+#     tx_pow = 6.40 (for 10 MHz BW) => tx_pow_density: -63.6 [dBW/Hz]
+#     tx_pow = 9.41 (for 20 MHz BW) => tx_pow_density: -63.6 [dBW/Hz]
+# TODO:
+# power control range from +10 dB to –10 dB on each beam
+#################################################################
+
+mss_d2d:
+  name: system-4.698-960MHz-block1.520km  # MSS_D2D system name
+  adjacent_ch_emissions: ACLR  # from document, in dBW/MHz
+  adjacent_ch_leak_ratio: 45   # OPTIONS: 45 dBsd for adjacent, 50 for non-adjacent
+  spectral_mask: IMT-2020  # NOTE: IGNORE THIS PARAMETER, NOT USED
+  frequency: -1                # center frequency [MHz] (PER SCENARIO)
+
+  bandwidth: 20            # OPTIONS: 3, 5, 10 or 20 [MHz]
+  cell_radius: 12055       # beam radius on ground [m] (PER SCENARIO)
+  tx_power_density: -63.6  # dBW/Hz
+  # Polarization loss [dB] (PER SCENARIO)
+  # P.619 suggests 3dB polarization loss as good constant value for monte carlo
+  polarization_loss: 0
+  num_sectors: 19  # Number of sectors (PER SCENARIO)
+
+  antenna:
+    pattern: ITU-R-S.1528-Section1.2
+    # FIXME: peak gain should be different when beam is at max steering angle
+    gain: 31.5
+    itu_r_s_1528:
+      # FIXME: L_F is currently hardcoded to 0 in simulator
+      antenna_3_dB_bw: 2.19
+      # FIXME: fix parameter name. While we pass as L_S, it actually means L_N
+      antenna_l_s: -20
+
+  sat_is_active_if: # (PER SCENARIO)
+    conditions:  # for a satellite to be active, it needs to respect ALL conditions
+      - MINIMUM_ELEVATION_FROM_ES
+    minimum_elevation_from_es: 50
+
+  channel_model: FSPL # (PER SCENARIO)
+
+  orbits:  # Orbit parameters
+    - n_planes: 1            # Number of planes
+      inclination_deg: 53.0  # Inclination in degrees
+      perigee_alt_km: 520.0  # Perigee in km
+      apogee_alt_km: 520.0   # Apogee in km
+      sats_per_plane: 5      # Number of satellites per plane
+      long_asc_deg: 0.0      # Longitude of the first ascending node in degrees
+      phasing_deg: 4.0       # Phasing in degrees
