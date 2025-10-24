@@ -1,0 +1,138 @@
+from itertools import product
+from pathlib import Path
+from campaigns.utils.parameters_factory import ParametersFactory
+from campaigns.utils.dump_parameters import dump_parameters
+from campaigns.new_mss_d2d.constants import (
+    CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR, PARAMETERS,
+    CELL_RADIUS_KM, get_service_zone_radius_from_max_num_of_beams,
+    get_specific_pattern, get_readable_from_str
+)
+
+SEED = 81
+
+general = {
+    "seed": SEED,
+    "num_snapshots": int(1e4),
+    "overwrite_output": False,
+    "output_dir": f"{CAMPAIGN_STR}/output/",
+    "output_dir_prefix": "to-update",
+    "system": "MSS_D2D",
+    "imt_link": "UPLINK",
+}
+
+def generate_inputs():
+    """Gera os arquivos YAML de parâmetros"""
+    OUTPUT_START_NAME = f"output_{CAMPAIGN_NAME}_"
+    PARAMETER_START_NAME = f"parameter_{CAMPAIGN_NAME}_"
+
+    print(f"Gerando arquivos em: {INPUTS_DIR}")
+    factory = ParametersFactory()
+
+    total = 0
+
+    for (imt_link, imt_id, mss_d2d_id,
+         mss_d2d_lf, exclusion_r_km,
+         max_n_beams
+    ) in product(*PARAMETERS):
+        general["imt_link"] = imt_link
+
+        print("Gerando:")
+        print("\timt_link=", imt_link, end=";")
+        print("\timt_id=", imt_id, end=";")
+        print("\tmss_d2d_id=", mss_d2d_id, end=";")
+        print("\tmss_d2d_lf=", mss_d2d_lf, end=";")
+        print("\texclusion_r_km=", exclusion_r_km, end=";")
+        print("\tmax_n_beams=", max_n_beams, end=";")
+
+        # print(f"Gerando: {imt_link} {imt_id}→{mss_d2d_id}, load={mss_d2d_lf}%")
+        total += 1
+
+        # Construir objeto de parâmetros
+        params = (
+            factory
+            .load_from_id(imt_id)
+            .load_from_id(mss_d2d_id)
+            .load_from_dict({"general": general})
+            .build()
+        )
+
+        # Configurar cenário
+        params.general.enable_adjacent_channel = False
+        params.general.enable_cochannel = True
+        params.imt.interfered_with = True
+        params.imt.imt_dl_intra_sinr_calculation_disabled = True
+
+        # TODO: choose frequency more carefully
+        params.imt.frequency = 800
+        params.mss_d2d.frequency = 800
+
+        # Parameters used for P.619
+        # WARNING: Remember to set the lut in propagation/Dataset!
+        params.mss_d2d.channel_model = "P619"
+        params.mss_d2d.param_p619.earth_station_lat_deg = -25.5549751
+        params.mss_d2d.param_p619.earth_station_alt_m = 200
+        params.mss_d2d.param_p619.mean_clutter_height = "low"
+
+        # Carga da BS
+        params.mss_d2d.beams_load_factor = mss_d2d_lf
+
+        # Geometry
+        # International Friendship Bridge
+        center_lat = -25.5549751
+        center_lon = -54.5746686
+        params.imt.topology.central_latitude = center_lat
+        params.imt.topology.central_longitude = center_lon
+        params.imt.topology.central_altitude = 200
+
+        params.mss_d2d.beam_positioning.type = "SERVICE_GRID"
+        service_grid = params.mss_d2d.beam_positioning.service_grid
+        # big number to make it so any visible satellite is ellegible
+        service_grid.eligible_sats_margin_from_border = -2 * 1110
+
+        service_grid.grid_in_zone.type = "CIRCLE"
+        service_grid.grid_in_zone.circle.center_lat = center_lat
+        service_grid.grid_in_zone.circle.center_lon = center_lon
+        grid_radius = float(get_service_zone_radius_from_max_num_of_beams(
+            max_n_beams, CELL_RADIUS_KM, exclusion_r_km
+        ))
+        print("grid_radius", grid_radius)
+
+        service_grid.grid_in_zone.circle.radius_km = grid_radius
+
+        service_grid.grid_exclusion_zone.type = "CIRCLE"
+        service_grid.grid_exclusion_zone.circle.center_lat = center_lat
+        service_grid.grid_exclusion_zone.circle.center_lon = center_lon
+        service_grid.grid_exclusion_zone.circle.radius_km = exclusion_r_km
+
+        # Gerar nome do arquivo
+        specific = get_specific_pattern(
+            mss_d2d_id, imt_id, imt_link, mss_d2d_lf, exclusion_r_km, max_n_beams
+        )
+
+        # Configurar caminhos de saída
+        params.general.output_dir_prefix = OUTPUT_START_NAME + specific
+        readable = get_readable_from_str(params.general.output_dir_prefix)
+        print("readable", readable)
+
+        output_path = INPUTS_DIR / f"{PARAMETER_START_NAME}{specific}.yaml"
+
+        # Escrever arquivo YAML
+        try:
+            dump_parameters(output_path, params)
+            print(f"Arquivo gerado: {output_path}")
+        except Exception as e:
+            print(f"Falha ao gerar {output_path}: {str(e)}")
+
+    print(f"\nTotal de arquivos gerados: {total}\n")
+
+def clear_inputs():
+    """Limpa o diretório de entrada antes da geração"""
+    INPUTS_DIR.mkdir(parents=True, exist_ok=True)
+    print(f"Limpando diretório: {INPUTS_DIR}")
+    for item in INPUTS_DIR.iterdir():
+        if item.is_file() and item.name.endswith(".yaml"):
+            item.unlink()
+
+if __name__ == "__main__":
+    clear_inputs()
+    generate_inputs()
