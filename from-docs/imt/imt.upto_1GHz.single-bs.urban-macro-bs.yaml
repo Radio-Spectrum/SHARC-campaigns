@@ -1,0 +1,92 @@
+#### IMT Single Base station following Urban Macrocell Parameters below 1GHz
+# FIXME: this input is not ready for adjacent channel studies
+
+id: imt.upto-1GHz.single-bs.urban-macro-bs
+
+metadata:
+  referenced_documents:
+    - annex 4.4 of 5D-716 (https://www.itu.int/md/R19-WP5D-C-0716/en)
+  created_at: 2025-10-20
+
+imt:
+  minimum_separation_distance_bs_ue: 35           # Minimum 2D distance between BS and UE [m]
+  interfered_with: FALSE                          # TRUE = IMT is victim; FALSE = IMT is interferer
+  # TODO: check actual used frequencies
+  frequency: 710                                  # IMT center frequency [MHz]
+  bandwidth: 10                                   # Total bandwidth [MHz]
+  rb_bandwidth: 0.180                             # Resource Block bandwidth [MHz]
+  adjacent_antenna_model: SINGLE_ELEMENT          # Adjacent antenna model: SINGLE_ELEMENT or BEAMFORMING
+  # FIXME:
+  spectral_mask: 3GPP E-UTRA                      # Spectral mask type: IMT-2020 or 3GPP E-UTRA
+  # FIXME:
+  spurious_emissions: -13                         # Spurious emission level [dBm/MHz]
+  # TODO: check guard band
+  guard_band_ratio: 0.1                           # Ratio of bandwidth reserved for guard band
+  channel_model: UMa                              # Intra-IMT channel model: FSPL, CI, UMa, etc.
+  shadowing: TRUE                                 # Enable log-normal shadowing
+
+  topology:
+    type: SINGLE_BS                               # Layout type: MACROCELL, SINGLE_BS, etc.
+    single_bs:
+      cell_radius: 1500                           # Coverage range radius [m]
+      num_clusters: 1                             # Number of base stations simulated (1 or 2)
+
+  bs:
+    load_probability: 1                           # BS activity factor [%]
+    conducted_power: 46                           # BS power per antenna element [dBm]
+    height: 30                                    # BS antenna height [m]
+    noise_figure: 6                               # BS receiver noise figure [dB]
+    # TODO: confirm if feeder loss should enter here
+    ohmic_loss: 3                                 # Cable/connector/feeder ohmic loss [dB]
+    # FIXME:
+    adjacent_ch_selectivity: -1                   # BS ACS [dB]
+    # FIXME:
+    adjacent_ch_leak_ratio: -1                    # BS ACLR [dB]
+
+    antenna:
+      pattern: ARRAY                              # Use antenna array model
+      array:
+        normalization: FALSE                      # Apply gain normalization (if TRUE)
+        element_pattern: F1336                    # Element pattern: M2101, F1336, or FIXED
+        downtilt: 3                               # Mechanical downtilt angle [degrees]
+        element_max_g: 15                         # Max element gain [dBi]
+        element_phi_3db: 65                       # Horizontal 3dB beamwidth [deg]
+        element_theta_3db: -1                     # Vertical 3dB beamwidth. Calculates if <=0
+        n_rows: 1                                 # Rows in the array
+        n_columns: 1                              # Columns in the array
+
+  ue:
+    k: 3                                          # Number of UEs per sector/BS
+    k_m: 1                                        # UE replication factor
+    indoor_percent: 70.0                          # Percentage of indoor UEs [%]
+    distribution_type: ANGLE_AND_DISTANCE         # UE spatial distribution
+    distribution_distance: SQRT(UNIFORM)          # Distance model for UEs
+    distribution_azimuth: UNIFORM                 # Azimuth angle distribution for UEs
+    tx_power_control: ON                          # Enable UE transmit power control
+    p_o_pusch: -92.2                              # Target power per RB [dBm]
+    alpha: 0.8                                    # Path loss compensation factor
+    p_cmax: 23                                    # Max UE transmit power [dBm]
+    power_dynamic_range: 56                       # Power control dynamic range [dB]
+    height: 1.5                                   # UE antenna height [m]
+    noise_figure: 9                               # UE noise figure [dB]
+    # TODO: check ohmic loss
+    ohmic_loss: 0                                 # UE ohmic loss [dB]
+    body_loss: 4                                  # UE body loss [dB]
+    # FIXME:
+    adjacent_ch_selectivity: -1                   # UE ACS [dB]
+    # FIXME:
+    adjacent_ch_leak_ratio: -1                    # UE ACLR [dB]
+
+    antenna:
+      pattern: OMNI                              # Antenna pattern used
+      gain: -3                                   # [dBi]
+
+  downlink:
+    attenuation_factor: 0.6                       # Downlink link-to-system mapping factor
+    sinr_min: -10                                 # Minimum SINR for downlink [dB]
+    sinr_max: 30                                  # Maximum SINR for downlink [dB]
+
+  uplink:
+    attenuation_factor: 0.4                       # Uplink link-to-system mapping factor
+    sinr_min: -10                                 # Minimum SINR for uplink [dB]
+    sinr_max: 22                                  # Maximum SINR for uplink [dB]
