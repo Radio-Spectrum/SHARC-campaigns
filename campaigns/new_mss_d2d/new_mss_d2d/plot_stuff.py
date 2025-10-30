@@ -45,20 +45,18 @@ def plot_antenna():
     plt.show()
 
 def plot_fps():
-    # pars = [
-    #     "parameter_new_mss_d2d_100max_beams_12exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
-    #     "parameter_new_mss_d2d_100max_beams_48exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
-    #     "parameter_new_mss_d2d_150max_beams_12exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
-    #     "parameter_new_mss_d2d_150max_beams_48exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
-    #     "parameter_new_mss_d2d_50max_beams_12exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
-    #     "parameter_new_mss_d2d_50max_beams_48exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
-    # ]
-    # print(list(INPUTS_DIR.iterdir()))
-    pars = [x for x in INPUTS_DIR.iterdir() if "parameter_" in str(x) and "downlink" in str(x)]
+    pars = [
+        "parameter_new_mss_d2d_100max_beams_12exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
+        "parameter_new_mss_d2d_100max_beams_48exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
+        "parameter_new_mss_d2d_150max_beams_12exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
+        "parameter_new_mss_d2d_150max_beams_48exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
+        "parameter_new_mss_d2d_50max_beams_12exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
+        "parameter_new_mss_d2d_50max_beams_48exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
+    ]
 
-    for i, par in enumerate(pars):
+    for par in pars:
         parameters = Parameters()
-        param_file = INPUTS_DIR / par
+        param_file = INPUTS_DIR / f"{par}.yaml"
         parameters.set_file_name(param_file)
         parameters.read_params()
         params = parameters.mss_d2d
@@ -92,43 +90,40 @@ def plot_fps():
                 # show_service_grid_if_possible=True,
                 step=[3, 1, 3, 14],
             ),
-            # FootPrintOpts(
-            #     seed=24,
-            #     resolution=1,
-            #     show_service_grid_if_possible=True,
-            #     # step=[3, 1, 3, 14],
-            # ),
-            # FootPrintOpts(
-            #     seed=24,
-            #     resolution=200,
-            #     # show_service_grid_if_possible=True,
-            #     step=[3, 1, 3, 14],
-            # ),
-            # FootPrintOpts(
-            #     seed=25,
-            #     resolution=1,
-            #     show_service_grid_if_possible=True,
-            #     # step=[3, 1, 3, 14],
-            # ),
-            # FootPrintOpts(
-            #     seed=25,
-            #     resolution=200,
-            #     # show_service_grid_if_possible=True,
-            #     step=[3, 1, 3, 14],
-            # ),
+            FootPrintOpts(
+                seed=24,
+                resolution=1,
+                show_service_grid_if_possible=True,
+                # step=[3, 1, 3, 14],
+            ),
+            FootPrintOpts(
+                seed=24,
+                resolution=200,
+                # show_service_grid_if_possible=True,
+                step=[3, 1, 3, 14],
+            ),
+            FootPrintOpts(
+                seed=25,
+                resolution=1,
+                show_service_grid_if_possible=True,
+                # step=[3, 1, 3, 14],
+            ),
+            FootPrintOpts(
+                seed=25,
+                resolution=200,
+                # show_service_grid_if_possible=True,
+                step=[3, 1, 3, 14],
+            ),
         ]
 
         Path("fps").mkdir(exist_ok=True)
-        # Path(f"fps/{par}").mkdir(exist_ok=True)
+        Path(f"fps/{par}").mkdir(exist_ok=True)
         fig = plot_fp(params, coord_sys, opts[0])
-        # fig.show()
-        # fig.write_image(f"fps/{par}/grid-1.png")
-        fig.write_html(f"fps/grid-{i}.html")
-        if par == pars[0]:
-            fig = plot_fp(params, coord_sys, opts[1])
-            # fig.show()
-        # fig.write_image(f"fps/{par}/fp-1.png")
-            fig.write_html(f"fps/fp-{i}.html")
+        fig.write_image(f"fps/{par}/grid-1.png")
+        fig.write_html(f"fps/{par}/grid-1.html")
+        fig = plot_fp(params, coord_sys, opts[1])
+        fig.write_image(f"fps/{par}/fp-1.png")
+        fig.write_html(f"fps/{par}/fp-1.html")
         # fig = plot_fp(params, coord_sys, opts[2])
         # fig.write_image(f"fps/{par}/grid-2.png")
         # fig.write_html(f"fps/{par}/grid-2.html")
@@ -145,3 +140,4 @@ def plot_fps():
 if __name__ == "__main__":
     # plot_antenna()
     plot_fps()
+

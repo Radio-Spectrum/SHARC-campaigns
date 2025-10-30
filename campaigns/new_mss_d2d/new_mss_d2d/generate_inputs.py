@@ -4,7 +4,7 @@ from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
 from campaigns.new_mss_d2d.constants import (
     CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR, PARAMETERS,
-    CELL_RADIUS_KM,
+    CELL_RADIUS_KM, get_service_zone_radius_from_max_num_of_beams,
     get_specific_pattern, get_readable_from_str
 )
 
@@ -31,7 +31,8 @@ def generate_inputs():
     total = 0
 
     for (imt_link, imt_id, mss_d2d_id,
-         mss_d2d_lf, exclusion_margin_km,
+         mss_d2d_lf, exclusion_r_km,
+         max_n_beams
     ) in product(*PARAMETERS):
         general["imt_link"] = imt_link.upper()
 
@@ -40,7 +41,8 @@ def generate_inputs():
         print("\timt_id=", imt_id, end=";")
         print("\tmss_d2d_id=", mss_d2d_id, end=";")
         print("\tmss_d2d_lf=", mss_d2d_lf, end=";")
-        print("\texclusion_r_km=", exclusion_margin_km, end=";")
+        print("\texclusion_r_km=", exclusion_r_km, end=";")
+        print("\tmax_n_beams=", max_n_beams, end=";")
 
         # print(f"Gerando: {imt_link} {imt_id}→{mss_d2d_id}, load={mss_d2d_lf}%")
         total += 1
@@ -90,19 +92,21 @@ def generate_inputs():
         service_grid.grid_in_zone.type = "CIRCLE"
         service_grid.grid_in_zone.circle.center_lat = center_lat
         service_grid.grid_in_zone.circle.center_lon = center_lon
-        # grid_radius = float(get_service_zone_radius_from_max_num_of_beams(
-        #     max_n_beams, CELL_RADIUS_KM, exclusion_margin_km
-        # ))
-        # print("grid_radius", grid_radius)
-        service_grid.grid_in_zone.circle.radius_km = 120
+        grid_radius = float(get_service_zone_radius_from_max_num_of_beams(
+            max_n_beams, CELL_RADIUS_KM, exclusion_r_km
+        ))
+        print("grid_radius", grid_radius)
 
-        service_grid.grid_exclusion_zone.type = "FROM_COUNTRIES"
-        service_grid.grid_exclusion_zone.from_countries.country_names = ["Paraguay"]
-        service_grid.grid_exclusion_zone.from_countries.margin_from_border = -exclusion_margin_km
+        service_grid.grid_in_zone.circle.radius_km = grid_radius
+
+        service_grid.grid_exclusion_zone.type = "CIRCLE"
+        service_grid.grid_exclusion_zone.circle.center_lat = center_lat
+        service_grid.grid_exclusion_zone.circle.center_lon = center_lon
+        service_grid.grid_exclusion_zone.circle.radius_km = exclusion_r_km
 
         # Gerar nome do arquivo
         specific = get_specific_pattern(
-            imt_link, imt_id, mss_d2d_id, mss_d2d_lf, exclusion_margin_km,
+            imt_link, imt_id, mss_d2d_id, mss_d2d_lf, exclusion_r_km, max_n_beams,
         )
 
         # Configurar caminhos de saída
