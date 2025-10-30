@@ -16,28 +16,28 @@ SYS_ID_TO_READABLE = {
 
 IMT_IDS = ["imt.upto-1GHz.single-bs.urban-macro-bs"]
 IMT_ID_TO_READABLE = {
-    "imt.upto-1GHz.single-bs.urban-macro-bs": "IMT Macro @7300MHz",
+    "imt.upto-1GHz.single-bs.urban-macro-bs": "IMT Macro @800MHZ",
 }
 
 CELL_RADIUS_KM = 12
 
 IMT_LINKS = ["downlink", "uplink"]
-MSS_D2D_LOAD_FACTOR = [0.1, 0.5, 1.0]
+MSS_D2D_LOAD_FACTOR = [0.2]
 EXCLUSION_ZONE_RADIUS_KM = [
     CELL_RADIUS_KM,
-    # 2 * CELL_RADIUS_KM,
-    # 3 * CELL_RADIUS_KM,
+    2 * CELL_RADIUS_KM,
+    3 * CELL_RADIUS_KM,
     4 * CELL_RADIUS_KM,
 ]
 MAX_NUMBER_OF_BEAMS = [50, 100, 150]
 
 PARAMETERS = [
-    [IMT_LINKS[0]],
-    [IMT_IDS[0]],
-    [SYS_IDS[0]],
-    [MSS_D2D_LOAD_FACTOR[0]],
-    [EXCLUSION_ZONE_RADIUS_KM[0]],
-    [MAX_NUMBER_OF_BEAMS[0]],
+    IMT_LINKS,
+    IMT_IDS,
+    SYS_IDS,
+    MSS_D2D_LOAD_FACTOR,
+    EXCLUSION_ZONE_RADIUS_KM,
+    MAX_NUMBER_OF_BEAMS,
 ]
 
 
@@ -70,6 +70,22 @@ def get_specific_pattern(
     """
     return f"{max_num_of_beams}max_beams_{exclusion_r_km}exclusion_{mss_load_factor}load_{imt_link}_{imt_id}_{mss_id}"
 
+def get_readable(
+    imt_link: str,
+    imt_id: str,
+    mss_d2d_id: str,
+    mss_load_factor: float,
+    exclusion_r_km: float,
+    max_num_of_beams: float,
+):
+    readable_load = f"LF = {float(mss_load_factor) * 100}%"
+    readable_exclusion = f"Excl. R = {exclusion_r_km}km"
+    readable_max_beams = f"Max. Beams = {max_num_of_beams}"
+    imt_link_readable = "-> IMT UE" if imt_link == "downlink" else "-> IMT BS"
+    readable_mss_d2d = SYS_ID_TO_READABLE[mss_d2d_id]
+    readable_imt = IMT_ID_TO_READABLE[imt_id]
+    return f"{readable_max_beams}; {readable_load}; {readable_exclusion}; {imt_link_readable}"
+
 
 def get_readable_from_str(
     value: str
@@ -77,7 +93,6 @@ def get_readable_from_str(
     """
     Generate a readable format for the specific pattern
     """
-    print("value", value)
     pattern = "(?P<max_num_of_beams>.*)max_beams_(?P<exclusion_r_km>.*)exclusion_(?P<mss_load_factor>.*)load_(?P<imt_link>(up|down)link)_(?P<imt_and_sys_ids>.*)"
     # pattern = ".*mss_d2d_(?P<max_num_of_beams>.*)max_beams_(?P<exclusion_r_km>.*)exclusion_(?P<mss_load_factor>.*)load_(?P<imt_link>(up|down)link)_(?P<imt_and_sys_ids>.*)"
     match = re.search(
@@ -86,25 +101,26 @@ def get_readable_from_str(
     )
 
     mss_load_factor = match.group("mss_load_factor")
-    readable_load = f"LF = {float(mss_load_factor) * 100}%"
 
     exclusion_r_km = match.group("exclusion_r_km")
-    readable_exclusion = f"Excl. R = {exclusion_r_km}km"
 
     max_num_of_beams = match.group("max_num_of_beams")
-    readable_max_beams = f"Max. Beams = {max_num_of_beams}"
 
     imt_link = match.group("imt_link")
-    imt_link_readable = "-> IMT UE" if imt_link == "downlink" else "-> IMT BS"
 
     imt_and_sys_ids = match.group("imt_and_sys_ids")
     mss_d2d_id = [id for id in SYS_IDS if id in imt_and_sys_ids][0]
-    readable_mss_d2d = SYS_ID_TO_READABLE[mss_d2d_id]
 
     imt_id = [id for id in IMT_IDS if id in imt_and_sys_ids][0]
-    readable_imt = IMT_ID_TO_READABLE[imt_id]
 
-    return f"{readable_max_beams}; {readable_load}; {readable_exclusion}; {imt_link_readable}"
+    return get_readable(
+        imt_link,
+        imt_id,
+        mss_d2d_id,
+        mss_load_factor,
+        exclusion_r_km,
+        max_num_of_beams,
+    )
 
 
 if __name__ == "__main__":

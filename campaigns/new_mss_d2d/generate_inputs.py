@@ -34,7 +34,7 @@ def generate_inputs():
          mss_d2d_lf, exclusion_r_km,
          max_n_beams
     ) in product(*PARAMETERS):
-        general["imt_link"] = imt_link
+        general["imt_link"] = imt_link.upper()
 
         print("Gerando:")
         print("\timt_link=", imt_link, end=";")
@@ -106,13 +106,13 @@ def generate_inputs():
 
         # Gerar nome do arquivo
         specific = get_specific_pattern(
-            mss_d2d_id, imt_id, imt_link, mss_d2d_lf, exclusion_r_km, max_n_beams
+            imt_link, imt_id, mss_d2d_id, mss_d2d_lf, exclusion_r_km, max_n_beams,
         )
 
         # Configurar caminhos de saída
         params.general.output_dir_prefix = OUTPUT_START_NAME + specific
-        readable = get_readable_from_str(params.general.output_dir_prefix)
-        print("readable", readable)
+        # readable = get_readable_from_str(params.general.output_dir_prefix)
+        # print("readable", readable)
 
         output_path = INPUTS_DIR / f"{PARAMETER_START_NAME}{specific}.yaml"
 

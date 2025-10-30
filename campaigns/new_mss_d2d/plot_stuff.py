@@ -5,6 +5,7 @@ from sharc.parameters.parameters import Parameters
 import matplotlib.pyplot as plt
 from sharc.satellite.scripts.plot_footprints import plot_fp, FootPrintOpts
 from sharc.support.sharc_geom import CoordinateSystem
+from campaigns.new_mss_d2d.constants import INPUTS_DIR
 
 
 def plot_antenna():
@@ -44,62 +45,98 @@ def plot_antenna():
     plt.show()
 
 def plot_fps():
-    parameters = Parameters()
-    param_file = Path(
-        "/home/artistreak/projects/Radio-Spectrum/SHARC-campaigns/campaigns/new_mss_d2d/input/parameter_new_mss_d2d_downlink.yaml"
-    )
-    parameters.set_file_name(param_file)
-    parameters.read_params()
-    params = parameters.mss_d2d
-
-    params.propagate_parameters()
-    params.validate("opa")
-
-    coord_sys = CoordinateSystem()
-
-    sys_lat = -14.5
-    sys_long = -52
-    sys_alt = 1200
-
-    coord_sys.set_reference(
-        sys_lat, sys_long, sys_alt
-    )
-
-    opts = [
-        # FootPrintOpts(
-        #     seed=20,
-        # ),
-        FootPrintOpts(
-            seed=23,
-            resolution=1,
-            show_service_grid_if_possible=True,
-            # step=[3, 1, 3, 14],
-        ),
-        FootPrintOpts(
-            seed=23,
-            resolution=200,
-            # show_service_grid_if_possible=True,
-            step=[3, 1, 3, 14],
-        ),
-        # FootPrintOpts(
-        #     seed=24,
-        #     resolution=200,
-        #     # show_service_grid_if_possible=True,
-        #     step=[3, 1, 3, 14],
-        # ),
-        # FootPrintOpts(
-        #     seed=25,
-        #     resolution=200,
-        #     # show_service_grid_if_possible=True,
-        #     step=[3, 1, 3, 14],
-        # ),
+    pars = [
+        "parameter_new_mss_d2d_100max_beams_12exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
+        "parameter_new_mss_d2d_100max_beams_48exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
+        "parameter_new_mss_d2d_150max_beams_12exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
+        "parameter_new_mss_d2d_150max_beams_48exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
+        "parameter_new_mss_d2d_50max_beams_12exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
+        "parameter_new_mss_d2d_50max_beams_48exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
     ]
 
-    for opt in opts:
-        fig = plot_fp(params, coord_sys, opt)
-        # fig.write_image(f"fp.png")
-        fig.show()
+    for par in pars:
+        parameters = Parameters()
+        param_file = INPUTS_DIR / f"{par}.yaml"
+        parameters.set_file_name(param_file)
+        parameters.read_params()
+        params = parameters.mss_d2d
+
+        params.propagate_parameters()
+        params.validate("opa")
+
+        coord_sys = CoordinateSystem()
+
+        sys_lat = parameters.imt.topology.central_latitude
+        sys_long = parameters.imt.topology.central_longitude
+        sys_alt = parameters.imt.topology.central_altitude
+
+        coord_sys.set_reference(
+            sys_lat, sys_long, sys_alt
+        )
+
+        opts = [
+            # FootPrintOpts(
+            #     seed=20,
+            # ),
+            FootPrintOpts(
+                seed=23,
+                resolution=1,
+                show_service_grid_if_possible=True,
+                # step=[3, 1, 3, 14],
+            ),
+            FootPrintOpts(
+                seed=23,
+                resolution=200,
+                # show_service_grid_if_possible=True,
+                step=[3, 1, 3, 14],
+            ),
+            FootPrintOpts(
+                seed=24,
+                resolution=1,
+                show_service_grid_if_possible=True,
+                # step=[3, 1, 3, 14],
+            ),
+            FootPrintOpts(
+                seed=24,
+                resolution=200,
+                # show_service_grid_if_possible=True,
+                step=[3, 1, 3, 14],
+            ),
+            FootPrintOpts(
+                seed=25,
+                resolution=1,
+                show_service_grid_if_possible=True,
+                # step=[3, 1, 3, 14],
+            ),
+            FootPrintOpts(
+                seed=25,
+                resolution=200,
+                # show_service_grid_if_possible=True,
+                step=[3, 1, 3, 14],
+            ),
+        ]
+
+        Path("fps").mkdir(exist_ok=True)
+        Path(f"fps/{par}").mkdir(exist_ok=True)
+        fig = plot_fp(params, coord_sys, opts[0])
+        fig.write_image(f"fps/{par}/grid-1.png")
+        fig.write_html(f"fps/{par}/grid-1.html")
+        fig = plot_fp(params, coord_sys, opts[1])
+        fig.write_image(f"fps/{par}/fp-1.png")
+        fig.write_html(f"fps/{par}/fp-1.html")
+        # fig = plot_fp(params, coord_sys, opts[2])
+        # fig.write_image(f"fps/{par}/grid-2.png")
+        # fig.write_html(f"fps/{par}/grid-2.html")
+        # fig = plot_fp(params, coord_sys, opts[3])
+        # fig.write_image(f"fps/{par}/fp-2.png")
+        # fig.write_html(f"fps/{par}/fp-2.html")
+        # fig = plot_fp(params, coord_sys, opts[4])
+        # fig.write_image(f"fps/{par}/grid-3.png")
+        # fig.write_html(f"fps/{par}/grid-3.html")
+        # fig = plot_fp(params, coord_sys, opts[5])
+        # fig.write_image(f"fps/{par}/fp-3.png")
+        # fig.write_html(f"fps/{par}/fp-3.html")
 
 if __name__ == "__main__":
-    plot_antenna()
-    # plot_fps()
+    # plot_antenna()
+    plot_fps()
