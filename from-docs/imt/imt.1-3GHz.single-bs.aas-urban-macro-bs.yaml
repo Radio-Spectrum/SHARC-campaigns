@@ -1,5 +1,5 @@
 # TODO: better documentation
-id: imt.1-3GHz.single-bs.aas-macro-bs
+id: imt.1-3GHz.single-bs.aas-urban-macro-bs
 
 metadata:
   referenced_documents:
@@ -132,7 +132,7 @@ imt:
                 ###########################################################################
                 # mechanical downtilt [degrees]
                 # NOTE: consider defining it to 90 degrees in case of indoor simulations
-                downtilt: 6
+                downtilt: 6.0
                 ###########################################################################
                 # BS/UE maximum transmit/receive element gain [dBi]
                 # default: element_max_g = 5, for M.2101
@@ -341,7 +341,6 @@ imt:
     #                                    "ABG" (Alpha-Beta-Gamma)
     #                                    "P619"
     channel_model: UMa
-    season: SUMMER
     ###########################################################################
     # Adjustment factor for LoS probability in UMi path loss model.
     #       Original value: 18 (3GPP)
