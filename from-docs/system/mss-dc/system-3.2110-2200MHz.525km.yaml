@@ -51,6 +51,9 @@ mss_d2d:
         # Radial (l_r) and transverse (l_t) sizes of the effective radiating area of the satellite transmitt antenna (m)
         l_r: 1.6
         l_t: 1.6
+        # Frequency of operation (MHz) - used to calculate wavelength
+        # This value is fixed independently of system frequency because D/lambda is kept constant.
+        frequency: 2000
     sat_is_active_if: # (PER SCENARIO)
         # for a satellite to be active, it needs to respect ALL conditions
         conditions:
