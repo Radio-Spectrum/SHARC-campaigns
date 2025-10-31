@@ -80,7 +80,9 @@ if __name__ == "__main__":
         "imt_dl_pfd_external",
         "imt_dl_pfd_external_aggregated",
         "imt_dl_inr",
-        "imt_ul_inr"
+        "imt_ul_inr",
+        "imt_dl_inr_noise_plus_intra_intf",
+        "imt_ul_inr_noise_plus_intra_intf",
     ]
 
     output_start = get_output_dir_start(mss_id, not args.adj)
@@ -165,6 +167,8 @@ if __name__ == "__main__":
 
     for attr in attributes_to_plot:
         plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=args.plot_type)
+        if plot is None:
+            continue
         # Add plot outline and increase font size
         plot.update_xaxes(
             title="INR[dB]",

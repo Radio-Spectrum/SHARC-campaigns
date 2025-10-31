@@ -1,10 +1,8 @@
-# TODO: better documentation
-id: imt.1-3GHz.single-bs.aas-macro-bs
+id: imt.1-3GHz.urban-macrocell.aas-macro-bs
 
 metadata:
   referenced_documents:
     - annex 4.4 of 5D-716 (https://www.itu.int/md/R19-WP5D-C-0716/en)
-  created_at: 23-07-2025
 
 imt:
     ###########################################################################
@@ -54,21 +52,20 @@ imt:
         ###########################################################################
         # Topology Type. Possible values are "MACROCELL", "HOTSPOT", "SINGLE_BS"
         # "INDOOR"
-        type: SINGLE_BS
+        type: MACROCELL
         ###########################################################################
         # Macrocell Topology parameters. Relevant when imt.topology.type == "MACROCELL"
-        ###########################################################################
-        # Single Base Station Topology parameters. Relevant when imt.topology.type == "SINGLE_BS"
-        single_bs:
+        macrocell:
             ###########################################################################
-            # Inter-site distance or Cell Radius in single Base Station network topology [m]
-            # You can either provide 'cell_radius' or 'intersite_distance' for this topology
-            # The relationship used is cell_radius = intersite_distance * 2 / 3
-            cell_radius: 400  # typical value to be used in sharing studies for urban macro 0.4 km 
-            # intersite_distance: 1
+            # Inter-site distance in macrocell network topology [m]
+            intersite_distance: 750 # 500 * 3 / 2
             ###########################################################################
-            # Number of clusters in single base station topology
-            # You can simulate 1 or 2 BS's with this topology
+            # NOTE: change
+            # Enable wrap around.
+            wrap_around: true
+            ###########################################################################
+            # Number of clusters in macro cell topology
+            # NOTE: change
             num_clusters: 1
     ###########################################################################
     # Defines the antenna model to be used in compatibility studies between
@@ -81,7 +78,7 @@ imt:
         # The load probability (or activity factor) models the statistical
         # variation of the network load by defining the number of fully loaded
         # base stations that are simultaneously transmitting
-        load_probability: 1.0
+        load_probability: 0.2
         ###########################################################################
         # Conducted power per antenna element [dBm/bandwidth]
         conducted_power: 28.0
@@ -213,7 +210,7 @@ imt:
         #                                   given distributions for angle and
         #                                   distance. In this case, these must be
         #                                   defined later.
-        distribution_type: ANGLE_AND_DISTANCE
+        distribution_type: UNIFORM_IN_CELL
         ###########################################################################
         # Regarding the distribution of active UE's over the cell area, this
         # parameter models the distance between UE's and BS.
@@ -344,15 +341,10 @@ imt:
     #                                    "ABG" (Alpha-Beta-Gamma)
     #                                    "P619"
     channel_model: UMa
-    season: SUMMER
-    ###########################################################################
-    # Adjustment factor for LoS probability in UMi path loss model.
-    #       Original value: 18 (3GPP)
-    los_adjustment_factor: 18
     ###########################################################################
     # If shadowing should be applied or not.
-    # Used in propagation UMi, UMa, ABG, when topology == indoor and any 
-    shadowing: FALSE
+    shadowing: TRUE
     ###########################################################################
     # receiver noise temperature [K]
     noise_temperature: 290
+
