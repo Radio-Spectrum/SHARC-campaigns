@@ -341,7 +341,6 @@ imt:
     #                                    "ABG" (Alpha-Beta-Gamma)
     #                                    "P619"
     channel_model: UMa
-    season: SUMMER
     ###########################################################################
     # Adjustment factor for LoS probability in UMi path loss model.
     #       Original value: 18 (3GPP)
