@@ -98,6 +98,7 @@ def generate_inputs():
         params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 50.0
         # big number to make it so any visible satellite is ellegible
         service_grid.eligible_sats_margin_from_border = -2 * 1110
+        service_grid.minimum_service_angle = 50.0
 
         # service_grid.grid_in_zone.type = "CIRCLE"
         # service_grid.grid_in_zone.circle.center_lat = center_lat

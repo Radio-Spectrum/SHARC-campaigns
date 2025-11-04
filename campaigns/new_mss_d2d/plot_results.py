@@ -15,11 +15,11 @@ post_processor = PostProcessor()
 # Samples to plot CCDF from
 
 attributes_to_plot = [
-    ("imt_system_antenna_gain", "cdf"),
-    ("imt_system_path_loss", "cdf"),
-    ("system_imt_antenna_gain", "cdf"),
-    ("imt_dl_inr", "cdf"),
-    ("imt_ul_inr", "cdf"),
+    # ("imt_system_antenna_gain", "cdf"),
+    # ("imt_system_path_loss", "cdf"),
+    # ("system_imt_antenna_gain", "cdf"),
+    # ("imt_dl_inr", "cdf"),
+    # ("imt_ul_inr", "cdf"),
     ("imt_dl_inr", "ccdf"),
     ("imt_ul_inr", "ccdf"),
 ]
@@ -63,13 +63,13 @@ def linestyle_getter(results):
     str
         The line style to use for plotting (e.g., 'dash' or 'solid').
     """
-    i = 4
+    i = 3
     styles = ["solid", "dot", "dash", "dashdot"]
-    if "_150max_beams" in results.output_directory:
+    if "_12exclusion" in results.output_directory:
         i = 0
-    if "_100max_beams" in results.output_directory:
+    if "_24exclusion" in results.output_directory:
         i = 1
-    if "_50max_beams" in results.output_directory:
+    if "_36exclusion" in results.output_directory:
         i = 2
     return styles[i]
 

@@ -3,6 +3,8 @@ import numpy as np
 from sharc.parameters.parameters import Parameters
 from campaigns.new_mss_d2d.constants import INPUTS_DIR, get_readable_from_str
 import matplotlib.pyplot as plt
+from sharc.topology.topology_imt_mss_dc import TopologyImtMssDc
+from sharc.support.sharc_geom import CoordinateSystem
 
 
 pars = [x for x in INPUTS_DIR.iterdir() if "parameter_" in str(x) and "downlink" in str(x)]
@@ -19,15 +21,24 @@ for i, par in enumerate(pars):
     params.propagate_parameters()
     params.validate("opa")
 
-    N = int(1e3)
+    N = int(1e2)
     # ns = []
     pmf = np.zeros(8000)
     rng = np.random.RandomState(22)
-    grid = params.beam_positioning.service_grid
+    coord_sys = CoordinateSystem()
+
+    sys_lat = parameters.imt.topology.central_latitude
+    sys_long = parameters.imt.topology.central_longitude
+    sys_alt = parameters.imt.topology.central_altitude
+
+    coord_sys.set_reference(
+        sys_lat, sys_long, sys_alt
+    )
+    topology = TopologyImtMssDc(params, coord_sys)
 
     for _ in range(N):
-        grid.reset_grid("", rng, True)
-        n_beams = grid.lon_lat_grid.shape[1]
+        topology.calculate_coordinates(rng)
+        n_beams = topology.num_base_stations
         n = np.sum(rng.rand(
             n_beams,
         ) < params.beams_load_factor)

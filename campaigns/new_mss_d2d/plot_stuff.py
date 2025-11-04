@@ -56,7 +56,7 @@ def plot_fps():
     # print(list(INPUTS_DIR.iterdir()))
     pars = [x for x in INPUTS_DIR.iterdir() if "parameter_" in str(x) and "downlink" in str(x)]
 
-    for i, par in enumerate(pars):
+    for i, par in enumerate(pars[:1]):
         parameters = Parameters()
         param_file = INPUTS_DIR / par
         parameters.set_file_name(param_file)
@@ -81,13 +81,13 @@ def plot_fps():
             #     seed=20,
             # ),
             FootPrintOpts(
-                seed=23,
+                seed=24,
                 resolution=1,
                 show_service_grid_if_possible=True,
                 # step=[3, 1, 3, 14],
             ),
             FootPrintOpts(
-                seed=23,
+                seed=24,
                 resolution=200,
                 # show_service_grid_if_possible=True,
                 step=[3, 1, 3, 14],
@@ -124,11 +124,12 @@ def plot_fps():
         # fig.show()
         # fig.write_image(f"fps/{par}/grid-1.png")
         fig.write_html(f"fps/grid-{i}.html")
-        if par == pars[0]:
-            fig = plot_fp(params, coord_sys, opts[1])
-            # fig.show()
+        params.beams_load_factor = 1.0
+        fig = plot_fp(params, coord_sys, opts[1])
+        fig.write_html(f"fps/fp-{i}.html")
+        # if par == pars[0]:
+        # fig.show()
         # fig.write_image(f"fps/{par}/fp-1.png")
-            fig.write_html(f"fps/fp-{i}.html")
         # fig = plot_fp(params, coord_sys, opts[2])
         # fig.write_image(f"fps/{par}/grid-2.png")
         # fig.write_html(f"fps/{par}/grid-2.html")
