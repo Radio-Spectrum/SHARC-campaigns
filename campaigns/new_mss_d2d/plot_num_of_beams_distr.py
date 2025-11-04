@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 
 pars = [x for x in INPUTS_DIR.iterdir() if "parameter_" in str(x) and "downlink" in str(x)]
 
+mx = 20
+mn = 2500
 for i, par in enumerate(pars):
     parameters = Parameters()
     param_file = par
@@ -19,8 +21,7 @@ for i, par in enumerate(pars):
 
     N = int(1e3)
     # ns = []
-    pmf = np.zeros(1000)
-    mx = 0
+    pmf = np.zeros(8000)
     rng = np.random.RandomState(22)
     grid = params.beam_positioning.service_grid
 
@@ -33,6 +34,7 @@ for i, par in enumerate(pars):
         # ns.append(n)
         pmf[n] += 1
         mx = max(mx, n)
+        mn = min(mn, n)
 
     bins = np.arange(0, mx+1)
 
@@ -41,7 +43,7 @@ for i, par in enumerate(pars):
     # print(pmf.shape)
     # print(bins.shape)
     ax.bar(bins, pmf, width=1, edgecolor="black", linewidth=0.25)
-    ax.set_xlim(-0.5, len(pmf) - 0.5)
+    ax.set_xlim(-0.5 + mn, len(pmf) - 0.5)
     ax.set_ylim(0, max(0.01, pmf.max() * 1.05))  # auto-scale a bit
     ax.set_xlabel("Number of beams")
     readable = get_readable_from_str(par.name)

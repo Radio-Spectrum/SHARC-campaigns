@@ -82,23 +82,35 @@ def generate_inputs():
         params.imt.topology.central_longitude = center_lon
         params.imt.topology.central_altitude = 200
 
+        # Beam pointing
         params.mss_d2d.beam_positioning.type = "SERVICE_GRID"
         service_grid = params.mss_d2d.beam_positioning.service_grid
+        service_grid.grid_in_zone.type = "FROM_COUNTRIES"
+        service_grid.grid_in_zone.from_countries.country_names = [
+            "Brazil", "Argentina",
+        ]
+        service_grid.grid_in_zone.from_countries.margin_from_border = exclusion_margin_km
+
+        # Beam is active if satellite
+        params.mss_d2d.sat_is_active_if.conditions = [
+            "MINIMUM_ELEVATION_FROM_ES",
+        ]
+        params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 50.0
         # big number to make it so any visible satellite is ellegible
         service_grid.eligible_sats_margin_from_border = -2 * 1110
 
-        service_grid.grid_in_zone.type = "CIRCLE"
-        service_grid.grid_in_zone.circle.center_lat = center_lat
-        service_grid.grid_in_zone.circle.center_lon = center_lon
-        # grid_radius = float(get_service_zone_radius_from_max_num_of_beams(
-        #     max_n_beams, CELL_RADIUS_KM, exclusion_margin_km
-        # ))
-        # print("grid_radius", grid_radius)
-        service_grid.grid_in_zone.circle.radius_km = 120
+        # service_grid.grid_in_zone.type = "CIRCLE"
+        # service_grid.grid_in_zone.circle.center_lat = center_lat
+        # service_grid.grid_in_zone.circle.center_lon = center_lon
+        # # grid_radius = float(get_service_zone_radius_from_max_num_of_beams(
+        # #     max_n_beams, CELL_RADIUS_KM, exclusion_margin_km
+        # # ))
+        # # print("grid_radius", grid_radius)
+        # service_grid.grid_in_zone.circle.radius_km = 120
 
-        service_grid.grid_exclusion_zone.type = "FROM_COUNTRIES"
-        service_grid.grid_exclusion_zone.from_countries.country_names = ["Paraguay"]
-        service_grid.grid_exclusion_zone.from_countries.margin_from_border = -exclusion_margin_km
+        # service_grid.grid_exclusion_zone.type = "FROM_COUNTRIES"
+        # service_grid.grid_exclusion_zone.from_countries.country_names = ["Paraguay"]
+        # service_grid.grid_exclusion_zone.from_countries.margin_from_border = -exclusion_margin_km
 
         # Gerar nome do arquivo
         specific = get_specific_pattern(
