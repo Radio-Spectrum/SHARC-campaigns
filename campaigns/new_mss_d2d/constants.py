@@ -11,23 +11,23 @@ INPUTS_DIR = CAMPAIGN_DIR / "input/"
 
 SYS_IDS = ["system-4.698-960MHz-block1.520km"]
 SYS_ID_TO_READABLE = {
-    "system-4.698-960MHz-block1.520km": "MSS DC System 4 @800MHz Block 1",
+    "system-4.698-960MHz-block1.520km": "MSS DC System 4 @700MHz Block 1",
 }
 
 IMT_IDS = ["imt.upto-1GHz.single-bs.urban-macro-bs"]
 IMT_ID_TO_READABLE = {
-    "imt.upto-1GHz.single-bs.urban-macro-bs": "IMT Macro @800MHZ",
+    "imt.upto-1GHz.single-bs.urban-macro-bs": "IMT Macro @700MHZ",
 }
 
-CELL_RADIUS_KM = 12
+CELL_RADIUS_KM = 24.105
 
 IMT_LINKS = ["downlink", "uplink"]
-MSS_D2D_LOAD_FACTOR = [0.2]
+MSS_D2D_LOAD_FACTOR = [0.1, 0.2]
 EXCLUSION_ZONE_MARGIN_KM = [
     CELL_RADIUS_KM,
     2 * CELL_RADIUS_KM,
     3 * CELL_RADIUS_KM,
-    4 * CELL_RADIUS_KM,
+    # 4 * CELL_RADIUS_KM,
 ]
 
 PARAMETERS = [
@@ -39,20 +39,20 @@ PARAMETERS = [
 ]
 
 
-def get_service_zone_radius_from_max_num_of_beams(
-    max_num_of_beams,
-    cell_radius,
-    exclusion_zone_radius,
-):
-    """Calculates the radius R of the annulus that can contain
-    at maximum the number of beams specified
-    """
-    # Area = n_beams * hexagon_area, so
-    A = max_num_of_beams * cell_radius * 3 * np.sqrt(3) / 2
-    # A = pi * (R**2 - exclusion_zone_radius**2)
-    # so
-    R = np.sqrt(A / np.pi + exclusion_zone_radius**2)
-    return R
+# def get_service_zone_radius_from_max_num_of_beams(
+#     max_num_of_beams,
+#     cell_radius,
+#     exclusion_zone_radius,
+# ):
+#     """Calculates the radius R of the annulus that can contain
+#     at maximum the number of beams specified
+#     """
+#     # Area = n_beams * hexagon_area, so
+#     A = max_num_of_beams * cell_radius * 3 * np.sqrt(3) / 2
+#     # A = pi * (R**2 - exclusion_zone_radius**2)
+#     # so
+#     R = np.sqrt(A / np.pi + exclusion_zone_radius**2)
+#     return R
 
 
 def get_specific_pattern(
