@@ -1,20 +1,58 @@
 from itertools import product
-import numpy as np
+import argparse
 import re as re
 from sharc.results import Results, SampleList
 from sharc.post_processor import PostProcessor
 
 from campaigns.ast_mss_d2d_to_imt_cpe.constants import (
-    CAMPAIGN_DIR, PARAMETERS, get_specific_pattern,
+    CAMPAIGN_DIR,
+    IMT_UE_TYPE,
+    MSS_D2D_LOAD_FACTOR,
+    get_specific_pattern,
     get_readable
 )
 
-auto_open = False
+# output_ast_mss_d2d_to_imt_cpe_12exclusion_0.2load_imt-cpe_imt.1-3GHz.single-bs.aas-macro-bs_system-4.698-960MHz-block1.520km_2025-11-05_01
+output_dir_pattern = re.compile(
+    r".*/output_ast_mss_d2d_to_imt_cpe_(\d+)exclusion_(\d+\.\d+)load_imt-(cpe|ue)_"
+)
+
+parser = argparse.ArgumentParser(description='Generate simulation plots')
+parser.add_argument('--band_mhz', type=int, choices=[700, 2100], default=700,
+                    help='Frequency band in MHz (700 or 2100)')
+parser.add_argument('--auto_open', action='store_true', default=False,
+                    help='Open the generated HTML plots automatically')
+
+args = parser.parse_args()
+auto_open = args.auto_open
+band_mhz = args.band_mhz
+
+# Band specific settings
+imt_bandwidth_mhz = 5.0  # MHz
+if band_mhz == 700:
+    print("Generating plots for 700 MHz band...")
+    output_dir_regex = "imt.upto-1GHz.single-bs.urban-macro-bs.*"
+    imt_id = "imt.upto-1GHz.single-bs.urban-macro-bs"
+    mss_id = "system-4.698-960MHz-block1.520km"
+    exclusion_margins_km = [24, 48, 72]
+else:
+    print("Generating plots for 2100 MHz band...")
+    output_dir_regex = "1-3GHz.single-bs.aas-macro-bs.*"
+    imt_id = "imt.1-3GHz.single-bs.aas-macro-bs"
+    mss_id = "system-4.2110-2200MHz.690km"
+    exclusion_margins_km = [12, 24, 48]
+
+scenario_params = [
+    IMT_UE_TYPE,
+    [imt_id],
+    [mss_id],
+    MSS_D2D_LOAD_FACTOR,
+    exclusion_margins_km,
+]
 
 post_processor = PostProcessor()
 
 # Samples to plot CCDF from
-
 attributes_to_plot = [
     # ("imt_system_antenna_gain", "cdf"),
     # ("imt_system_path_loss", "cdf"),
@@ -29,8 +67,6 @@ samples_for_ccdf = [attr[0] for attr in attributes_to_plot if attr[1] == "ccdf"]
 samples_for_cdf = [attr[0] for attr in attributes_to_plot if attr[1] == "cdf"]
 
 print("Getting results from", CAMPAIGN_DIR / "output")
-output_dir_regex = "imt.upto-1GHz.single-bs.urban-macro-bs.*"
-# output_dir_regex = "1-3GHz.single-bs.aas-macro-bs.*"
 ccdf_results = Results.load_many_from_dir(
     CAMPAIGN_DIR / "output",
     # filter_fn=lambda x: "mss_d2d_to_eess" in x,
@@ -69,20 +105,33 @@ def linestyle_getter(results):
     str
         The line style to use for plotting (e.g., 'dash' or 'solid').
     """
+    match = output_dir_pattern.match(results.output_directory)
+    if not match:
+        return "solid"
+
+    exclusion_dist, lf, ue_type = match.groups()
     i = 3
     styles = ["solid", "dot", "dash", "dashdot"]
-    if "_12exclusion" in results.output_directory:
-        i = 0
-    if "_24exclusion" in results.output_directory:
-        i = 1
-    if "_36exclusion" in results.output_directory:
-        i = 2
+    if band_mhz == 700:
+        if exclusion_dist in ["24"]:
+            i = 0
+        if exclusion_dist in ["48"]:
+            i = 1
+        if exclusion_dist in ["72"]:
+            i = 2
+    else:
+        if exclusion_dist in ["12"]:
+            i = 0
+        if exclusion_dist in ["24"]:
+            i = 1
+        if exclusion_dist in ["36"]:
+            i = 2
     return styles[i]
 
 
 post_processor.add_results_linestyle_getter(linestyle_getter)
 
-for pars in product(*PARAMETERS):
+for pars in product(*scenario_params):
     pat = get_specific_pattern(*pars)
     post_processor\
         .add_plot_legend_pattern(
@@ -190,3 +239,4 @@ for attr, plot_type in attributes_to_plot:
     )
     plot.write_html(file=file, include_plotlyjs="cdn", auto_open=auto_open)
     # plot.show()
+

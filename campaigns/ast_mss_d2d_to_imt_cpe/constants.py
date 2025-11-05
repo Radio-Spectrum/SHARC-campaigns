@@ -9,9 +9,14 @@ CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 INPUTS_DIR = CAMPAIGN_DIR / "input/"
 
-SYS_IDS = ["system-4.698-960MHz-block1.520km"]
+SYS_IDS = [
+    "system-4.698-960MHz-block1.520km",
+    "system-4.2110-2200MHz.690km"
+]
+
 SYS_ID_TO_READABLE = {
     "system-4.698-960MHz-block1.520km": "MSS DC System 4 @700MHz Block 1",
+    "system-4.2110-2200MHz.690km": "MSS DC System 4 @2GHz",
 }
 
 IMT_IDS = [
@@ -22,8 +27,6 @@ IMT_ID_TO_READABLE = {
     "imt.upto-1GHz.single-bs.urban-macro-bs": "IMT Macro @700MHZ",
     "imt.1-3GHz.single-bs.aas-macro-bs": "IMT Macro @2GHz",
 }
-
-CELL_RADIUS_KM = 12
 
 IMT_LINKS = [
     "downlink",
@@ -36,22 +39,10 @@ IMT_UE_TYPE = [
 ]
 
 MSS_D2D_LOAD_FACTOR = [0.2]
-EXCLUSION_ZONE_MARGIN_KM = [
-    CELL_RADIUS_KM,
-    2 * CELL_RADIUS_KM,
-    3 * CELL_RADIUS_KM,
-    4 * CELL_RADIUS_KM,
-]
 
-PARAMETERS = [
-    # IMT_LINKS,
-    IMT_UE_TYPE,
-    IMT_IDS,
-    SYS_IDS,
-    MSS_D2D_LOAD_FACTOR,
-    EXCLUSION_ZONE_MARGIN_KM,
-]
-
+# Rec. ITU-R M.1036-7 IMT bands - downlink band lower limits
+IMT_A5_DL_BAND_LOW_MHZ = 758.0
+IMT_B4_DL_BAND_LOW_MHZ = 2110.0
 
 def get_service_zone_radius_from_max_num_of_beams(
     max_num_of_beams,
@@ -83,7 +74,7 @@ def get_specific_pattern(
 
 
 def get_readable(
-    imt_link: str,
+    imt_ue_type: str,
     imt_id: str,
     mss_d2d_id: str,
     mss_load_factor: float,
@@ -91,10 +82,10 @@ def get_readable(
 ):
     readable_load = f"LF = {float(mss_load_factor) * 100}%"
     readable_exclusion = f"Excl. R = {exclusion_r_km}km"
-    imt_link_readable = "-> IMT UE" if imt_link == "downlink" else "-> IMT BS"
+    imt_ue_type_readable = imt_ue_type
     readable_mss_d2d = SYS_ID_TO_READABLE[mss_d2d_id]
     readable_imt = IMT_ID_TO_READABLE[imt_id]
-    return f"{readable_load}; {readable_exclusion}; {imt_link_readable}"
+    return f"{readable_mss_d2d}; {readable_load}; {readable_exclusion}; {imt_ue_type.upper()}"
 
 
 def get_readable_from_str(

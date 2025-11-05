@@ -2,13 +2,20 @@ from itertools import product
 from pathlib import Path
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
+import argparse
+from time import time
 from campaigns.ast_mss_d2d_to_imt_cpe.constants import (
-    CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR, PARAMETERS,
-    CELL_RADIUS_KM,
-    get_specific_pattern, get_readable_from_str
+    CAMPAIGN_STR,
+    CAMPAIGN_NAME,
+    INPUTS_DIR,
+    IMT_UE_TYPE,
+    MSS_D2D_LOAD_FACTOR,
+    IMT_A5_DL_BAND_LOW_MHZ,
+    IMT_B4_DL_BAND_LOW_MHZ,
+    get_specific_pattern
 )
 
-SEED = 81
+SEED = int(time() * 1000) % 2**32
 
 general = {
     "seed": SEED,
@@ -20,7 +27,6 @@ general = {
     "imt_link": "UPLINK",
 }
 
-
 # Generate the parameters for the UE vs CPE campaign
 #
 # Assumptions for CPE parameters:
@@ -28,43 +34,63 @@ general = {
 # body loss = 0 dB
 # antenna gain = 0 dBi
 
-cpe_params = {
-    "antenna_height_m": 1.5,
-    "body_loss_db": 0.0,
-    "antenna_gain_dbi": 0.0,
-}
+def generate_inputs(band_mhz=700):
+    """Generate the YAML parameters files for the campaign.
+    band_mhz: Frequency band in MHz (700 or 2100)"""
 
-def generate_inputs():
-    """Gera os arquivos YAML de parâmetros"""
+    if band_mhz not in [700, 2100]:
+        raise ValueError("band_mhz must be 700 or 2100")
+
     OUTPUT_START_NAME = f"output_{CAMPAIGN_NAME}_"
     PARAMETER_START_NAME = f"parameter_{CAMPAIGN_NAME}_"
 
-    print(f"Gerando arquivos em: {INPUTS_DIR}")
+    print(f"Generating files in: {INPUTS_DIR}")
     factory = ParametersFactory()
 
-    total = 0
+    # Band specific settings
+    imt_bandwidth_mhz = 5.0  # MHz
+    if band_mhz == 700:
+        print("Generating inputs for 700 MHz band...")
+        imt_id = "imt.upto-1GHz.single-bs.urban-macro-bs"
+        mss_id = "system-4.698-960MHz-block1.520km"
+        exclusion_margins_km = [24, 48, 72]
+        # imt_bandwidth_mhz = 10.0
+        imt_frequency_mhz = IMT_A5_DL_BAND_LOW_MHZ + imt_bandwidth_mhz / 2
+    else:
+        print("Generating inputs for 2100 MHz band...")
+        imt_id = "imt.1-3GHz.single-bs.aas-macro-bs"
+        mss_id = "system-4.2110-2200MHz.690km"
+        exclusion_margins_km = [12, 24, 48]
+        # imt_bandwidth_mhz = 20.0
+        imt_frequency_mhz = IMT_B4_DL_BAND_LOW_MHZ + imt_bandwidth_mhz / 2
 
+    scenario_params = [
+        IMT_UE_TYPE,
+        [imt_id],
+        [mss_id],
+        MSS_D2D_LOAD_FACTOR,
+        exclusion_margins_km,
+    ]
+
+    total_files = 0
     for (
         imt_ue_type,
         imt_id,
         mss_d2d_id,
         mss_d2d_lf,
         exclusion_margin_km,
-    ) in product(*PARAMETERS):
+    ) in product(*scenario_params):
 
-        general["imt_link"] = 'DOWNLINK'  # only uplink for UE/CPE
+        general["imt_link"] = 'DOWNLINK'  # only downlink for UE/CPE
 
         print("Generating parameters:")
-        print("\timt_link=", general["imt_link"], end=";")
-        print("\timt_ue_type=", imt_ue_type, end=";")
-        print("\timt_id=", imt_id, end=";")
-        print("\tmss_d2d_id=", mss_d2d_id, end=";")
-        print("\tmss_d2d_lf=", mss_d2d_lf, end=";")
-        print("\texclusion_r_km=", exclusion_margin_km, end=";")
+        print("\timt_link =", general["imt_link"])
+        print("\timt_ue_type =", imt_ue_type)
+        print("\timt_id =", imt_id)
+        print("\tmss_d2d_id =", mss_d2d_id)
+        print("\tmss_d2d_lf =", mss_d2d_lf)
+        print("\texclusion_r_km =", exclusion_margin_km)
 
-        total += 1
-
-        # Construir objeto de parâmetros
         params = (
             factory
             .load_from_id(imt_id)
@@ -73,29 +99,31 @@ def generate_inputs():
             .build()
         )
 
-        # Configurar cenário
+        # Scenario configuration
         params.general.enable_adjacent_channel = False
         params.general.enable_cochannel = True
         params.imt.interfered_with = True
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
+        # IMT UE parameters
+        params.imt.ue.distribution_distance = "SQRT(UNIFORM)"
+        params.imt.ue.antenna.pattern = "OMNI"
+        params.imt.ue.antenna.gain = -3.0
+        params.imt.ue.k = 1  # single user per cell
         # CPE-speficic parameters
         if imt_ue_type == "imt-cpe":
             params.imt.ue.body_loss = 0.0
             params.imt.ue.antenna.gain = 0.0
             params.imt.ue.height = 1.5
+            params.imt.ue.ohmic_loss = 2.0  # tipical cable and other losses @700MHz
             params.imt.ue.indoor_percent = 0.0  # all outdoor
 
         # Frequencies and bandwidths
+        params.imt.bandwidth = imt_bandwidth_mhz
+        params.imt.frequency = imt_frequency_mhz
+        params.imt.guard_band_ratio = 0.1  # 10% guard band - single UE has 4.5MHz usable bw in 5MHz channel
         params.mss_d2d.bandwidth = 5.0  # MHz
-        # Using the LTE-28/A5 frequency arrangement for IMT
-        params.imt.frequency = 758 + params.imt.bandwidth / 2
-        params.imt.bandwidth = 10.0  # MHz
-        # Using the LTE-256/B4 frequency arrangement for IMT
-        # params.imt.frequency = 2110 + params.imt.bandwidth / 2
-        # params.imt.bandwidth = 20.0  # MHz
         params.mss_d2d.frequency = params.imt.frequency  # full bw overlap
-        params.imt.ue.k = 3
 
         # Adding this just to prevent UserWarnings for unset mask parameters.
         params.mss_d2d.spectral_mask = "MSS"
@@ -109,9 +137,6 @@ def generate_inputs():
         # P.619 suggests 3dB polarization loss as good constant value for monte carlo
         params.mss_d2d.polarization_loss = 3.0  # dB
 
-        # DC-MSS load factor
-        params.mss_d2d.beams_load_factor = mss_d2d_lf
-
         # Geometry
         # International Friendship Bridge
         center_lat = -25.5549751
@@ -120,8 +145,10 @@ def generate_inputs():
         params.imt.topology.central_longitude = center_lon
         params.imt.topology.central_altitude = 200
 
-        # Beam pointing
+        # Beam management - service grid
+        params.mss_d2d.beams_load_factor = mss_d2d_lf
         params.mss_d2d.beam_positioning.type = "SERVICE_GRID"
+        params.mss_d2d.beam_positioning.service_grid.transform_grid_randomly = True
         service_grid = params.mss_d2d.beam_positioning.service_grid
         service_grid.grid_in_zone.type = "FROM_COUNTRIES"
         service_grid.grid_in_zone.from_countries.country_names = [
@@ -130,9 +157,14 @@ def generate_inputs():
         ]
         service_grid.grid_in_zone.from_countries.margin_from_border = exclusion_margin_km
 
-        # Beam is active if satellite
+        # Satellite activity conditions
         params.mss_d2d.sat_is_active_if.conditions = [
             "MINIMUM_ELEVATION_FROM_ES",
+            "LAT_LONG_INSIDE_COUNTRY"
+        ]
+        params.mss_d2d.sat_is_active_if.lat_long_inside_country.country_names = [
+            "Brazil",
+            "Argentina",
         ]
         # Set the minimum elevation as the service elevation angle. That way we avoid dealing with multiple patterns
         # according to System 4 specifications.
@@ -155,37 +187,46 @@ def generate_inputs():
         # service_grid.grid_exclusion_zone.from_countries.country_names = ["Paraguay"]
         # service_grid.grid_exclusion_zone.from_countries.margin_from_border = -exclusion_margin_km
 
-        # Gerar nome do arquivo
+        # Generate the filename pattern
         specific = get_specific_pattern(
             imt_ue_type, imt_id, mss_d2d_id, mss_d2d_lf, exclusion_margin_km,
         )
 
-        # Configurar caminhos de saída
         params.general.output_dir_prefix = OUTPUT_START_NAME + specific
         # readable = get_readable_from_str(params.general.output_dir_prefix)
         # print("readable", readable)
 
         output_path = INPUTS_DIR / f"{PARAMETER_START_NAME}{specific}.yaml"
 
-        # Escrever arquivo YAML
+        # Write YAML
         try:
             dump_parameters(output_path, params)
-            print(f"Arquivo gerado: {output_path}")
+            print(f"Generated parameter file: {output_path}")
+            total_files += 1
         except Exception as e:
-            print(f"Falha ao gerar {output_path}: {str(e)}")
+            print(f"Parameter generation failed {output_path}: {str(e)}")
 
-    print(f"\nTotal de arquivos gerados: {total}\n")
+    print(f"\nTotal generated files: {total_files}\n")
 
 
 def clear_inputs():
-    """Limpa o diretório de entrada antes da geração"""
+    """Clear the input directory before generation"""
     INPUTS_DIR.mkdir(parents=True, exist_ok=True)
-    print(f"Limpando diretório: {INPUTS_DIR}")
+    print(f"Clearing directory: {INPUTS_DIR}")
     for item in INPUTS_DIR.iterdir():
         if item.is_file() and item.name.endswith(".yaml"):
             item.unlink()
 
 
 if __name__ == "__main__":
-    clear_inputs()
-    generate_inputs()
+
+    parser = argparse.ArgumentParser(description='Generate simulation inputs')
+    parser.add_argument('--band_mhz', type=int, choices=[700, 2100], default=700,
+                        help='Frequency band in MHz (700 or 2100)')
+    parser.add_argument('--dont-clear', action='store_true', default=False,
+                        help='Skip clearing the inputs directory')
+    args = parser.parse_args()
+
+    if not args.dont_clear:
+        clear_inputs()
+    generate_inputs(band_mhz=args.band_mhz)

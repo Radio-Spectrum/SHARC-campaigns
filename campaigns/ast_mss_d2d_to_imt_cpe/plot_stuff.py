@@ -5,13 +5,14 @@ from sharc.parameters.parameters import Parameters
 import matplotlib.pyplot as plt
 from sharc.satellite.scripts.plot_footprints import plot_fp, FootPrintOpts
 from sharc.support.sharc_geom import CoordinateSystem
-from campaigns.new_mss_d2d.constants import INPUTS_DIR
+from campaigns.ast_mss_d2d_to_imt_cpe.constants import INPUTS_DIR
 
 
 def plot_antenna():
     parameters = Parameters()
     param_file = Path(
-        "/home/artistreak/projects/Radio-Spectrum/SHARC-campaigns/campaigns/new_mss_d2d/input/parameter_new_mss_d2d_downlink.yaml"
+        "/Users/bfaria/github/SHARC/sharc/campaigns/ast_mss_d2d_to_imt_cpe/input/parameter_ast_mss_d2d_to_imt_cpe_12exclusion_0.2load_imt-cpe_imt.1-3GHz.single-bs.aas-macro-bs_system-4.2110-2200MHz.690km.yaml"
+        # "/Users/bfaria/github/SHARC/sharc/campaigns/ast_mss_d2d_to_imt_cpe/input/parameter_ast_mss_d2d_to_imt_cpe_24exclusion_0.2load_imt-cpe_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km.yaml"
     )
     parameters.set_file_name(param_file)
     parameters.read_params()
@@ -21,13 +22,14 @@ def plot_antenna():
     gains = ant.calculate_gain(
         off_axis_angle_vec=off_axis_angle
     )
-    idx = np.where(gains <= ant_params.gain - 4.0)[0][0]
+    idx = np.where(gains <= ant_params.gain -4.0)[0][0]
     angle_4dB = off_axis_angle[idx]
     g = gains[idx]
     print("4dB angle: ", angle_4dB)
     print("for gain of: ", g)
     print("when it should be eq:", ant_params.gain - 4.0)
-    r = np.tan(np.deg2rad(angle_4dB)) * 520e3
+    h = parameters.mss_d2d.orbits[0].perigee_alt_km * 1e3  # in meters
+    r = np.tan(np.deg2rad(angle_4dB)) * h
     print("resulting in radius of: ", r)
 
     plt.figure(figsize=(6, 6))
@@ -35,8 +37,8 @@ def plot_antenna():
     plt.xlabel('off_axis_angle (degrees)')
     plt.ylabel('Gain (dB)')
     plt.xticks(np.arange(-100, 100, 20))
-    plt.xlim((-100, 100))
-    plt.ylim((-40, 40))
+    plt.xlim((-75, 75))
+    plt.ylim((np.min(gains) - 5, np.max(gains) + 5))
     # plt.minorticks_on()
     # plt.gca().xaxis.set_minor_locator(plt.MultipleLocator(2))
     # plt.gca().yaxis.set_minor_locator(plt.MultipleLocator(2.5))
@@ -54,7 +56,12 @@ def plot_fps():
     #     "parameter_new_mss_d2d_50max_beams_48exclusion_1.0load_uplink_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km",
     # ]
     # print(list(INPUTS_DIR.iterdir()))
-    pars = [x for x in INPUTS_DIR.iterdir() if "parameter_" in str(x) and "downlink" in str(x)]
+    # pars = [x for x in INPUTS_DIR.iterdir() if "parameter_" in str(x) and "downlink" in str(x)]
+    pars = [x for x in INPUTS_DIR.iterdir() if "parameter_" in str(x)]
+
+    if len(pars) == 0:
+        print(f"No parameter files found in {INPUTS_DIR}")
+        return
 
     for i, par in enumerate(pars[:1]):
         parameters = Parameters()
@@ -118,7 +125,9 @@ def plot_fps():
             # ),
         ]
 
-        Path("fps").mkdir(exist_ok=True)
+        fps_path = Path("fps")
+        fps_path.mkdir(exist_ok=True)
+        print(f"Plotting fps in {fps_path}")
         # Path(f"fps/{par}").mkdir(exist_ok=True)
         fig = plot_fp(params, coord_sys, opts[0])
         # fig.show()
@@ -144,5 +153,5 @@ def plot_fps():
         # fig.write_html(f"fps/{par}/fp-3.html")
 
 if __name__ == "__main__":
-    # plot_antenna()
-    plot_fps()
+    plot_antenna()
+    # plot_fps()
