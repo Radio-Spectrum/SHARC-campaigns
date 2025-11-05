@@ -61,8 +61,8 @@ def generate_inputs():
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
         # TODO: choose frequency more carefully
-        params.imt.frequency = 800
-        params.mss_d2d.frequency = 800
+        params.imt.frequency = 700
+        params.mss_d2d.frequency = 700
 
         # Parameters used for P.619
         # WARNING: Remember to set the lut in propagation/Dataset!
@@ -70,6 +70,9 @@ def generate_inputs():
         params.mss_d2d.param_p619.earth_station_lat_deg = -25.5549751
         params.mss_d2d.param_p619.earth_station_alt_m = 200
         params.mss_d2d.param_p619.mean_clutter_height = "low"
+
+        # Polarization loss - following Item 2.2 of the Rec. ITU-P.61
+        params.mss_d2d.polarization_loss = 3.0  # dB
 
         # Carga da BS
         params.mss_d2d.beams_load_factor = mss_d2d_lf
