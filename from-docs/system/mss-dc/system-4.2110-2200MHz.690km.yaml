@@ -21,7 +21,7 @@ mss_d2d:
     # MSS_D2d system bandwidth in MHz
     bandwidth: 20
     # MSS_D2D cell radius in network topology [m] (PER SCENARIO)
-    cell_radius: 1
+    cell_radius: 10960
     # Satellite power density in dBW/Hz
     # NOTE: for different BWs these values change
     # NOTE: 50.41~55.41 EIRP per beam
@@ -37,20 +37,16 @@ mss_d2d:
     # Number of sectors (PER SCENARIO)
     num_sectors: 19
     # Satellite antenna pattern
-    # Antenna pattern from ITU-R S.1528
-    # Possible values: "ITU-R-S.1528-Section1.2", "ITU-R-S.1528-LEO"
-    antenna_pattern: ITU-R-S.1528-Section1.2
-    # TODO: L_F is currently hardcoded to 0 in simulator
-    antenna_3_dB_bw: 0.375
-    # FIXME:
-    # document DOES NOT provide enough information about using L_n = -35
-    # since document S.1528 does not provide enough information to use it
-    # as is
-    antenna_l_s: -35
-    antenna_s1528:
-        # Maximum Antenna gain in dBi
-        # NOTE: doc. specifies 41 dBi only at nadir, 46 at maximum steering angle
-        antenna_gain: 41
+    # Antenna pattern from ITU-R S.1528 Section 1.2
+    antenna:
+        pattern: ITU-R-S.1528-Section1.2
+        # FIXME: peak gain should be different when beam is at max steering angle
+        gain: 41.0
+        itu_r_s_1528:
+            # FIXME: L_F is currently hardcoded to 0 in simulator
+            antenna_3_dB_bw: 1.50
+            # FIXME: fix parameter name. While we pass as L_S, it actually means L_N
+            antenna_l_s: -35
     sat_is_active_if: # (PER SCENARIO)
         # for a satellite to be active, it needs to respect ALL conditions
         conditions:

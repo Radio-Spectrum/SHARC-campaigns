@@ -32,7 +32,7 @@ mss_d2d:
   frequency: -1                # center frequency [MHz] (PER SCENARIO)
 
   bandwidth: 20            # OPTIONS: 3, 5, 10 or 20 [MHz]
-  cell_radius: 12055       # beam radius on ground [m] (PER SCENARIO)
+  cell_radius: 24105       # beam radius on ground [m] (PER SCENARIO)
   tx_power_density: -63.6  # dBW/Hz
   # Polarization loss [dB] (PER SCENARIO)
   # P.619 suggests 3dB polarization loss as good constant value for monte carlo
@@ -45,7 +45,7 @@ mss_d2d:
     gain: 31.5
     itu_r_s_1528:
       # FIXME: L_F is currently hardcoded to 0 in simulator
-      antenna_3_dB_bw: 2.19
+      antenna_3_dB_bw: 4.38
       # FIXME: fix parameter name. While we pass as L_S, it actually means L_N
       antenna_l_s: -20
 
