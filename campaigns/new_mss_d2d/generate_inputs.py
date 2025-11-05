@@ -113,9 +113,8 @@ def generate_inputs():
         # x = arcsin(sin(90+50) * R / (R + h))
         # x = 36.5 deg
         # theta = 3.5 deg
-        # distance_km apprx.= theta * 111
-        # 392 km
-        params.mss_d2d.sat_is_active_if.lat_long_inside_country.margin_from_border = -392
+        # distance_km = theta_rad * R = 389 km
+        params.mss_d2d.sat_is_active_if.lat_long_inside_country.margin_from_border = -389
 
         # big number to make it so that any visible satellite is ellegible
         service_grid.eligible_sats_margin_from_border = -2 * 1110
