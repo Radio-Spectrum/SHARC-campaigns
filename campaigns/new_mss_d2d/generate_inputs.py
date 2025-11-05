@@ -97,9 +97,27 @@ def generate_inputs():
         # Beam is active if satellite
         params.mss_d2d.sat_is_active_if.conditions = [
             "MINIMUM_ELEVATION_FROM_ES",
+            "LAT_LONG_INSIDE_COUNTRY",
         ]
         params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 50.0
-        # big number to make it so any visible satellite is ellegible
+        params.mss_d2d.sat_is_active_if.lat_long_inside_country.country_names = \
+            service_grid.grid_in_zone.from_countries.country_names
+        ###### Calculating margin from border so that satellite will be at
+        # most observed from 50deg elevation from border
+        # x + 90 + 50 + theta = 180
+        # theta = 90 - 50 - x
+        # theta = 40 - x
+
+        # (R + h) / sin(90+50) = R / sin(x)
+        # sin(x) = sin(90+50) * R / (R + h)
+        # x = arcsin(sin(90+50) * R / (R + h))
+        # x = 36.5 deg
+        # theta = 3.5 deg
+        # distance_km apprx.= theta * 111
+        # 392 km
+        params.mss_d2d.sat_is_active_if.lat_long_inside_country.margin_from_border = -392
+
+        # big number to make it so that any visible satellite is ellegible
         service_grid.eligible_sats_margin_from_border = -2 * 1110
         service_grid.minimum_service_angle = 50.0
 
