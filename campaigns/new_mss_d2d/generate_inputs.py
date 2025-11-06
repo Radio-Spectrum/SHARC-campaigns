@@ -32,6 +32,7 @@ def generate_inputs():
 
     for (imt_link, imt_id, mss_d2d_id,
          mss_d2d_lf, exclusion_margin_km,
+         served_countries
     ) in product(*PARAMETERS):
         general["imt_link"] = imt_link.upper()
 
@@ -41,6 +42,7 @@ def generate_inputs():
         print("\tmss_d2d_id=", mss_d2d_id, end=";")
         print("\tmss_d2d_lf=", mss_d2d_lf, end=";")
         print("\texclusion_r_km=", exclusion_margin_km, end=";")
+        print(f"\t{served_countries=}", end=";")
 
         # print(f"Gerando: {imt_link} {imt_id}→{mss_d2d_id}, load={mss_d2d_lf}%")
         total += 1
@@ -61,8 +63,8 @@ def generate_inputs():
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
         # TODO: choose frequency more carefully
-        params.imt.frequency = 700
-        params.mss_d2d.frequency = 700
+        params.imt.frequency = 758
+        params.mss_d2d.frequency = 758
 
         # Parameters used for P.619
         # WARNING: Remember to set the lut in propagation/Dataset!
@@ -88,10 +90,10 @@ def generate_inputs():
         # Beam pointing
         params.mss_d2d.beam_positioning.type = "SERVICE_GRID"
         service_grid = params.mss_d2d.beam_positioning.service_grid
+        service_grid.transform_grid_randomly = True
+
         service_grid.grid_in_zone.type = "FROM_COUNTRIES"
-        service_grid.grid_in_zone.from_countries.country_names = [
-            "Brazil", "Argentina",
-        ]
+        service_grid.grid_in_zone.from_countries.country_names = served_countries
         service_grid.grid_in_zone.from_countries.margin_from_border = exclusion_margin_km
 
         # Beam is active if satellite
@@ -135,7 +137,7 @@ def generate_inputs():
 
         # Gerar nome do arquivo
         specific = get_specific_pattern(
-            imt_link, imt_id, mss_d2d_id, mss_d2d_lf, exclusion_margin_km,
+            imt_link, imt_id, mss_d2d_id, mss_d2d_lf, exclusion_margin_km, served_countries
         )
 
         # Configurar caminhos de saída

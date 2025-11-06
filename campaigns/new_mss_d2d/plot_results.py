@@ -5,7 +5,7 @@ from sharc.post_processor import PostProcessor
 
 from campaigns.new_mss_d2d.constants import (
     CAMPAIGN_DIR, PARAMETERS, get_specific_pattern,
-    get_readable
+    get_readable, CELL_RADIUS_KM,
 )
 
 auto_open = False
@@ -65,12 +65,9 @@ def linestyle_getter(results):
     """
     i = 3
     styles = ["solid", "dot", "dash", "dashdot"]
-    if "_12exclusion" in results.output_directory:
-        i = 0
-    if "_24exclusion" in results.output_directory:
-        i = 1
-    if "_36exclusion" in results.output_directory:
-        i = 2
+    for j in [1, 2, 3]:
+        if f"_{j * CELL_RADIUS_KM}exclusion" in results.output_directory:
+            i = j - 1
     return styles[i]
 
 

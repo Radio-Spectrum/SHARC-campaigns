@@ -1,6 +1,5 @@
 from campaigns.utils.constants import SHARC_SIM_ROOT_DIR
 import re
-import numpy as np
 
 CAMPAIGN_NAME = "new_mss_d2d"
 CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
@@ -21,7 +20,10 @@ IMT_ID_TO_READABLE = {
 
 CELL_RADIUS_KM = 24.105
 
-IMT_LINKS = ["downlink", "uplink"]
+IMT_LINKS = [
+    "downlink",
+    # "uplink"
+]
 MSS_D2D_LOAD_FACTOR = [0.1, 0.2]
 EXCLUSION_ZONE_MARGIN_KM = [
     CELL_RADIUS_KM,
@@ -30,30 +32,32 @@ EXCLUSION_ZONE_MARGIN_KM = [
     # 4 * CELL_RADIUS_KM,
 ]
 
+COVERAGE_COUNTRIES = [
+    ["Brazil"],
+    ["Argentina"],
+    ["Brazil", "Argentina"],
+]
+
 PARAMETERS = [
     IMT_LINKS,
     IMT_IDS,
     SYS_IDS,
     MSS_D2D_LOAD_FACTOR,
     EXCLUSION_ZONE_MARGIN_KM,
+    COVERAGE_COUNTRIES,
 ]
 
 
-# def get_service_zone_radius_from_max_num_of_beams(
-#     max_num_of_beams,
-#     cell_radius,
-#     exclusion_zone_radius,
-# ):
-#     """Calculates the radius R of the annulus that can contain
-#     at maximum the number of beams specified
-#     """
-#     # Area = n_beams * hexagon_area, so
-#     A = max_num_of_beams * cell_radius * 3 * np.sqrt(3) / 2
-#     # A = pi * (R**2 - exclusion_zone_radius**2)
-#     # so
-#     R = np.sqrt(A / np.pi + exclusion_zone_radius**2)
-#     return R
+def get_country_short(c: str):
+    if c == "Brazil":
+        return "br"
+    if c == "Argentina":
+        return "ar"
 
+    raise NotImplementedError()
+
+def get_countries_short(cs: list):
+    return "_".join([get_country_short(c) for c in cs])
 
 def get_specific_pattern(
     imt_link: str,
@@ -61,11 +65,13 @@ def get_specific_pattern(
     mss_id: str,
     mss_load_factor: float,
     exclusion_r_km: float,
+    coverage_countries: list
 ):
     """
     Generate a pattern string identifying the simulation configuration.
     """
-    return f"{exclusion_r_km}exclusion_{mss_load_factor}load_{imt_link}_{imt_id}_{mss_id}"
+    short_countrs = get_countries_short(coverage_countries)
+    return f"{short_countrs}_{exclusion_r_km}exclusion_{mss_load_factor}load_{imt_link}_{imt_id}_{mss_id}"
 
 def get_readable(
     imt_link: str,
@@ -73,13 +79,17 @@ def get_readable(
     mss_d2d_id: str,
     mss_load_factor: float,
     exclusion_r_km: float,
+    coverage_countries: list
 ):
     readable_load = f"LF = {float(mss_load_factor) * 100}%"
     readable_exclusion = f"Excl. R = {exclusion_r_km}km"
     imt_link_readable = "-> IMT UE" if imt_link == "downlink" else "-> IMT BS"
+    short_countrs = get_countries_short(coverage_countries)
+    readbl_countrs = ", ".join([x.upper() for x in short_countrs.split("_")])
+
     readable_mss_d2d = SYS_ID_TO_READABLE[mss_d2d_id]
     readable_imt = IMT_ID_TO_READABLE[imt_id]
-    return f"{readable_load}; {readable_exclusion}; {imt_link_readable}"
+    return f"{readable_load}; {readable_exclusion}; {imt_link_readable}; {readbl_countrs}"
 
 
 def get_readable_from_str(
