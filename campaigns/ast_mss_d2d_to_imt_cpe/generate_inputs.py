@@ -15,16 +15,17 @@ from campaigns.ast_mss_d2d_to_imt_cpe.constants import (
     get_specific_pattern
 )
 
-SEED = int(time() * 1000) % 2**32
+SEED = int(time() * 1000) % 2**32 - 1
+NUM_SNAPSHOTS = int(1e4)
 
 general = {
     "seed": SEED,
-    "num_snapshots": int(1e3),
+    "num_snapshots": NUM_SNAPSHOTS,
     "overwrite_output": False,
-    "output_dir": f"{CAMPAIGN_STR}/output/",
+    "output_dir": "to-update",
     "output_dir_prefix": "to-update",
     "system": "MSS_D2D",
-    "imt_link": "UPLINK",
+    "imt_link": "DOWNLINK",
 }
 
 # Generate the parameters for the UE vs CPE campaign
@@ -102,6 +103,7 @@ def generate_inputs(band_mhz=700):
         # Scenario configuration
         params.general.enable_adjacent_channel = False
         params.general.enable_cochannel = True
+        params.general.output_dir = f"{CAMPAIGN_STR}/output_{band_mhz}/"
         params.imt.interfered_with = True
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
