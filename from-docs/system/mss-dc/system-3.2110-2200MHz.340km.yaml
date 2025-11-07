@@ -21,7 +21,7 @@ mss_d2d:
     # MSS_D2d system bandwidth in MHz
     bandwidth: 5
     # MSS_D2D cell radius in network topology [m] (PER SCENARIO)
-    cell_radius: 1
+    cell_radius: 25700
     # Satellite power density in dBW/Hz
     # NOTE:
     # EIRP density @nadir = -20.1 dBW/Hz
@@ -33,24 +33,21 @@ mss_d2d:
     polarization_loss: 0
     # Number of sectors (PER SCENARIO)
     num_sectors: 19
-    # Satellite antenna pattern
-    # Antenna pattern from ITU-R S.1528
-    # Possible values: "ITU-R-S.1528-Section1.2", "ITU-R-S.1528-LEO"
-    antenna_pattern: ITU-R-S.1528-Taylor
-    # NOTE: doc specifies lambda = 0.15m
-    # we calculate based on frequency, giving out approx. 0.14m
-    antenna_s1528:
-        # Maximum Antenna gain in dBi
-        antenna_gain: 34.1
-        ### The following parameters are used for S.1528-Taylor antenna pattern
-        # SLR is the side-lobe ratio of the pattern (dB), the difference in gain between the maximum
-        # gain and the gain at the peak of the first side lobe.
-        slr: 20.0
-        # Number of secondarylobes considered in the diagram (coincide with the roots of the Bessel function)
-        n_side_lobes: 2
-        # Radial (l_r) and transverse (l_t) sizes of the effective radiating area of the satellite transmitt antenna (m)
-        l_r: 1.6
-        l_t: 1.6
+    antenna:
+        pattern: ITU-R-S.1528-Taylor
+        # FIXME: peak gain should be different when beam is at max steering angle
+        gain: 34.1
+        itu_r_s_1528:
+            ### The following parameters are used for S.1528-Taylor antenna pattern
+            # SLR is the side-lobe ratio of the pattern (dB), the difference in gain between the maximum
+            # gain and the gain at the peak of the first side lobe.
+            slr: 20.0
+            # Number of secondarylobes considered in the diagram (coincide with the roots of the Bessel function)
+            n_side_lobes: 2
+            # Radial (l_r) and transverse (l_t) sizes of the effective radiating area of the satellite transmitt antenna (m)
+            l_r: 1.6
+            l_t: 1.6
+            frequency: 2000  # lambda = 0.15
     sat_is_active_if: # (PER SCENARIO)
         # for a satellite to be active, it needs to respect ALL conditions
         conditions:
