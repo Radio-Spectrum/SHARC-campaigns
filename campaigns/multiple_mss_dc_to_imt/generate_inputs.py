@@ -4,14 +4,15 @@ from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
 from campaigns.multiple_mss_dc_to_imt.constants import (
     CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR, PARAMETERS,
-    get_specific_pattern, skip_parameters_combination
+    get_specific_pattern, skip_parameters_combination,
+    CENTER_FREQUENCY
 )
 
 SEED = 81
 
 general = {
     "seed": SEED,
-    "num_snapshots": int(1e3),
+    "num_snapshots": int(1e4),
     "overwrite_output": False,
     "output_dir": f"{CAMPAIGN_STR}/output/",
     "output_dir_prefix": "to-update",
@@ -73,9 +74,8 @@ def generate_inputs():
         params.imt.interfered_with = True
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        # TODO: choose frequency more carefully
-        params.imt.frequency = 2160.0
-        params.mss_d2d.frequency = 2160.0
+        params.imt.frequency = CENTER_FREQUENCY
+        params.mss_d2d.frequency = CENTER_FREQUENCY
 
         # Parameters used for P.619
         # WARNING: Remember to set the lut in propagation/Dataset!
@@ -112,6 +112,7 @@ def generate_inputs():
             "MINIMUM_ELEVATION_FROM_ES",
             "LAT_LONG_INSIDE_COUNTRY",
         ]
+        # TODO: check this
         params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 50.0
         params.mss_d2d.sat_is_active_if.lat_long_inside_country.country_names = \
             service_grid.grid_in_zone.from_countries.country_names

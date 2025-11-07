@@ -8,22 +8,35 @@ CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 INPUTS_DIR = CAMPAIGN_DIR / "input/"
 
+CENTER_FREQUENCY = 758.0
+# CENTER_FREQUENCY = 2160.0
 SYS_IDS = [
-    "system-3.2110-2200MHz.525km",
-    "system-4.2110-2200MHz.690km",
+    "system-3.698-960MHz.525km",
+    "system-4.698-960MHz-block1.520km",
+    # "system-3.2110-2200MHz.525km",
+    # "system-4.2110-2200MHz.690km",
 ]
 SYS_ID_TO_READABLE = {
     "system-4.2110-2200MHz.690km": "MSS DC System 4 @2100MHz",
     "system-3.2110-2200MHz.525km": "MSS DC System 3 @2100MHz",
+    "system-3.698-960MHz.525km": "MSS DC System 4 @758MHz",
+    "system-4.698-960MHz-block1.520km": "MSS DC System 3 @758MHz",
 }
 
-IMT_IDS = ["imt.1-3GHz.single-bs.aas-macro-bs"]
+IMT_IDS = [
+    # "imt.1-3GHz.single-bs.aas-macro-bs",
+    "imt.upto-1GHz.single-bs.urban-macro-bs"
+]
 IMT_ID_TO_READABLE = {
     "imt.1-3GHz.single-bs.aas-macro-bs": "IMT Macro @2100MHz",
+    "imt.upto-1GHz.single-bs.urban-macro-bs": "IMT Macro @758MHZ",
 }
 
 CELL_RADIUS_SYS3_KM = 39.684
-CELL_RADIUS_SYS4_KM = 10.960
+if CENTER_FREQUENCY == 2160.0:
+    CELL_RADIUS_SYS4_KM = 10.960
+else:
+    CELL_RADIUS_SYS4_KM = 24.105
 
 IMT_LINKS = [
     "downlink",
@@ -65,20 +78,20 @@ def skip_parameters_combination(
     exclusion_zone_margin_km,
     coverage_country,
 ):
-    if sys_id == "system-3.2110-2200MHz.525km":
+    if "system-3" in sys_id:
         if exclusion_zone_margin_km not in EXCLUSION_ZONE_SYS3_MARGIN_KM:
             # only generate parameter for sys3 correct margin border values
             return True
-        if coverage_country != "Brazil":
-            # only generate parameter for sys3 covering Brazil
-            return True
-    elif sys_id == "system-4.2110-2200MHz.690km":
+        # if coverage_country != "Brazil":
+        #     # only generate parameter for sys3 covering Brazil
+        #     return True
+    elif "system-4" in sys_id:
         if exclusion_zone_margin_km not in EXCLUSION_ZONE_SYS4_MARGIN_KM:
             # only generate parameter for sys4 correct margin border values
             return True
-        if coverage_country != "Argentina":
-            # only generate parameter for sys4 covering Argentina
-            return True
+        # if coverage_country != "Argentina":
+        #     # only generate parameter for sys4 covering Argentina
+        #     return True
     else:
         raise NotImplementedError()
 
