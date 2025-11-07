@@ -8,34 +8,44 @@ CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 INPUTS_DIR = CAMPAIGN_DIR / "input/"
 
-SYS_IDS = ["system-4.698-960MHz-block1.520km"]
+SYS_IDS = [
+    "system-3.2110-2200MHz.525km",
+    "system-4.2110-2200MHz.690km",
+]
 SYS_ID_TO_READABLE = {
-    "system-4.698-960MHz-block1.520km": "MSS DC System 4 @700MHz Block 1",
+    "system-4.2110-2200MHz.690km": "MSS DC System 4 @2100MHz",
+    "system-3.2110-2200MHz.525km": "MSS DC System 3 @2100MHz",
 }
 
-IMT_IDS = ["imt.upto-1GHz.single-bs.urban-macro-bs"]
+IMT_IDS = ["imt.1-3GHz.single-bs.aas-macro-bs"]
 IMT_ID_TO_READABLE = {
-    "imt.upto-1GHz.single-bs.urban-macro-bs": "IMT Macro @700MHZ",
+    "imt.1-3GHz.single-bs.aas-macro-bs": "IMT Macro @2100MHz",
 }
 
-CELL_RADIUS_KM = 24.105
+CELL_RADIUS_SYS3_KM = 39.684
+CELL_RADIUS_SYS4_KM = 24.105
 
 IMT_LINKS = [
     "downlink",
     # "uplink"
 ]
 MSS_D2D_LOAD_FACTOR = [0.1, 0.2]
-EXCLUSION_ZONE_MARGIN_KM = [
-    CELL_RADIUS_KM,
-    2 * CELL_RADIUS_KM,
-    3 * CELL_RADIUS_KM,
-    # 4 * CELL_RADIUS_KM,
+EXCLUSION_ZONE_SYS4_MARGIN_KM = [
+    CELL_RADIUS_SYS4_KM,
+    # rounding to get rid of weird precision errors
+    # round(2 * CELL_RADIUS_SYS4_KM, 1),
+    # round(3 * CELL_RADIUS_SYS4_KM, 1),
 ]
+EXCLUSION_ZONE_SYS3_MARGIN_KM = [
+    CELL_RADIUS_SYS3_KM,
+    # round(2 * CELL_RADIUS_SYS3_KM, 1),
+    # round(3 * CELL_RADIUS_SYS3_KM, 1),
+]
+EXCLUSION_ZONE_MARGIN_KM = EXCLUSION_ZONE_SYS3_MARGIN_KM + EXCLUSION_ZONE_SYS4_MARGIN_KM
 
 COVERAGE_COUNTRIES = [
-    ["Brazil"],
-    ["Argentina"],
-    ["Brazil", "Argentina"],
+    "Brazil",
+    "Argentina",
 ]
 
 PARAMETERS = [
@@ -47,6 +57,33 @@ PARAMETERS = [
     COVERAGE_COUNTRIES,
 ]
 
+def skip_parameters_combination(
+    imt_link,
+    imt_id,
+    sys_id,
+    mss_d2d_load_factor,
+    exclusion_zone_margin_km,
+    coverage_country,
+):
+    if sys_id == "system-3.2110-2200MHz.525km":
+        if exclusion_zone_margin_km not in EXCLUSION_ZONE_SYS3_MARGIN_KM:
+            # only generate parameter for sys3 correct margin border values
+            return True
+        if coverage_country != "Brazil":
+            # only generate parameter for sys3 covering Brazil
+            return True
+    elif sys_id == "system-4.2110-2200MHz.690km":
+        if exclusion_zone_margin_km not in EXCLUSION_ZONE_SYS4_MARGIN_KM:
+            # only generate parameter for sys4 correct margin border values
+            return True
+        if coverage_country != "Argentina":
+            # only generate parameter for sys4 covering Argentina
+            return True
+    else:
+        raise NotImplementedError()
+
+    return False
+
 
 def get_country_short(c: str):
     if c == "Brazil":
@@ -56,21 +93,18 @@ def get_country_short(c: str):
 
     raise NotImplementedError()
 
-def get_countries_short(cs: list):
-    return "_".join([get_country_short(c) for c in cs])
-
 def get_specific_pattern(
     imt_link: str,
     imt_id: str,
     mss_id: str,
     mss_load_factor: float,
     exclusion_r_km: float,
-    coverage_countries: list
+    coverage_country: list
 ):
     """
     Generate a pattern string identifying the simulation configuration.
     """
-    short_countrs = get_countries_short(coverage_countries)
+    short_countrs = get_country_short(coverage_country)
     return f"{short_countrs}_{exclusion_r_km}exclusion_{mss_load_factor}load_{imt_link}_{imt_id}_{mss_id}"
 
 def get_readable(
@@ -79,17 +113,17 @@ def get_readable(
     mss_d2d_id: str,
     mss_load_factor: float,
     exclusion_r_km: float,
-    coverage_countries: list
+    coverage_country: str
 ):
     readable_load = f"LF = {float(mss_load_factor) * 100}%"
     readable_exclusion = f"Excl. R = {exclusion_r_km}km"
     imt_link_readable = "-> IMT UE" if imt_link == "downlink" else "-> IMT BS"
-    short_countrs = get_countries_short(coverage_countries)
+    short_countrs = get_country_short(coverage_country)
     readbl_countrs = ", ".join([x.upper() for x in short_countrs.split("_")])
 
     readable_mss_d2d = SYS_ID_TO_READABLE[mss_d2d_id]
     readable_imt = IMT_ID_TO_READABLE[imt_id]
-    return f"{readable_load}; {readable_exclusion}; {imt_link_readable}; {readbl_countrs}"
+    return f"{readable_load}; {readable_exclusion}; {imt_link_readable}; {readbl_countrs}; {readable_mss_d2d}"
 
 
 def get_readable_from_str(

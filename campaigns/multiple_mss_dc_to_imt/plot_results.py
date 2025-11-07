@@ -5,7 +5,7 @@ from sharc.post_processor import PostProcessor
 
 from campaigns.multiple_mss_dc_to_imt.constants import (
     CAMPAIGN_DIR, PARAMETERS, get_specific_pattern,
-    get_readable, CELL_RADIUS_KM,
+    get_readable, CELL_RADIUS_SYS3_KM, CELL_RADIUS_SYS4_KM,
 )
 
 auto_open = False
@@ -65,9 +65,10 @@ def linestyle_getter(results):
     """
     i = 3
     styles = ["solid", "dot", "dash", "dashdot"]
-    for j in [1, 2, 3]:
-        if f"_{j * CELL_RADIUS_KM}exclusion" in results.output_directory:
-            i = j - 1
+    if f"_{CELL_RADIUS_SYS3_KM}exclusion" in results.output_directory:
+        i = 0
+    if f"_{CELL_RADIUS_SYS4_KM}exclusion" in results.output_directory:
+        i = 1
     return styles[i]
 
 

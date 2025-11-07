@@ -4,15 +4,14 @@ from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
 from campaigns.multiple_mss_dc_to_imt.constants import (
     CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR, PARAMETERS,
-    CELL_RADIUS_KM,
-    get_specific_pattern, get_readable_from_str
+    get_specific_pattern, skip_parameters_combination
 )
 
 SEED = 81
 
 general = {
     "seed": SEED,
-    "num_snapshots": int(1e4),
+    "num_snapshots": int(1e3),
     "overwrite_output": False,
     "output_dir": f"{CAMPAIGN_STR}/output/",
     "output_dir_prefix": "to-update",
@@ -32,8 +31,13 @@ def generate_inputs():
 
     for (imt_link, imt_id, mss_d2d_id,
          mss_d2d_lf, exclusion_margin_km,
-         served_countries
+         served_country
     ) in product(*PARAMETERS):
+        if skip_parameters_combination(imt_link, imt_id, mss_d2d_id,
+             mss_d2d_lf, exclusion_margin_km,
+             served_country
+        ):
+            continue
         general["imt_link"] = imt_link.upper()
 
         print("Gerando:")
@@ -42,7 +46,7 @@ def generate_inputs():
         print("\tmss_d2d_id=", mss_d2d_id, end=";")
         print("\tmss_d2d_lf=", mss_d2d_lf, end=";")
         print("\texclusion_r_km=", exclusion_margin_km, end=";")
-        print(f"\t{served_countries=}", end=";")
+        print(f"\t{served_country=}", end=";")
 
         # print(f"Gerando: {imt_link} {imt_id}→{mss_d2d_id}, load={mss_d2d_lf}%")
         total += 1
@@ -58,13 +62,20 @@ def generate_inputs():
 
         # Configurar cenário
         params.general.enable_adjacent_channel = False
+        if params.mss_d2d.bandwidth < params.imt.bandwidth:
+            # need to activate adjacent channel so that no samples are -inf
+            params.general.enable_adjacent_channel = True
+
+            params.mss_d2d.adjacent_ch_emissions = "SPECTRAL_MASK"
+            params.imt.adjacent_ch_reception = "OFF"
+
         params.general.enable_cochannel = True
         params.imt.interfered_with = True
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
         # TODO: choose frequency more carefully
-        params.imt.frequency = 758
-        params.mss_d2d.frequency = 758
+        params.imt.frequency = 2160.0
+        params.mss_d2d.frequency = 2160.0
 
         # Parameters used for P.619
         # WARNING: Remember to set the lut in propagation/Dataset!
@@ -93,7 +104,7 @@ def generate_inputs():
         service_grid.transform_grid_randomly = True
 
         service_grid.grid_in_zone.type = "FROM_COUNTRIES"
-        service_grid.grid_in_zone.from_countries.country_names = served_countries
+        service_grid.grid_in_zone.from_countries.country_names = [served_country]
         service_grid.grid_in_zone.from_countries.margin_from_border = exclusion_margin_km
 
         # Beam is active if satellite
@@ -122,22 +133,9 @@ def generate_inputs():
         service_grid.eligible_sats_margin_from_border = -2 * 1110
         service_grid.minimum_service_angle = 50.0
 
-        # service_grid.grid_in_zone.type = "CIRCLE"
-        # service_grid.grid_in_zone.circle.center_lat = center_lat
-        # service_grid.grid_in_zone.circle.center_lon = center_lon
-        # # grid_radius = float(get_service_zone_radius_from_max_num_of_beams(
-        # #     max_n_beams, CELL_RADIUS_KM, exclusion_margin_km
-        # # ))
-        # # print("grid_radius", grid_radius)
-        # service_grid.grid_in_zone.circle.radius_km = 120
-
-        # service_grid.grid_exclusion_zone.type = "FROM_COUNTRIES"
-        # service_grid.grid_exclusion_zone.from_countries.country_names = ["Paraguay"]
-        # service_grid.grid_exclusion_zone.from_countries.margin_from_border = -exclusion_margin_km
-
         # Gerar nome do arquivo
         specific = get_specific_pattern(
-            imt_link, imt_id, mss_d2d_id, mss_d2d_lf, exclusion_margin_km, served_countries
+            imt_link, imt_id, mss_d2d_id, mss_d2d_lf, exclusion_margin_km, served_country
         )
 
         # Configurar caminhos de saída
