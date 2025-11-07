@@ -123,7 +123,7 @@ def get_readable(
 
     readable_mss_d2d = SYS_ID_TO_READABLE[mss_d2d_id]
     readable_imt = IMT_ID_TO_READABLE[imt_id]
-    return f"{readable_load}; {readable_exclusion}; {imt_link_readable}; {readbl_countrs}; {readable_mss_d2d}"
+    return f"{readable_load}; {readbl_countrs}; {readable_mss_d2d}"
 
 
 def get_readable_from_str(
