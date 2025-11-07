@@ -2,6 +2,7 @@ from itertools import product
 import numpy as np
 from sharc.results import Results, SampleList
 from sharc.post_processor import PostProcessor
+import plotly.graph_objects as go
 
 from campaigns.multiple_mss_dc_to_imt.constants import (
     CAMPAIGN_DIR, PARAMETERS, get_specific_pattern,
@@ -103,9 +104,77 @@ if system_dl_interf_power_per_mhz is not None:
         title_text="dB[W/MHz]",
     )
 
+def compatible_patterns(s1, s2):
+    a = compatible_patterns_ordered(s1, s2)
+    if a is not None:
+        return a
+    b = compatible_patterns_ordered(s2, s1)
+    return b
 
+def compatible_patterns_ordered(s1, s2):
+    if "0.1load" in s1:
+        rload = "LF = 10%; "
+    elif "0.2load" in s1:
+        rload = "LF = 20%; "
+
+    if "system-3.2110-2200MHz.525km" in s1:
+        s1 = s1.replace(
+            "system-3.2110-2200MHz.525km", "system-4.2110-2200MHz.690km"
+        ).replace(
+            "39.684", "10.96"
+        )
+        if "to_imt_br" in s1:
+            if s1.replace(
+                "to_imt_br",
+                "to_imt_ar",
+            ) == s2:
+                return rload + "BR3 & AR4"
+        elif "to_imt_ar" in s1:
+            if s1.replace(
+                "to_imt_ar",
+                "to_imt_br",
+            ) == s2:
+                return rload + "AR3 & BR4"
+    return None
+
+plots_to_save = []
 HTMLS_DIR = CAMPAIGN_DIR / "output" / "htmls"
 HTMLS_DIR.mkdir(exist_ok=True)
+
+fig = None
+for i in range(len(ccdf_results)):
+    for j in range(i+1, len(ccdf_results)):
+        r = ccdf_results[i]
+        r2 = ccdf_results[j]
+        legend = compatible_patterns(r.output_directory, r2.output_directory)
+        if legend is not None:
+            if fig is None:
+                # getting same formatting that other plots get
+                fig = list(post_processor.generate_ccdf_plots_from_results([r]))[0]
+                fig.data = []
+                plots_to_save.append((HTMLS_DIR / "aggregated.html", fig))
+            aggregated_inr = 10 * np.log10(
+                10**(np.array(r.imt_dl_inr)/10)
+                + 10**(np.array(r2.imt_dl_inr)/10)
+            )
+            x, y = PostProcessor.ccdf_from(aggregated_inr, n_bins=None)
+            fig.add_trace(
+                go.Scatter(
+                    x=x,
+                    y=y,
+                    mode="lines",
+                    name=f"{legend}",
+                    # line=dict(color=COLORS[linestyle_color[linestyle]], dash=linestyle)
+                ),
+            )
+            # print()
+            # print("########################")
+            # print(plot)
+            # print("r.output_directory", r.output_directory)
+            # print("r2.output_directory", r2.output_directory)
+            # print("c", c)
+
+
 print(f"Saving plots in {HTMLS_DIR}")
 for attr, plot_type in attributes_to_plot:
     file = HTMLS_DIR / f"{attr}-{plot_type}.html"
@@ -113,6 +182,9 @@ for attr, plot_type in attributes_to_plot:
     if plot is None:
         print("Skipping", attr, plot_type)
         continue
+    plots_to_save.append((file, plot))
+
+for file, plot in plots_to_save:
     # Add plot outline and increase font size
     plot.update_xaxes(
         linewidth=1,
