@@ -1,34 +1,35 @@
 import numpy as np
 from sharc.antenna.antenna_factory import AntennaFactory
 from pathlib import Path
+from sharc.parameters.parameters_mss_d2d import ParametersMssD2d
 from sharc.parameters.parameters import Parameters
 import matplotlib.pyplot as plt
 from sharc.satellite.scripts.plot_footprints import plot_fp, FootPrintOpts
 from sharc.support.sharc_geom import CoordinateSystem
 from campaigns.ast_mss_d2d_to_imt_cpe.constants import INPUTS_DIR
 
+MY_PATH = Path(__file__).resolve().parent
+
 
 def plot_antenna():
-    parameters = Parameters()
-    param_file = Path(
-        "/Users/bfaria/github/SHARC/sharc/campaigns/ast_mss_d2d_to_imt_cpe/input/parameter_ast_mss_d2d_to_imt_cpe_12exclusion_0.2load_imt-cpe_imt.1-3GHz.single-bs.aas-macro-bs_system-4.2110-2200MHz.690km.yaml"
-        # "/Users/bfaria/github/SHARC/sharc/campaigns/ast_mss_d2d_to_imt_cpe/input/parameter_ast_mss_d2d_to_imt_cpe_24exclusion_0.2load_imt-cpe_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block1.520km.yaml"
-    )
-    parameters.set_file_name(param_file)
-    parameters.read_params()
-    ant_params = parameters.mss_d2d.antenna
+    parameters = ParametersMssD2d()
+    param_file = MY_PATH.parent.parent / "from-docs/system/mss-dc/system-4.698-960MHz-block2.690km.yaml"
+    parameters.load_parameters_from_file(param_file)
+    # parameters.read_params()
+    ant_params = parameters.antenna
     ant = AntennaFactory.create_antenna(ant_params, 0.0, 0.0)
     off_axis_angle = np.linspace(0, 60, num=int(3e4))
     gains = ant.calculate_gain(
         off_axis_angle_vec=off_axis_angle
     )
-    idx = np.where(gains <= ant_params.gain -4.0)[0][0]
-    angle_4dB = off_axis_angle[idx]
-    g = gains[idx]
+    idx_4dB = np.where(gains <= ant_params.gain - 4.0)[0][0]
+    angle_4dB = off_axis_angle[idx_4dB]
+    g = gains[idx_4dB]
+    print("3dB angle: ", f"{off_axis_angle[np.where(gains <= ant_params.gain - 3.0)[0][0]]:.2f}")
     print("4dB angle: ", angle_4dB)
     print("for gain of: ", g)
     print("when it should be eq:", ant_params.gain - 4.0)
-    h = parameters.mss_d2d.orbits[0].perigee_alt_km * 1e3  # in meters
+    h = parameters.orbits[0].perigee_alt_km * 1e3  # in meters
     r = np.tan(np.deg2rad(angle_4dB)) * h
     print("resulting in radius of: ", r)
 
