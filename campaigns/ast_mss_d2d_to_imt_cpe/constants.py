@@ -10,12 +10,12 @@ CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 INPUTS_DIR = CAMPAIGN_DIR / "input/"
 
 SYS_IDS = [
-    "system-4.698-960MHz-block1.520km",
+    "system-4.698-960MHz-block2.690km",
     "system-4.2110-2200MHz.690km"
 ]
 
 SYS_ID_TO_READABLE = {
-    "system-4.698-960MHz-block1.520km": "MSS DC System 4 @700MHz Block 1",
+    "system-4.698-960MHz-block2.690km": "MSS DC System 4 @700MHz Block 2",
     "system-4.2110-2200MHz.690km": "MSS DC System 4 @2GHz",
 }
 

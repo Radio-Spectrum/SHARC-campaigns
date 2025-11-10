@@ -12,7 +12,7 @@ from campaigns.ast_mss_d2d_to_imt_cpe.constants import (
     get_readable
 )
 
-# output_ast_mss_d2d_to_imt_cpe_12exclusion_0.2load_imt-cpe_imt.1-3GHz.single-bs.aas-macro-bs_system-4.698-960MHz-block1.520km_2025-11-05_01
+# output_ast_mss_d2d_to_imt_cpe_24exclusion_0.2load_imt-cpe_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block2.690km_2025-11-10_01
 output_dir_pattern = re.compile(
     r".*/output_ast_mss_d2d_to_imt_cpe_(\d+)exclusion_(\d+\.\d+)load_imt-(cpe|ue)_"
 )
@@ -33,8 +33,8 @@ if band_mhz == 700:
     print("Generating plots for 700 MHz band...")
     output_dir_regex = "imt.upto-1GHz.single-bs.urban-macro-bs.*"
     imt_id = "imt.upto-1GHz.single-bs.urban-macro-bs"
-    mss_id = "system-4.698-960MHz-block1.520km"
-    exclusion_margins_km = [24, 48, 72]
+    mss_id = "system-4.698-960MHz-block2.690km"
+    exclusion_margins_km = [24, 30, 36, 40]
 else:
     print("Generating plots for 2100 MHz band...")
     output_dir_regex = "1-3GHz.single-bs.aas-macro-bs.*"
@@ -42,6 +42,7 @@ else:
     mss_id = "system-4.2110-2200MHz.690km"
     exclusion_margins_km = [12, 24, 48]
 
+output_dir = f"output_{band_mhz}"
 scenario_params = [
     IMT_UE_TYPE,
     [imt_id],
@@ -56,7 +57,7 @@ post_processor = PostProcessor()
 attributes_to_plot = [
     # ("imt_system_antenna_gain", "cdf"),
     # ("imt_system_path_loss", "cdf"),
-    # ("system_imt_antenna_gain", "cdf"),
+    ("system_imt_antenna_gain", "cdf"),
     # ("imt_dl_inr", "cdf"),
     # ("imt_ul_inr", "cdf"),
     ("imt_dl_inr", "ccdf"),
@@ -66,16 +67,17 @@ attributes_to_plot = [
 samples_for_ccdf = [attr[0] for attr in attributes_to_plot if attr[1] == "ccdf"]
 samples_for_cdf = [attr[0] for attr in attributes_to_plot if attr[1] == "cdf"]
 
-print("Getting results from", CAMPAIGN_DIR / "output")
+campaign_ouput_dir = CAMPAIGN_DIR / output_dir
+print("Getting results from", campaign_ouput_dir)
 ccdf_results = Results.load_many_from_dir(
-    CAMPAIGN_DIR / "output",
+    campaign_ouput_dir,
     # filter_fn=lambda x: "mss_d2d_to_eess" in x,
     filter_fn=re.compile(output_dir_regex).search,
     only_latest=True,
     only_samples=samples_for_ccdf)
 
 cdf_results = Results.load_many_from_dir(
-    CAMPAIGN_DIR / "output",
+    campaign_ouput_dir,
     # filter_fn=lambda x: "mss_d2d_to_eess" in x,
     filter_fn=re.compile(output_dir_regex).search,
     only_latest=True,
@@ -188,7 +190,7 @@ if imt_dl_inr_plot is not None:
     )
 
 
-HTMLS_DIR = CAMPAIGN_DIR / "output" / "htmls"
+HTMLS_DIR = campaign_ouput_dir / "htmls"
 HTMLS_DIR.mkdir(exist_ok=True)
 print(f"Saving plots in {HTMLS_DIR}")
 for attr, plot_type in attributes_to_plot:

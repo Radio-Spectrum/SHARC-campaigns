@@ -53,8 +53,8 @@ def generate_inputs(band_mhz=700):
     if band_mhz == 700:
         print("Generating inputs for 700 MHz band...")
         imt_id = "imt.upto-1GHz.single-bs.urban-macro-bs"
-        mss_id = "system-4.698-960MHz-block1.520km"
-        exclusion_margins_km = [24, 48, 72]
+        mss_id = "system-4.698-960MHz-block2.690km"
+        exclusion_margins_km = [24, 30, 36, 40]
         # imt_bandwidth_mhz = 10.0
         imt_frequency_mhz = IMT_A5_DL_BAND_LOW_MHZ + imt_bandwidth_mhz / 2
     else:
