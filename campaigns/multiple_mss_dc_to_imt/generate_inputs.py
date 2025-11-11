@@ -48,6 +48,7 @@ def generate_inputs():
         print("\tmss_d2d_lf=", mss_d2d_lf, end=";")
         print("\texclusion_r_km=", exclusion_margin_km, end=";")
         print(f"\t{served_country=}", end=";")
+        print()
 
         # print(f"Gerando: {imt_link} {imt_id}→{mss_d2d_id}, load={mss_d2d_lf}%")
         total += 1
@@ -83,6 +84,7 @@ def generate_inputs():
         params.mss_d2d.param_p619.earth_station_lat_deg = -25.5549751
         params.mss_d2d.param_p619.earth_station_alt_m = 200
         params.mss_d2d.param_p619.mean_clutter_height = "low"
+        params.mss_d2d.param_p619.below_rooftop = 0
 
         # Polarization loss - following Item 2.2 of the Rec. ITU-P.61
         params.mss_d2d.polarization_loss = 3.0  # dB
@@ -113,7 +115,15 @@ def generate_inputs():
             "LAT_LONG_INSIDE_COUNTRY",
         ]
         # TODO: check this
-        params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 50.0
+        if "system-4" in mss_d2d_id:
+            params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 50.0
+            service_grid.minimum_service_angle = 50.0
+        else:
+            params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 5.0
+            # no need for limiting this for system 4
+            service_grid.minimum_service_angle = 5.0
+
+
         params.mss_d2d.sat_is_active_if.lat_long_inside_country.country_names = \
             service_grid.grid_in_zone.from_countries.country_names
         ###### Calculating margin from border so that satellite will be at
@@ -132,7 +142,6 @@ def generate_inputs():
 
         # big number to make it so that any visible satellite is ellegible
         service_grid.eligible_sats_margin_from_border = -2 * 1110
-        service_grid.minimum_service_angle = 50.0
 
         # Gerar nome do arquivo
         specific = get_specific_pattern(

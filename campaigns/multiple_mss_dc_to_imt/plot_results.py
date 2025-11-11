@@ -66,10 +66,16 @@ def linestyle_getter(results):
     """
     i = 3
     styles = ["solid", "dot", "dash", "dashdot"]
-    if f"_{CELL_RADIUS_SYS3_KM}exclusion" in results.output_directory:
-        i = 0
-    if f"_{CELL_RADIUS_SYS4_KM}exclusion" in results.output_directory:
+    if (
+        f"_br_{CELL_RADIUS_SYS3_KM}exclusion" in results.output_directory
+        or f"_ar_{CELL_RADIUS_SYS4_KM}exclusion" in results.output_directory
+    ):
         i = 1
+    if (
+        f"_ar_{CELL_RADIUS_SYS3_KM}exclusion" in results.output_directory
+        or f"_br_{CELL_RADIUS_SYS4_KM}exclusion" in results.output_directory
+    ):
+        i = 0
     return styles[i]
 
 
@@ -116,12 +122,15 @@ def compatible_patterns_ordered(s1, s2):
         rload = "LF = 10%; "
     elif "0.2load" in s1:
         rload = "LF = 20%; "
-
-    if "system-3.2110-2200MHz.525km" in s1:
+    sys3_name = "system-3.698-960MHz.525km"
+    sys4_name = "system-4.698-960MHz-block2.690km"
+    # sys3_name = "system-3.2110-2200MHz.525km"
+    # sys4_name = "system-4.2110-2200MHz.690km"
+    if sys3_name in s1:
         s1 = s1.replace(
-            "system-3.2110-2200MHz.525km", "system-4.2110-2200MHz.690km"
+            sys3_name, sys4_name
         ).replace(
-            "39.684", "10.96"
+            "39.684", "24.105"
         )
         if "to_imt_br" in s1:
             if s1.replace(
@@ -141,7 +150,10 @@ plots_to_save = []
 HTMLS_DIR = CAMPAIGN_DIR / "output" / "htmls"
 HTMLS_DIR.mkdir(exist_ok=True)
 
-fig = None
+fig = post_processor.get_plot_by_results_attribute_name("imt_dl_inr", plot_type="ccdf")
+aggregated_res = [
+    # (legend, aggr)
+]
 for i in range(len(ccdf_results)):
     for j in range(i+1, len(ccdf_results)):
         r = ccdf_results[i]
@@ -157,14 +169,16 @@ for i in range(len(ccdf_results)):
                 10**(np.array(r.imt_dl_inr)/10)
                 + 10**(np.array(r2.imt_dl_inr)/10)
             )
+            aggregated_res.append((legend, aggregated_inr))
             x, y = PostProcessor.ccdf_from(aggregated_inr, n_bins=None)
+            linestyle = linestyle_getter(r2)
             fig.add_trace(
                 go.Scatter(
                     x=x,
                     y=y,
                     mode="lines",
-                    name=f"{legend}",
-                    # line=dict(color=COLORS[linestyle_color[linestyle]], dash=linestyle)
+                    name=f"Aggregated {legend}",
+                    line=dict(dash=linestyle)
                 ),
             )
             # print()
@@ -227,3 +241,27 @@ for file, plot in plots_to_save:
     )
     plot.write_html(file=file, include_plotlyjs="cdn", auto_open=auto_open)
     # plot.show()
+
+percentiles = [0.99]
+print()
+print("=" * 60)
+print("Percentiles")
+for res in ccdf_results:
+    name = post_processor.get_results_possible_legends(res)[0]['legend']
+    inr_values = res.imt_dl_inr
+    if inr_values is None or len(inr_values) == 0:
+        print("Skipped one")
+        continue
+    print(f"{name}")
+    res = np.percentile(inr_values, percentiles, method='inverted_cdf')
+    print("\tpercentiles", percentiles)
+    print("\tres", res)
+
+print()
+print("=" * 60)
+print("Aggregated percentiles")
+for name, inr_values in aggregated_res:
+    print(f"{name}")
+    res = np.percentile(inr_values, percentiles, method='inverted_cdf')
+    print("\tpercentiles", percentiles)
+    print("\tres", res)
