@@ -22,7 +22,7 @@ attributes_to_plot = [
     # ("imt_dl_inr", "cdf"),
     # ("imt_ul_inr", "cdf"),
     ("imt_dl_inr", "ccdf"),
-    ("imt_ul_inr", "ccdf"),
+    # ("imt_ul_inr", "ccdf"),
 ]
 
 samples_for_ccdf = [attr[0] for attr in attributes_to_plot if attr[1] == "ccdf"]

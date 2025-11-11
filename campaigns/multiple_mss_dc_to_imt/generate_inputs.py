@@ -75,8 +75,8 @@ def generate_inputs():
         params.imt.interfered_with = True
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        params.imt.frequency = CENTER_FREQUENCY
-        params.mss_d2d.frequency = CENTER_FREQUENCY
+        params.imt.frequency = CENTER_FREQUENCY + params.imt.bandwidth / 2
+        params.mss_d2d.frequency = CENTER_FREQUENCY + params.mss_d2d.bandwidth / 2
 
         # Parameters used for P.619
         # WARNING: Remember to set the lut in propagation/Dataset!
