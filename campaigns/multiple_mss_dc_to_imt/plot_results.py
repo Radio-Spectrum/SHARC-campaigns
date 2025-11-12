@@ -32,15 +32,20 @@ attributes_to_plot = [
 samples_for_ccdf = [attr[0] for attr in attributes_to_plot if attr[1] == "ccdf"]
 samples_for_cdf = [attr[0] for attr in attributes_to_plot if attr[1] == "cdf"]
 
+def filter_fn(x):
+    # return "0.5load_" in x
+    # return "0.2load_" in x
+    return "0.1load_" in x
+
 ccdf_results = Results.load_many_from_dir(
     CAMPAIGN_DIR / "output",
-    # filter_fn=lambda x: "mss_d2d_to_eess" in x,
+    filter_fn=filter_fn,
     only_latest=True,
     only_samples=samples_for_ccdf)
 
 cdf_results = Results.load_many_from_dir(
     CAMPAIGN_DIR / "output",
-    # filter_fn=lambda x: "mss_d2d_to_eess" in x,
+    filter_fn=filter_fn,
     only_latest=True,
     only_samples=samples_for_cdf)
 
@@ -71,13 +76,25 @@ def linestyle_getter(results):
     i = 3
     styles = ["solid", "dot", "dash", "dashdot"]
     if (
-        f"_br_{CELL_RADIUS_SYS3_KM}exclusion" in results.output_directory
-        or f"_ar_{CELL_RADIUS_SYS4_KM}exclusion" in results.output_directory
+        (
+            "_ar_" in results.output_directory and
+            "system-4.698-960MHz-block2.690km" in results.output_directory
+        )
+        or (
+            "_br_" in results.output_directory and
+            "system-3.698-960MHz.525km" in results.output_directory
+        )
     ):
         i = 1
     if (
-        f"_ar_{CELL_RADIUS_SYS3_KM}exclusion" in results.output_directory
-        or f"_br_{CELL_RADIUS_SYS4_KM}exclusion" in results.output_directory
+        (
+            "_ar_" in results.output_directory and
+            "system-3.698-960MHz.525km" in results.output_directory
+        )
+        or (
+            "_br_" in results.output_directory and
+            "system-4.698-960MHz-block2.690km" in results.output_directory
+        )
     ):
         i = 0
     return styles[i]
@@ -126,6 +143,8 @@ def compatible_patterns_ordered(s1, s2):
         rload = "Aggregated; LF = 10%; "
     elif "0.2load" in s1:
         rload = "Aggregated; LF = 20%; "
+    elif "0.5load" in s1:
+        rload = "Aggregated; LF = 50%; "
     sys3_name = "system-3.698-960MHz.525km"
     sys4_name = "system-4.698-960MHz-block2.690km"
     # sys3_name = "system-3.2110-2200MHz.525km"
@@ -176,13 +195,30 @@ for i in range(len(ccdf_results)):
             calculate_percentile_for.append((legend, aggregated_inr))
             x, y = PostProcessor.ccdf_from(aggregated_inr, n_bins=None)
             linestyle = linestyle_getter(r2)
+            from plotly.colors import DEFAULT_PLOTLY_COLORS
+
+            color_i = 0
+            while True:
+                if color_i >= len(DEFAULT_PLOTLY_COLORS):
+                    color_i = 0
+                    break
+                some_has = False
+                for obj in fig.data:
+                    if obj.line.dash == linestyle and obj.line.color == DEFAULT_PLOTLY_COLORS[color_i]:
+                        some_has = True
+                        break
+                if not some_has:
+                    break
+                else:
+                    color_i += 1
+   
             fig.add_trace(
                 go.Scatter(
                     x=x,
                     y=y,
                     mode="lines",
                     name=f"{legend}",
-                    line=dict(dash=linestyle)
+                    line=dict(color=DEFAULT_PLOTLY_COLORS[color_i], dash=linestyle)
                 ),
             )
             # print()
