@@ -17,8 +17,12 @@ post_processor = PostProcessor()
 
 attributes_to_plot = [
     # ("imt_system_antenna_gain", "cdf"),
-    # ("imt_system_path_loss", "cdf"),
-    # ("system_imt_antenna_gain", "cdf"),
+    ("imt_system_path_loss", "cdf"),
+    ("imt_system_path_loss", "ccdf"),
+    ("system_imt_antenna_gain", "cdf"),
+    ("system_imt_antenna_gain", "ccdf"),
+    ("sys_to_imt_coupling_loss", "ccdf"),
+    ("sys_to_imt_coupling_loss", "cdf"),
     # ("imt_dl_inr", "cdf"),
     # ("imt_ul_inr", "cdf"),
     ("imt_dl_inr", "ccdf"),
@@ -92,7 +96,7 @@ for pars in product(*PARAMETERS):
 # ^: typing.List[Results]
 
 plots = post_processor.generate_ccdf_plots_from_results(
-    ccdf_results
+    ccdf_results, cutoff_percentage=0.001/2
 )
 
 post_processor.add_plots(plots)
@@ -119,9 +123,9 @@ def compatible_patterns(s1, s2):
 
 def compatible_patterns_ordered(s1, s2):
     if "0.1load" in s1:
-        rload = "LF = 10%; "
+        rload = "Aggregated; LF = 10%; "
     elif "0.2load" in s1:
-        rload = "LF = 20%; "
+        rload = "Aggregated; LF = 20%; "
     sys3_name = "system-3.698-960MHz.525km"
     sys4_name = "system-4.698-960MHz-block2.690km"
     # sys3_name = "system-3.2110-2200MHz.525km"
@@ -151,7 +155,7 @@ HTMLS_DIR = CAMPAIGN_DIR / "output" / "htmls"
 HTMLS_DIR.mkdir(exist_ok=True)
 
 fig = post_processor.get_plot_by_results_attribute_name("imt_dl_inr", plot_type="ccdf")
-aggregated_res = [
+calculate_percentile_for = [
     # (legend, aggr)
 ]
 for i in range(len(ccdf_results)):
@@ -169,7 +173,7 @@ for i in range(len(ccdf_results)):
                 10**(np.array(r.imt_dl_inr)/10)
                 + 10**(np.array(r2.imt_dl_inr)/10)
             )
-            aggregated_res.append((legend, aggregated_inr))
+            calculate_percentile_for.append((legend, aggregated_inr))
             x, y = PostProcessor.ccdf_from(aggregated_inr, n_bins=None)
             linestyle = linestyle_getter(r2)
             fig.add_trace(
@@ -177,7 +181,7 @@ for i in range(len(ccdf_results)):
                     x=x,
                     y=y,
                     mode="lines",
-                    name=f"Aggregated {legend}",
+                    name=f"{legend}",
                     line=dict(dash=linestyle)
                 ),
             )
@@ -197,6 +201,32 @@ for attr, plot_type in attributes_to_plot:
         print("Skipping", attr, plot_type)
         continue
     plots_to_save.append((file, plot))
+
+protection_criteria = -6
+perc_time = 0.001
+
+for attr in ["imt_dl_inr", "imt_ul_inr"]:
+    plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type="ccdf")
+    if plot is not None:
+        plot.add_vline(
+            protection_criteria,
+            line_dash="dash", annotation=dict(
+                text="-6dB Protection criteria",
+                font=dict(size=20),
+                xref="x",
+                yref="paper",
+                x=protection_criteria + 0.2,  # Offset for visibility
+                y=0.85
+            )
+        )
+        plot.add_hline(perc_time, line_dash="dash", annotation=dict(
+            text="Time Percentage: " + str(perc_time * 100) + "%",
+            xref="x", yref="y",
+            x=protection_criteria + 0.5, y=perc_time + 0.01,
+            font=dict(size=12, color="blue")
+        ))
+    else:
+        print(f"Warning: No plot found for attribute '{attr}'")
 
 for file, plot in plots_to_save:
     # Add plot outline and increase font size
@@ -242,26 +272,25 @@ for file, plot in plots_to_save:
     plot.write_html(file=file, include_plotlyjs="cdn", auto_open=auto_open)
     # plot.show()
 
-percentiles = [0.99]
-print()
-print("=" * 60)
-print("Percentiles")
+percentiles = [(1 - perc_time)*100]
+# percentiles = [99.9]
 for res in ccdf_results:
     name = post_processor.get_results_possible_legends(res)[0]['legend']
     inr_values = res.imt_dl_inr
     if inr_values is None or len(inr_values) == 0:
-        print("Skipped one")
+        print("Skipped one result for percentile calc")
         continue
-    print(f"{name}")
-    res = np.percentile(inr_values, percentiles, method='inverted_cdf')
-    print("\tpercentiles", percentiles)
-    print("\tres", res)
+    calculate_percentile_for.append((name, inr_values))
 
 print()
 print("=" * 60)
-print("Aggregated percentiles")
-for name, inr_values in aggregated_res:
+print("Percentiles")
+for name, inr_values in calculate_percentile_for:
     print(f"{name}")
     res = np.percentile(inr_values, percentiles, method='inverted_cdf')
-    print("\tpercentiles", percentiles)
-    print("\tres", res)
+    exceedance = res - protection_criteria
+    colsize = 6
+    print(f"\t{'Percentile':<10} | {'Exceeded':<10}")
+    for i in range(len(percentiles)):
+        print(f"\t{percentiles[i]:<10}", end=" | ")
+        print(f"{round(exceedance[i], 5):<10}")

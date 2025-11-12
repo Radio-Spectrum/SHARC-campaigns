@@ -115,14 +115,9 @@ def generate_inputs():
             "LAT_LONG_INSIDE_COUNTRY",
         ]
         # TODO: check this
+        params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 5.0
         if "system-4" in mss_d2d_id:
-            params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 50.0
             service_grid.minimum_service_angle = 50.0
-        else:
-            params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 5.0
-            # no need for limiting this for system 4
-            service_grid.minimum_service_angle = 5.0
-
 
         params.mss_d2d.sat_is_active_if.lat_long_inside_country.country_names = \
             service_grid.grid_in_zone.from_countries.country_names

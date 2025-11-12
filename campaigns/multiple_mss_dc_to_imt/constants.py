@@ -52,15 +52,15 @@ IMT_LINKS = [
     "downlink",
     # "uplink"
 ]
-MSS_D2D_LOAD_FACTOR = [0.1, 0.2]
+MSS_D2D_LOAD_FACTOR = [0.5, 0.2, 0.1]
 EXCLUSION_ZONE_SYS4_MARGIN_KM = [
-    CELL_RADIUS_SYS4_KM,
+    40,
     # rounding to get rid of weird precision errors
     # round(2 * CELL_RADIUS_SYS4_KM, 1),
     # round(3 * CELL_RADIUS_SYS4_KM, 1),
 ]
 EXCLUSION_ZONE_SYS3_MARGIN_KM = [
-    CELL_RADIUS_SYS3_KM,
+    40,
     # round(2 * CELL_RADIUS_SYS3_KM, 1),
     # round(3 * CELL_RADIUS_SYS3_KM, 1),
 ]
