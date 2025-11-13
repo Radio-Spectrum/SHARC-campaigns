@@ -77,22 +77,22 @@ def linestyle_getter(results):
     styles = ["solid", "dot", "dash", "dashdot"]
     if (
         (
-            "_ar_" in results.output_directory and
+            "_fr_" in results.output_directory and
             "system-4.698-960MHz-block2.690km" in results.output_directory
         )
         or (
-            "_br_" in results.output_directory and
+            "_de_" in results.output_directory and
             "system-3.698-960MHz.525km" in results.output_directory
         )
     ):
         i = 1
     if (
         (
-            "_ar_" in results.output_directory and
+            "_fr_" in results.output_directory and
             "system-3.698-960MHz.525km" in results.output_directory
         )
         or (
-            "_br_" in results.output_directory and
+            "_de_" in results.output_directory and
             "system-4.698-960MHz-block2.690km" in results.output_directory
         )
     ):

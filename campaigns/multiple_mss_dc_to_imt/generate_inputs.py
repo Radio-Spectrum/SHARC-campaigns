@@ -81,7 +81,7 @@ def generate_inputs():
         # Parameters used for P.619
         # WARNING: Remember to set the lut in propagation/Dataset!
         params.mss_d2d.channel_model = "P619"
-        params.mss_d2d.param_p619.earth_station_lat_deg = -25.5549751
+        params.mss_d2d.param_p619.earth_station_lat_deg = 49.4901
         params.mss_d2d.param_p619.earth_station_alt_m = 200
         params.mss_d2d.param_p619.mean_clutter_height = "low"
         params.mss_d2d.param_p619.below_rooftop = 0
@@ -93,9 +93,9 @@ def generate_inputs():
         params.mss_d2d.beams_load_factor = mss_d2d_lf
 
         # Geometry
-        # International Friendship Bridge
-        center_lat = -25.5549751
-        center_lon = -54.5746686
+        # Luxemburg
+        center_lat = 49.4901
+        center_lon = 6.1502
         params.imt.topology.central_latitude = center_lat
         params.imt.topology.central_longitude = center_lon
         params.imt.topology.central_altitude = 200

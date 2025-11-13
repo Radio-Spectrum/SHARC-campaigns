@@ -67,8 +67,8 @@ EXCLUSION_ZONE_SYS3_MARGIN_KM = [
 EXCLUSION_ZONE_MARGIN_KM = list(set(EXCLUSION_ZONE_SYS3_MARGIN_KM + EXCLUSION_ZONE_SYS4_MARGIN_KM))
 
 COVERAGE_COUNTRIES = [
-    "Brazil",
-    "Argentina",
+    "Germany",
+    "France",
 ]
 
 PARAMETERS = [
@@ -92,15 +92,15 @@ def skip_parameters_combination(
         if exclusion_zone_margin_km not in EXCLUSION_ZONE_SYS3_MARGIN_KM:
             # only generate parameter for sys3 correct margin border values
             return True
-        # if coverage_country != "Brazil":
-        #     # only generate parameter for sys3 covering Brazil
+        # if coverage_country != "Germany":
+        #     # only generate parameter for sys3 covering Germany
         #     return True
     elif "system-4" in sys_id:
         if exclusion_zone_margin_km not in EXCLUSION_ZONE_SYS4_MARGIN_KM:
             # only generate parameter for sys4 correct margin border values
             return True
-        # if coverage_country != "Argentina":
-        #     # only generate parameter for sys4 covering Argentina
+        # if coverage_country != "France":
+        #     # only generate parameter for sys4 covering France
         #     return True
     else:
         raise NotImplementedError()
@@ -109,10 +109,10 @@ def skip_parameters_combination(
 
 
 def get_country_short(c: str):
-    if c == "Brazil":
-        return "br"
-    if c == "Argentina":
-        return "ar"
+    if c == "Germany":
+        return "de"
+    if c == "France":
+        return "fr"
 
     raise NotImplementedError()
 
