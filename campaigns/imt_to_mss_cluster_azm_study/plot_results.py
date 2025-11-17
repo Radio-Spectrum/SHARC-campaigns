@@ -21,7 +21,8 @@ post_processor = PostProcessor()
 # Samples para CCDF
 # ========================
 samples_for_ccdf = [
-    "system_dl_interf_power_per_mhz"
+    "system_dl_interf_power_per_mhz",
+    "system_inr",
 ]
 
 # ========================
@@ -93,7 +94,8 @@ def ensure_readable_name(results):
     )
 
     # extrai só a última parte (nome da pasta), compatível Windows/Linux
-    name = str(name).replace("\\", "/").split("/")[-1]
+    name = str(name).replace("\\", "/").split("/")[-1].split("mss")[-1]
+    name = (f"mss" + name).split("_2025")[0]
 
     results.readable_name = name
 
@@ -210,6 +212,7 @@ attributes_to_plot = [
     ("system_dl_interf_power_per_mhz", "ccdf"),
     ("system_imt_antenna_gain", "cdf"),
     ("system_inr", "cdf"),
+    ("system_inr", "ccdf"),
 ]
 
 HTMLS_DIR = CAMPAIGN_DIR / "output" / "htmls"
