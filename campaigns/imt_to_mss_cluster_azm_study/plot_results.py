@@ -39,16 +39,16 @@ samples_for_cdf = [
 ]
 
 # ========================
-# Carregar resultados (Inalterado)
+# Carregar resultados (Caminho alterado para "output/pos_0_degree")
 # ========================
 ccdf_results = Results.load_many_from_dir(
-    CAMPAIGN_DIR / "output/both_ends",
+    CAMPAIGN_DIR / "output/pos_0_degree",
     only_latest=True,
     only_samples=samples_for_ccdf
 )
 
 cdf_results = Results.load_many_from_dir(
-    CAMPAIGN_DIR / "output/both_ends",
+    CAMPAIGN_DIR / "output/pos_0_degree",
     only_latest=True,
     only_samples=samples_for_cdf
 )
@@ -204,7 +204,7 @@ CRITERIA_LINES = {
     "Protection -6": {
         "x_value": -6,
         "y_ccdf": 0.0003,
-        "color": "green",
+        "color": "purple",
         "legend": "Protection Criteria -6 dB @ 0.03%"
     }
 }
@@ -268,7 +268,7 @@ def add_protection_lines(plot, attr, plot_type):
             plot_type
         )
 
-    # Condição 2: Linhas -7 dB e -10.5 dB (para system_dl_interf_power_per_mhz CCDF e system_inr CDF/CCDF)
+    # Condição 2: Linhas -7 dB e -10.5 dB e -6 dB (para system_dl_interf_power_per_mhz CCDF e system_inr CDF/CCDF)
     if (attr == "system_dl_interf_power_per_mhz" and plot_type == "ccdf") or \
        (attr == "system_inr"):
 
@@ -294,6 +294,17 @@ def add_protection_lines(plot, attr, plot_type):
             plot_type
         )
 
+        # Par 3: -6 dB @ 0.03%
+        crit3 = CRITERIA_LINES["Protection -6"]
+        add_protection_criteria_line(
+            plot,
+            crit3["x_value"],
+            crit3["y_ccdf"],
+            crit3["color"],
+            crit3["legend"],
+            plot_type
+        )
+
 
 # ========================
 # Exportar plots (HTML + PNG)
@@ -315,6 +326,21 @@ PNG_DIR = CAMPAIGN_DIR / "output" / "png"
 PNG_DIR.mkdir(parents=True, exist_ok=True)
 
 print(f"Saving plots in {HTMLS_DIR} and {PNG_DIR}")
+
+# =================================================================
+# DEFINIÇÃO DOS TICKS CUSTOMIZADOS SEM DELIMITADORES $$
+# =================================================================
+# Valores de probabilidade para os ticks principais (1, 0.1, 0.01, 0.001, 0.0001)
+major_tickvals = [1e0, 1e-1, 1e-2, 1e-3, 1e-4]
+# Rótulos em formato string para que o Plotly renderize superscrito
+major_ticktext = [
+    '10^0',     # Sem $$
+    '10^-1',    # Sem $$
+    '10^-2',    # Sem $$
+    '10^-3',    # Sem $$
+    '10^-4'     # Sem $$
+]
+# =================================================================
 
 for attr, plot_type in attributes_to_plot:
     file_html = HTMLS_DIR / f"{attr}_{plot_type}.html"
@@ -344,12 +370,15 @@ for attr, plot_type in attributes_to_plot:
         tickfont=dict(size=16),
     )
 
-    # 🎯 ALTERAÇÃO FEITA AQUI: Eixo Y em escala logarítmica (base 10)
+    # 🎯 Eixo Y em escala logarítmica (Base 10) com rótulos customizados limpos
     plot.update_yaxes(
         linewidth=1, linecolor='black', mirror=True,
         ticks='inside', showline=True, gridcolor="#DCDCDC",
         gridwidth=1.5,
-        type='log'  # <--- Adicionado para escala logarítmica
+        type='log',                 # Escala Logarítmica
+        tickmode='array',           # Define para usar ticks customizados
+        tickvals=major_tickvals,    # Valores de 1 a 1e-4
+        ticktext=major_ticktext     # Rótulos sem os delimitadores $$
     )
 
     plot.update_layout(
