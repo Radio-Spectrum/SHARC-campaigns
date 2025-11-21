@@ -1,0 +1,16 @@
+# Ignore CSV files (simulation results)
+*.csv
+
+# Ignore YAML parameter files (generated inputs)
+*.yaml
+*.yml
+
+# Ignore input and output directories if they exist locally
+input/
+output/
+
+# Ignore plot outputs (optional - you may want to keep some plots)
+plot/*.png
+plot/*.pdf
+plot/*.svg
+

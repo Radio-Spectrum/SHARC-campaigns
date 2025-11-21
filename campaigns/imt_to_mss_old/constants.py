@@ -1,15 +1,15 @@
 from campaigns.utils.constants import SHARC_SIM_ROOT_DIR, ROOT_DIR
 import typing
 
-CAMPAIGN_NAME = "imt_to_mss_cluster_azm_study"
+CAMPAIGN_NAME = "imt_to_mss"
 CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 
-#CAMPAIGN_DIR = ROOT_DIR / CAMPAIGN_STR
-CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
+CAMPAIGN_DIR = ROOT_DIR / CAMPAIGN_STR
+#CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 INPUTS_DIR = CAMPAIGN_DIR / "input/"
 
 SYS_ID_TO_READABLE = {
-    "mss.7300MHz.hubType-18": "Hub Type 18 @7300MHz",
+    "mss.7300MHz.hubType-16": "Hub Type 16 @7300MHz",
 }
 
 IMT_ID_TO_READABLE = {

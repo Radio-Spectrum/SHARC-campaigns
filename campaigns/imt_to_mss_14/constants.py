@@ -30,15 +30,18 @@ SHARC_PATH = _get_sharc_path()
 MY_CAMPAIGNS_PATH = Path(__file__).parent.absolute()
 
 # Update CAMPAIGN_NAME to match folder name
-CAMPAIGN_NAME = "imt_to_mss"
+CAMPAIGN_NAME = "imt_to_mss_14"
 CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 
 #CAMPAIGN_DIR = ROOT_DIR / CAMPAIGN_STR
 CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 INPUTS_DIR = CAMPAIGN_DIR / "input/"
 
+# Output directory in campaigns repository (not in simulator directory)
+OUTPUT_DIR = ROOT_DIR / CAMPAIGN_STR / "output/"
+
 SYS_ID_TO_READABLE = {
-    "mss.7300MHz.hubType-18": "Hub Type 18 @7300MHz",
+    "mss.7300MHz.hubType-14": "Hub Type 14 @7300MHz",
 }
 
 IMT_ID_TO_READABLE = {
@@ -68,5 +71,6 @@ if __name__ == "__main__":
     print("CAMPAIGN_STR", CAMPAIGN_STR)
     print("CAMPAIGN_DIR", CAMPAIGN_DIR)
     print("INPUTS_DIR", INPUTS_DIR)
+    print("OUTPUT_DIR", OUTPUT_DIR)
     print("SHARC_PATH", SHARC_PATH)
     print("MY_CAMPAIGNS_PATH", MY_CAMPAIGNS_PATH)

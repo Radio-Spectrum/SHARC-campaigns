@@ -3,6 +3,17 @@ logs/
 output/
 output*/
 
+# Campaign generated files
+# Ignore CSV files (simulation results) in campaign output directories
+campaigns/**/output/**/*.csv
+# Ignore generated YAML parameter files (but keep template/config YAMLs)
+campaigns/**/input/param_*.yaml
+# Ignore plot outputs
+campaigns/**/plot/*.png
+campaigns/**/plot/*.pdf
+campaigns/**/plot/*.svg
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

@@ -2,20 +2,20 @@ from itertools import product
 from pathlib import Path
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.imt_to_mss_cluster_azm_study.constants import CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR
+from campaigns.imt_to_mss.constants import CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR
 
 SEED = 83
 
 # Configurações
-CLUTTER_TYPES = ['one_end', 'both_ends']
+CLUTTER_TYPES = ['both_ends']
 ALLOWED_CLUTTER_TYPES = {'one_end', 'both_ends'}
 
 general = {
     "seed": SEED,
-    "num_snapshots": 10,
+    "num_snapshots": 100000,
     "overwrite_output": False,
     "output_dir": f"{CAMPAIGN_STR}/output/",
-    "output_dir_prefix": "study-azm-cluster",
+    "output_dir_prefix": "to-update",
     "system": "SINGLE_EARTH_STATION",
     "imt_link": "UPLINK",
 }
@@ -65,21 +65,21 @@ def generate_inputs():
 
     # Parâmetros da campanha
     Ro = 1600
-    R_values = [Ro + 1000, Ro + 2000, Ro + 5000 ]
+    y_values = [Ro + 1000, Ro + 2000, Ro + 5000, Ro + 10000 ]
     load_probabilities = [50]
-    p_modes = ["RANDOM_CENARIO"]  # 
+    p_modes = [0.2, 20,"RANDOM_GLOBAL"]  # 
     total = 0
 
-    for imt_link in ["DOWNLINK"]:
+    for imt_link in ["UPLINK", "DOWNLINK"]:
         general["imt_link"] = imt_link
         imt_link_tag = imt_link.lower()
 
-        for imt_id in ["imt.7300MHz.macrocell"]:
+        for imt_id in ["imt.7300MHz.macrocell","imt.7300MHz.microcell"]:
             for mss_id in ["mss.7300MHz.hubType-18"]:
-                for R, load_pct, p_mode, clutter_type in product(
-                    R_values, load_probabilities, p_modes, clutter_types
+                for y, load_pct, p_mode, clutter_type in product(
+                    y_values, load_probabilities, p_modes, clutter_types
                 ):
-                    print(f"Gerando: {imt_link} {imt_id}→{mss_id}, R={R}, load={load_pct}%, p={p_mode}, clutter={clutter_type}")
+                    print(f"Gerando: {imt_link} {imt_id}→{mss_id}, y={y}, load={load_pct}%, p={p_mode}, clutter={clutter_type}")
                     total += 1
 
                     # Construir objeto de parâmetros
@@ -98,16 +98,9 @@ def generate_inputs():
                     params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
                     # Posição da Estação Terrestre
-                    #params.single_earth_station.geometry.location.type = "FIXED"
-                    #params.single_earth_station.geometry.location.fixed.x = 0
-                    #params.single_earth_station.geometry.location.fixed.y = y
-                   
-                    params.single_earth_station.geometry.location.type = "UNIFORM_DIST"
-                    params.single_earth_station.geometry.location.uniform_dist.min_dist_to_center = R
-                    params.single_earth_station.geometry.location.uniform_dist.max_dist_to_center = R
-
-                    # Azimute do cluster
-                    params.single_earth_station.geometry.azimuth.type = "POINTING_AT_IMT_CENTER"
+                    params.single_earth_station.geometry.location.type = "FIXED"
+                    params.single_earth_station.geometry.location.fixed.x = 0
+                    params.single_earth_station.geometry.location.fixed.y = y
 
                     # Carga da BS
                     params.imt.bs.load_probability = load_pct / 100.0
@@ -120,7 +113,7 @@ def generate_inputs():
 
                     # Gerar nome do arquivo
                     specific = (
-                        f"{imt_link_tag}_{imt_id}_{mss_id}_R{R}_load{load_pct}"
+                        f"{imt_link_tag}_{imt_id}_{mss_id}_y{y}_load{load_pct}"
                         f"_p-{p_tag}_clt-{clutter_type}"
                     )
                     specific = _sanitize_for_filename(specific)

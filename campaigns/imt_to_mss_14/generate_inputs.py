@@ -2,7 +2,7 @@ from itertools import product
 from pathlib import Path
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.imt_to_mss.constants import CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR
+from campaigns.imt_to_mss_14.constants import CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR
 
 SEED = 83
 
@@ -14,7 +14,7 @@ general = {
     "seed": SEED,
     "num_snapshots": 10,
     "overwrite_output": False,
-    "output_dir": f"{CAMPAIGN_STR}/output/",
+    "output_dir": str(OUTPUT_DIR),  # Use absolute path to campaigns repository output directory
     "output_dir_prefix": "study-azm-cluster",
     "system": "SINGLE_EARTH_STATION",
     "imt_link": "UPLINK",
@@ -99,18 +99,25 @@ def generate_inputs():
     Ro = 1600
     R_values = [Ro + 1000, Ro + 2000, Ro + 5000 ]
     load_probabilities = [50]
-    p_modes = ["RANDOM_CENARIO"] 
+    p_modes = ["RANDOM_CENARIO"]
+    
+    # Earth Station position parameters
+    use_fixed_options = [True, False]  # Iterate between FIXED and UNIFORM_DIST
+    x_positions = [1, -1]  # Multipliers: 1 for x=R, -1 for x=-R
+    heights = [5, 40]  # Heights in meters
 
     for imt_link in ["DOWNLINK"]:
         general["imt_link"] = imt_link
         imt_link_tag = _shorten_link_tag(imt_link)  # Use shortened link tag
 
         for imt_id in ["imt.7300MHz.macrocell"]:
-            for mss_id in ["mss.7300MHz.hubType-18"]:
-                for R, load_pct, p_mode, clutter_type in product(
-                    R_values, load_probabilities, p_modes, clutter_types
+            for mss_id in ["mss.7300MHz.hubType-14"]:
+                for R, load_pct, p_mode, clutter_type, use_fixed, x_mult, height in product(
+                    R_values, load_probabilities, p_modes, clutter_types, use_fixed_options, x_positions, heights
                 ):
-                    print(f"Generating: {imt_link} {imt_id}→{mss_id}, R={R}, load={load_pct}%, p={p_mode}, clutter={clutter_type}")
+                    x_pos = x_mult * R
+                    location_type = "FIXED" if use_fixed else "UNIFORM"
+                    print(f"Generating: {imt_link} {imt_id}→{mss_id}, R={R}, {location_type}, x={x_pos}, h={height}m, load={load_pct}%, p={p_mode}, clutter={clutter_type}")
                     total += 1
 
                     # Build parameters object
@@ -127,15 +134,30 @@ def generate_inputs():
                     params.general.enable_cochannel = True
                     params.imt.interfered_with = False
                     params.imt.imt_dl_intra_sinr_calculation_disabled = True
+                    params.single_earth_station.geometry.height = height
 
                     # Earth Station Position
-                    #params.single_earth_station.geometry.location.type = "FIXED"
-                    #params.single_earth_station.geometry.location.fixed.x = y
-                    #params.single_earth_station.geometry.location.fixed.y = 0
-                   
-                    params.single_earth_station.geometry.location.type = "UNIFORM_DIST"
-                    params.single_earth_station.geometry.location.uniform_dist.min_dist_to_center = R
-                    params.single_earth_station.geometry.location.uniform_dist.max_dist_to_center = R
+                    if use_fixed:
+                        # Use FIXED position
+                        params.single_earth_station.geometry.location.type = "FIXED"
+                        params.single_earth_station.geometry.location.fixed.x = x_pos
+                        params.single_earth_station.geometry.location.fixed.y = 0
+                       
+                        
+                        # UNIFORM_DIST must be disabled when using FIXED
+                        # params.single_earth_station.geometry.location.type = "UNIFORM_DIST"
+                        # params.single_earth_station.geometry.location.uniform_dist.min_dist_to_center = R
+                        # params.single_earth_station.geometry.location.uniform_dist.max_dist_to_center = R
+                    else:
+                        # Use UNIFORM_DIST position
+                        # params.single_earth_station.geometry.location.type = "FIXED"
+                        # params.single_earth_station.geometry.location.fixed.x = x_pos
+                        # params.single_earth_station.geometry.location.fixed.y = 0
+                
+                        
+                        params.single_earth_station.geometry.location.type = "UNIFORM_DIST"
+                        params.single_earth_station.geometry.location.uniform_dist.min_dist_to_center = R
+                        params.single_earth_station.geometry.location.uniform_dist.max_dist_to_center = R
 
                     # Cluster azimuth
                     params.single_earth_station.geometry.azimuth.type = "POINTING_AT_IMT_CENTER"
@@ -148,16 +170,24 @@ def generate_inputs():
                     params.single_earth_station.param_p452.percentage_p = p_mode
                     params.single_earth_station.param_p452.clutter_loss = True
                     params.single_earth_station.param_p452.clutter_type = clutter_type
+                    params.single_earth_station.param_p452.Hre = height
 
                     # Generate file name - use shortened IDs to avoid Windows path length issues
                     imt_short = _shorten_imt_id(imt_id)
                     mss_short = _shorten_mss_id(mss_id)  # Returns empty string
                     
-                    # Build filename parts - only include mss_short if not empty
+                    # Build filename parts - include position info
                     filename_parts = [imt_link_tag, imt_short]
                     if mss_short:  # Only add if not empty
                         filename_parts.append(mss_short)
-                    filename_parts.extend([f"R{R}", f"l{load_pct}", f"p-{p_tag}", f"clt-{clutter_type}"])
+                    
+                    if use_fixed:
+                        # Add position info: x position and height
+                        x_tag = f"x{x_pos}" if x_pos >= 0 else f"xneg{abs(x_pos)}"
+                        filename_parts.extend([f"R{R}", x_tag, f"h{height}", f"l{load_pct}", f"p-{p_tag}", f"clt-{clutter_type}"])
+                    else:
+                        # UNIFORM_DIST - add UNIFORM tag, R and height
+                        filename_parts.extend([f"R{R}", "UNIFORM", f"h{height}", f"l{load_pct}", f"p-{p_tag}", f"clt-{clutter_type}"])
                     
                     specific = "_".join(filename_parts)
                     specific = _sanitize_for_filename(specific)
