@@ -3,19 +3,20 @@ from pathlib import Path
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
 from campaigns.imt_to_mss_cluster_azm_study.constants import CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR
+import math 
 
 SEED = 83
 
 # Configurações
-CLUTTER_TYPES = ['one_end', 'both_ends']
-ALLOWED_CLUTTER_TYPES = {'one_end', 'both_ends'}
+CLUTTER_TYPES = [ 'both_ends']
+ALLOWED_CLUTTER_TYPES = { 'both_ends'}
 
 general = {
     "seed": SEED,
-    "num_snapshots": 10,
+    "num_snapshots": 100000,
     "overwrite_output": False,
     "output_dir": f"{CAMPAIGN_STR}/output/",
-    "output_dir_prefix": "study-azm-cluster",
+    "output_dir_prefix": "study-pos-fixed", 
     "system": "SINGLE_EARTH_STATION",
     "imt_link": "UPLINK",
 }
@@ -43,15 +44,25 @@ def _sanitize_for_filename(s: str) -> str:
 def _p_mode_tag(p):
     """
     Gera tag simplificada para nome de arquivo:
-      - 0.2 → '0.2'
-      - 20 → '20'
-      - Strings permanecem iguais
     """
     if isinstance(p, (int, float)):
-        # Mantém o formato original sem conversões
-        return f"{p}".replace(".", "_")  # Usa _ para evitar problemas com pontos em nomes de arquivo
+        # Usa _ para evitar problemas com pontos em nomes de arquivo
+        return f"{p}".replace(".", "_")
     return str(p).lower()
 
+def calculate_coords(R, angle_deg):
+    """
+    Calcula x e y em coordenadas cartesianas a partir de R e Azimute (Norte=0°, Leste=90°).
+    O centro do cluster IMT é (0, 0).
+    """
+    angle_rad = math.radians(90 - angle_deg)
+    
+    x = R * math.cos(angle_rad)
+    y = R * math.sin(angle_rad)
+    x = round(x, 3)
+    y = round(y, 3)
+    
+    return x, y
 
 
 def generate_inputs():
@@ -65,9 +76,12 @@ def generate_inputs():
 
     # Parâmetros da campanha
     Ro = 1600
-    R_values = [Ro + 1000, Ro + 2000, Ro + 5000 ]
+    R_values = [Ro + 1500, Ro + 2000, Ro + 5000 ]
     load_probabilities = [50]
-    p_modes = ["RANDOM_CENARIO"]  # 
+    p_modes = ["RANDOM_CENARIO"]
+    
+    azimuth_pos_values = [0, 90, 180] 
+    
     total = 0
 
     for imt_link in ["DOWNLINK"]:
@@ -76,10 +90,16 @@ def generate_inputs():
 
         for imt_id in ["imt.7300MHz.macrocell"]:
             for mss_id in ["mss.7300MHz.hubType-18"]:
-                for R, load_pct, p_mode, clutter_type in product(
-                    R_values, load_probabilities, p_modes, clutter_types
+                
+                for R, load_pct, p_mode, clutter_type, angle_deg in product(
+                    R_values, load_probabilities, p_modes, clutter_types, azimuth_pos_values
                 ):
-                    print(f"Gerando: {imt_link} {imt_id}→{mss_id}, R={R}, load={load_pct}%, p={p_mode}, clutter={clutter_type}")
+                    x, y = calculate_coords(R, angle_deg)
+                    
+                    print(
+                        f"Gerando: {imt_link} {imt_id}→{mss_id}, R={R}, load={load_pct}%, p={p_mode}, "
+                        f"clutter={clutter_type}, Posição Fixa: {angle_deg}° (x={x}, y={y})"
+                    )
                     total += 1
 
                     # Construir objeto de parâmetros
@@ -97,16 +117,11 @@ def generate_inputs():
                     params.imt.interfered_with = False
                     params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-                    # Posição da Estação Terrestre
-                    #params.single_earth_station.geometry.location.type = "FIXED"
-                    #params.single_earth_station.geometry.location.fixed.x = 0
-                    #params.single_earth_station.geometry.location.fixed.y = y
+                    params.single_earth_station.geometry.location.type = "FIXED"
+                    params.single_earth_station.geometry.location.fixed.x = x
+                    params.single_earth_station.geometry.location.fixed.y = y
                    
-                    params.single_earth_station.geometry.location.type = "UNIFORM_DIST"
-                    params.single_earth_station.geometry.location.uniform_dist.min_dist_to_center = R
-                    params.single_earth_station.geometry.location.uniform_dist.max_dist_to_center = R
-
-                    # Azimute do cluster
+                    # Azimute do cluster: Mantém o apontamento para o centro do cluster IMT (original)
                     params.single_earth_station.geometry.azimuth.type = "POINTING_AT_IMT_CENTER"
 
                     # Carga da BS
@@ -121,7 +136,7 @@ def generate_inputs():
                     # Gerar nome do arquivo
                     specific = (
                         f"{imt_link_tag}_{imt_id}_{mss_id}_R{R}_load{load_pct}"
-                        f"_p-{p_tag}_clt-{clutter_type}"
+                        f"_p-{p_tag}_clt-{clutter_type}_pos{angle_deg}" 
                     )
                     specific = _sanitize_for_filename(specific)
 
