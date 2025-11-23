@@ -12,7 +12,7 @@ ALLOWED_CLUTTER_TYPES = {'one_end', 'both_ends'}
 
 general = {
     "seed": SEED,
-    "num_snapshots": 10,
+    "num_snapshots": 100000,
     "overwrite_output": False,
     "output_dir": str(OUTPUT_DIR),  # Use absolute path to campaigns repository output directory
     "output_dir_prefix": "study-azm-cluster",
@@ -97,7 +97,7 @@ def generate_inputs():
 
     # Campaign parameters
     Ro = 1600
-    R_values = [Ro + 1000, Ro + 2000, Ro + 5000 ]
+    R_values = [Ro + 30000, Ro + 35000, Ro + 40000, Ro + 45000, Ro + 50000]
     load_probabilities = [50]
     p_modes = ["RANDOM_CENARIO"]
     

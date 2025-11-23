@@ -458,7 +458,8 @@ def plot_ccdf_inr(
 
 if __name__ == "__main__":
     import sys
-    
+    height = [5, 40]
+    distance = [30000, 35000]
     # ===================== CONFIGURATION =====================
     # Configure which curves to plot
     # Format: (R, x_pos, height, clutter, location_type, custom_label)
@@ -470,16 +471,24 @@ if __name__ == "__main__":
     #   - custom_label: Custom name for this curve (optional, None uses auto-generated label)
     curves_to_plot = [
         # Example 1: Compare FIXED vs UNIFORM for R=3600, height=40m, both_ends
-          (3600, None, 40, "both_ends", "FIXED", "FIXED, h=40m"),
-          (3600, None, 40, "both_ends", "UNIFORM", "UNIFORM, h=40m"),
+          #(1600 + 2000, None, 40, "both_ends", "FIXED", "FIXED, h=40m, Distance = 2Km"),
+          #(1600 + 2000, None, 40, "both_ends", "UNIFORM", "UNIFORM, h=40m, Distance = 2Km"),
         
         # Example 2: Compare different heights
-        # (2600, 2600, 5, "both_ends", "FIXED", "Low height (5m)"),
-        # (2600, 2600, 40, "both_ends", "FIXED", "High height (40m)"),
+         # (2600, 2600, 5, "both_ends", "FIXED", "Low height (5m)"),
+         # (2600, 2600, 40, "both_ends", "FIXED", "High height (40m)"),
         
         # Example 3: Compare x positions
         # (3600, 3600, 40, "both_ends", "FIXED", "x = +R"),
         # (3600, -3600, 40, "both_ends", "FIXED", "x = -R"),
+
+         #(1600 + 30000, None, 45, "both_ends", "UNIFORM", "UNIFORM, h=40m, Distance = 30Km"),
+         (1600 + distance[0], None, height[0], "both_ends", "UNIFORM", f"UNIFORM, h={height[0]}m, Distance = {distance[0]/1000}Km"),
+         (1600 + distance[1], None, height[0], "both_ends", "UNIFORM", f"UNIFORM, h={height[0]}m, Distance = {distance[1]/1000}Km"),
+         (1600 + distance[0], None, height[1], "both_ends", "UNIFORM", f"UNIFORM, h={height[1]}m, Distance = {distance[0]/1000}Km"),
+         (1600 + distance[1], None, height[1], "both_ends", "UNIFORM", f"UNIFORM, h={height[1]}m, Distance = {distance[1]/1000}Km")
+         #(1600 + 45000, None, 40, "both_ends", "UNIFORM", "UNIFORM, h=40m, Distance = 45Km"),
+         #(1600 + 50000, None, 40, "both_ends", "UNIFORM", "UNIFORM, h=40m, Distance = 50Km"),
         
         # Leave empty [] to plot all curves
     ]
