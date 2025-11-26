@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     mss_id = args.mss[0]
 
-    if mss_id == "3.1":
+    if mss_id == "system-3.2110-2200MHz.525km":
         orbit_altitude_km = 525
     else:
         orbit_altitude_km = 340
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     attributes_to_plot = [
         "imt_system_antenna_gain",
         "system_imt_antenna_gain",
-        "sys_to_imt_coupling_loss",
+        "system_imt_antenna_gain_adjacent",
         "imt_system_path_loss",
         "imt_dl_pfd_external",
         "imt_dl_pfd_external_aggregated",
@@ -115,7 +115,7 @@ if __name__ == "__main__":
     print(f"INR Protection Criteria: {inr_protection_criteria} dB")
     print(f"System3 - altitude {orbit_altitude_km}km")
     print("Altitude, IMT Link, Margin, Load, Percentile, Exceedance (dB)")
-    percentiles = [99.5, 99.9]
+    percentiles = [50.0, 75.0, 99.5, 99.9]
     for res in all_results:
         pattern = re.compile(
             r".*/output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_([ud]l)_"
@@ -130,18 +130,18 @@ if __name__ == "__main__":
         if hasattr(res, "imt_ul_inr") and link_type == "ul":
             inr_values = res.imt_ul_inr
             if len(inr_values) == 0:
-                print(f"No UL INR values for border={border_km}km, load={load_pct}%, link_type={link_type}")
+                print(f"No UL INR values for border={border_km}km, load={100 * load_pct:.2f}%, link_type={link_type}")
                 continue
 
         elif hasattr(res, "imt_dl_inr") and link_type == "dl":
             inr_values = res.imt_dl_inr
             if len(inr_values) == 0:
-                print(f"No DL INR values for border={border_km}km, load={load_pct}, link_type={link_type}")
+                print(f"No DL INR values for border={border_km}km, load={100 * float(load_pct):.1f}%, link_type={link_type}")
                 continue
 
-        percentile_values = np.percentile(inr_values, percentiles)
+        percentile_values = np.percentile(inr_values, percentiles, method='inverted_cdf')
         for i, p in enumerate(percentiles):
-            print(f"{orbit_altitude_km}km, {link_type.upper()}, {border_km}km, {float(load_pct)}%, p{p}, {np.round(percentile_values[i] - inr_protection_criteria, 2)}")
+            print(f"{orbit_altitude_km}km, {link_type.upper()}, {border_km}km, {100 * float(load_pct):.1f}%, p{p}, {np.round(percentile_values[i] - inr_protection_criteria, 2)}")
 
     # If set to True the plots will be opened in the browser automatically
     auto_open = False
@@ -155,6 +155,9 @@ if __name__ == "__main__":
     elif args.plot_type == "ccdf":
         plots = post_processor.generate_ccdf_plots_from_results(
             all_results,
+            n_bins=200,
+            cutoff_percentage=0.0005
+
         )
     else:
         raise ValueError(f"Unknown plot type: {args.plot_type}. Choose 'cdf' or 'ccdf'.")
@@ -208,6 +211,9 @@ if __name__ == "__main__":
 
     for attr in attributes_to_plot:
         plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=args.plot_type)
+        if plot is None:
+            print(f"Warning: No plot found for attribute '{attr}'")
+            continue
         # Add plot outline and increase font size
         plot.update_xaxes(
             title="INR[dB]",

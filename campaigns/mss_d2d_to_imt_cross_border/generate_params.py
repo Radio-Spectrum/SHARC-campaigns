@@ -103,6 +103,15 @@ def generate(
             # Set IMT frequency to be adjacent to DC-MSS
             params.imt.frequency = params.imt.frequency + params.mss_d2d.bandwidth
 
+        # Setup adjacent channel emissions
+        system3_eirp_mask_vals = \
+            np.array([-55.6, -73.6, -83.6]) + 90 + 20 * np.log10(params.mss_d2d.frequency / 2000.0)
+        params.mss_d2d.spectral_mask = "STEPPED"
+        params.mss_d2d.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
+        params.mss_d2d.use_oob_antenna = False
+        params.mss_d2d.oob_antenna.pattern = "Cosine Antenna"
+        params.mss_d2d.oob_antenna.gain = 0.0
+
         params.mss_d2d.param_p619.below_rooftop = 0.0 if link == "dl" else 50.0
 
         # Get cell radius
@@ -119,7 +128,7 @@ def generate(
             theta_vec=0,
         )
         angle_7dB_i = np.where(
-            gains <= params.mss_d2d.antenna.gain - 7)[0][0]
+            gains <= 34.1 - 7)[0][0]
         angle_7dB = off_axis[angle_7dB_i]
         cell_radius = np.tan(np.deg2rad(angle_7dB)) * \
             params.mss_d2d.orbits[0].apogee_alt_km * 1e3
@@ -143,9 +152,9 @@ def generate(
                 params.mss_d2d.beam_positioning.service_grid.transform_grid_randomly = True
                 params.mss_d2d.beam_positioning.service_grid.grid_margin_from_border = border
                 output_start = get_output_dir_start(mss_id, co_channel)
-                params.general.output_dir = f"{CAMPAIGN_STR}/{output_start}_{link}/"
+                params.general.output_dir = f"{CAMPAIGN_STR}/{output_start}_eirp_mask_{link}/"
 
-                postfix = f"mss_d2d_to_imt_cross_border_{border}km_{load}load_{link}"
+                postfix = f"mss_d2d_to_imt_cross_border_eirp_mask_{border}km_{load}load_{link}"
                 params.general.output_dir_prefix = f"output_{postfix}"
                 file = INPUTS_DIR / \
                     f"parameter_{mss_id}_{"co" if co_channel else "adj"}_{postfix}.yaml"
