@@ -106,7 +106,7 @@ def generate(
         # Setup adjacent channel emissions
         system3_eirp_mask_vals = \
             np.array([-55.6, -73.6, -83.6]) + 90 + 20 * np.log10(params.mss_d2d.frequency / 2000.0)
-        params.mss_d2d.spectral_mask = "STEPPED"
+        params.mss_d2d.spectral_mask = "MSS"
         params.mss_d2d.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
         params.mss_d2d.use_oob_antenna = False
         params.mss_d2d.oob_antenna.pattern = "Cosine Antenna"
