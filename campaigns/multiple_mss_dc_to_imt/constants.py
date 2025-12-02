@@ -8,8 +8,30 @@ CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 INPUTS_DIR = CAMPAIGN_DIR / "input/"
 
-CENTER_FREQUENCY = 758.0
-# CENTER_FREQUENCY = 2160.0
+# CENTER_FREQUENCY = 758.0
+CENTER_FREQUENCY = 1475
+
+# Frequency blocks under study
+# 1 427-1 518 MHz
+# 1 710-2 200 MHz
+# 2 300-2 400 MHz
+# 2 500-2 690 MHz
+FREQ_BAND_EDGES_DL_MHZ = [
+    1475,
+    2110,
+    2300,  # TDD
+    2620,
+]
+
+DUPLEX_SEP_MHZ = [
+    48,
+    190,
+    0,  # TDD
+    120
+]
+
+FREQ_BAND_EDGES_MHZ = [(f - DUPLEX_SEP_MHZ[i], f) for i, f in enumerate(FREQ_BAND_EDGES_DL_MHZ)]
+
 if CENTER_FREQUENCY == 758.0:
     SYS_IDS = [
         "system-3.698-960MHz.525km",
@@ -22,8 +44,8 @@ else:
     ]
 
 SYS_ID_TO_READABLE = {
-    "system-4.2110-2200MHz.690km": "MSS DC System 4 @2100MHz",
-    "system-3.2110-2200MHz.525km": "MSS DC System 3 @2100MHz",
+    "system-4.2110-2200MHz.690km": "MSS DC System 4",
+    "system-3.2110-2200MHz.525km": "MSS DC System 3",
     "system-3.698-960MHz.525km": "MSS DC System 3 @758MHz",
     "system-4.698-960MHz-block2.690km": "MSS DC System 4 @758MHz",
 }
@@ -34,12 +56,17 @@ if CENTER_FREQUENCY == 758.0:
     ]
 else:
     IMT_IDS = [
-        "imt.1-3GHz.single-bs.aas-macro-bs",
+        "imt.1-3GHz.single-bs.aas-rural-macro-bs",
+        "imt.1-3GHz.single-bs.aas-suburban-macro-bs",
+        "imt.1-3GHz.single-bs.aas-urban-macro-bs",
     ]
 
 IMT_ID_TO_READABLE = {
     "imt.1-3GHz.single-bs.aas-macro-bs": "IMT Macro @2100MHz",
     "imt.upto-1GHz.single-bs.urban-macro-bs": "IMT Macro @758MHZ",
+    "imt.1-3GHz.single-bs.aas-rural-macro-bs": "IMT Macro Rural",
+    "imt.1-3GHz.single-bs.aas-suburban-macro-bs": "IMT Macro Suburban",
+    "imt.1-3GHz.single-bs.aas-urban-macro-bs": "IMT Macro Urban",
 }
 
 CELL_RADIUS_SYS3_KM = 39.684
@@ -50,7 +77,7 @@ else:
 
 IMT_LINKS = [
     "downlink",
-    # "uplink"
+    "uplink"
 ]
 MSS_D2D_LOAD_FACTOR = [0.5, 0.2, 0.1]
 EXCLUSION_ZONE_SYS4_MARGIN_KM = [
@@ -78,6 +105,7 @@ PARAMETERS = [
     MSS_D2D_LOAD_FACTOR,
     EXCLUSION_ZONE_MARGIN_KM,
     COVERAGE_COUNTRIES,
+    FREQ_BAND_EDGES_MHZ,
 ]
 
 def skip_parameters_combination(
@@ -102,8 +130,10 @@ def skip_parameters_combination(
         # if coverage_country != "France":
         #     # only generate parameter for sys4 covering France
         #     return True
-    else:
-        raise NotImplementedError()
+
+    if imt_link == "downlink":
+        if ("rural-macro" in imt_id) or ("suburban-macro" in imt_id):
+            return True
 
     return False
 
@@ -122,13 +152,14 @@ def get_specific_pattern(
     mss_id: str,
     mss_load_factor: float,
     exclusion_r_km: float,
-    coverage_country: list
+    coverage_country: list,
+    freq_band_edges_mhz: tuple,
 ):
     """
     Generate a pattern string identifying the simulation configuration.
     """
     short_countrs = get_country_short(coverage_country)
-    return f"{short_countrs}_{exclusion_r_km}exclusion_{mss_load_factor}load_{imt_link}_{imt_id}_{mss_id}"
+    return f"{short_countrs}_{exclusion_r_km}exclusion_{mss_load_factor}load_{imt_link}_{freq_band_edges_mhz[1]}mhz_{imt_id}_{mss_id}"
 
 def get_readable(
     imt_link: str,
@@ -136,17 +167,22 @@ def get_readable(
     mss_d2d_id: str,
     mss_load_factor: float,
     exclusion_r_km: float,
-    coverage_country: str
+    coverage_country: str,
+    freq_band_edges_mhz: tuple
 ):
     readable_load = f"LF = {float(mss_load_factor) * 100}%"
     readable_exclusion = f"Excl. R = {exclusion_r_km}km"
-    imt_link_readable = "-> IMT UE" if imt_link == "downlink" else "-> IMT BS"
+    imt_link_readable = "IMT UE" if imt_link == "downlink" else "IMT BS"
     short_countrs = get_country_short(coverage_country)
     readbl_countrs = ", ".join([x.upper() for x in short_countrs.split("_")])
 
     readable_mss_d2d = SYS_ID_TO_READABLE[mss_d2d_id]
     readable_imt = IMT_ID_TO_READABLE[imt_id]
-    return f"{readable_load}; {readbl_countrs}; {readable_mss_d2d}"
+    if imt_link == "downlink": 
+        readable_str = f"{freq_band_edges_mhz[1]}MHz; {readable_load}; {readbl_countrs}; {readable_mss_d2d}; {imt_link_readable}"
+    else:
+        readable_str = f"{freq_band_edges_mhz[1]}MHz; {readable_load}; {readbl_countrs}; {readable_mss_d2d}; {readable_imt}; {imt_link_readable}"
+    return readable_str
 
 
 def get_readable_from_str(

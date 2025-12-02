@@ -5,7 +5,7 @@ from campaigns.utils.dump_parameters import dump_parameters
 from campaigns.multiple_mss_dc_to_imt.constants import (
     CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR, PARAMETERS,
     get_specific_pattern, skip_parameters_combination,
-    CENTER_FREQUENCY
+    CENTER_FREQUENCY, FREQ_BAND_EDGES_DL_MHZ
 )
 
 SEED = 81
@@ -30,13 +30,23 @@ def generate_inputs():
 
     total = 0
 
-    for (imt_link, imt_id, mss_d2d_id,
-         mss_d2d_lf, exclusion_margin_km,
-         served_country
-    ) in product(*PARAMETERS):
-        if skip_parameters_combination(imt_link, imt_id, mss_d2d_id,
-             mss_d2d_lf, exclusion_margin_km,
-             served_country
+    # Configure the frequencies under study:
+
+    for (imt_link,
+         imt_id,
+         mss_d2d_id,
+         mss_d2d_lf,
+         exclusion_margin_km,
+         served_country,
+         freq_band_edges_mhz) in product(*PARAMETERS):
+
+        if skip_parameters_combination(
+            imt_link,
+            imt_id,
+            mss_d2d_id,
+            mss_d2d_lf,
+            exclusion_margin_km,
+            served_country
         ):
             continue
         general["imt_link"] = imt_link.upper()
@@ -75,8 +85,24 @@ def generate_inputs():
         params.imt.interfered_with = True
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        params.imt.frequency = CENTER_FREQUENCY + params.imt.bandwidth / 2
-        params.mss_d2d.frequency = CENTER_FREQUENCY + params.mss_d2d.bandwidth / 2
+        # Configure the center frequency
+        # We want full overlap of bands
+        params.imt.ue.k = 1
+        params.imt.bandwidth = 5  # MHz
+        params.mss_d2d.bandwidth = 5  # MHz
+        params.imt.guard_band_ratio = 0.0  # MHz
+        if imt_link == 'downlink':
+            params.imt.frequency = freq_band_edges_mhz[1] + params.imt.bandwidth / 2
+            params.mss_d2d.frequency = freq_band_edges_mhz[1] + params.mss_d2d.bandwidth / 2
+        else:
+            params.imt.frequency = freq_band_edges_mhz[0] + params.imt.bandwidth / 2
+            params.mss_d2d.frequency = freq_band_edges_mhz[0] + params.mss_d2d.bandwidth / 2
+
+        print(f"IMT {imt_link} frequency: {params.imt.frequency}")
+
+        # Adjust the Sys3 power accoring to the frequency band.
+        if params.mss_d2d.frequency < 1710.0 and "system-3" in mss_d2d_id:
+            params.mss_d2d.tx_power_density = params.mss_d2d.tx_power_density - 2.4
 
         # Parameters used for P.619
         # WARNING: Remember to set the lut in propagation/Dataset!
@@ -116,8 +142,9 @@ def generate_inputs():
         ]
         # TODO: check this
         params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 5.0
-        if "system-4" in mss_d2d_id:
-            service_grid.minimum_service_angle = 50.0
+        # if "system-4" in mss_d2d_id:
+        #     service_grid.minimum_service_angle = 50.0
+        service_grid.minimum_service_angle = 50.0  # set same limits for both systems to compare
 
         params.mss_d2d.sat_is_active_if.lat_long_inside_country.country_names = \
             service_grid.grid_in_zone.from_countries.country_names
@@ -140,7 +167,7 @@ def generate_inputs():
 
         # Gerar nome do arquivo
         specific = get_specific_pattern(
-            imt_link, imt_id, mss_d2d_id, mss_d2d_lf, exclusion_margin_km, served_country
+            imt_link, imt_id, mss_d2d_id, mss_d2d_lf, exclusion_margin_km, served_country, freq_band_edges_mhz
         )
 
         # Configurar caminhos de saída

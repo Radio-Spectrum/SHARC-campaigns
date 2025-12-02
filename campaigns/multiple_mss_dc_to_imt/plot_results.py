@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 
 from campaigns.multiple_mss_dc_to_imt.constants import (
     CAMPAIGN_DIR, PARAMETERS, get_specific_pattern,
-    get_readable, CELL_RADIUS_SYS3_KM, CELL_RADIUS_SYS4_KM,
+    get_readable, CELL_RADIUS_SYS3_KM, CELL_RADIUS_SYS4_KM, IMT_LINKS
 )
 
 auto_open = False
@@ -17,16 +17,16 @@ post_processor = PostProcessor()
 
 attributes_to_plot = [
     # ("imt_system_antenna_gain", "cdf"),
-    ("imt_system_path_loss", "cdf"),
-    ("imt_system_path_loss", "ccdf"),
-    ("system_imt_antenna_gain", "cdf"),
-    ("system_imt_antenna_gain", "ccdf"),
-    ("sys_to_imt_coupling_loss", "ccdf"),
-    ("sys_to_imt_coupling_loss", "cdf"),
+    # ("imt_system_path_loss", "cdf"),
+    # ("imt_system_path_loss", "ccdf"),
+    # ("system_imt_antenna_gain", "cdf"),
+    # ("system_imt_antenna_gain", "ccdf"),
+    # ("sys_to_imt_coupling_loss", "ccdf"),
+    # ("sys_to_imt_coupling_loss", "cdf"),
     # ("imt_dl_inr", "cdf"),
     # ("imt_ul_inr", "cdf"),
     ("imt_dl_inr", "ccdf"),
-    # ("imt_ul_inr", "ccdf"),
+    ("imt_ul_inr", "ccdf"),
 ]
 
 samples_for_ccdf = [attr[0] for attr in attributes_to_plot if attr[1] == "ccdf"]
@@ -145,88 +145,126 @@ def compatible_patterns_ordered(s1, s2):
         rload = "Aggregated; LF = 20%; "
     elif "0.5load" in s1:
         rload = "Aggregated; LF = 50%; "
-    sys3_name = "system-3.698-960MHz.525km"
-    sys4_name = "system-4.698-960MHz-block2.690km"
-    # sys3_name = "system-3.2110-2200MHz.525km"
-    # sys4_name = "system-4.2110-2200MHz.690km"
-    if sys3_name in s1:
-        s1 = s1.replace(
-            sys3_name, sys4_name
-        ).replace(
-            "39.684", "24.105"
-        )
-        if "to_imt_br" in s1:
-            if s1.replace(
-                "to_imt_br",
-                "to_imt_ar",
-            ) == s2:
-                return rload + "BR3 & AR4"
-        elif "to_imt_ar" in s1:
-            if s1.replace(
-                "to_imt_ar",
-                "to_imt_br",
-            ) == s2:
-                return rload + "AR3 & BR4"
+    # sys3_name = "system-3.698-960MHz.525km"
+    # sys4_name = "system-4.698-960MHz-block2.690km"
+    sys3_name = "system-3.2110-2200MHz.525km"
+    sys4_name = "system-4.2110-2200MHz.690km"
+    if ("_downlink_" in s1) and ("_downlink_" in s2):
+        if sys3_name in s1:
+            s1 = s1.replace(
+                sys3_name, sys4_name
+            )
+            if "to_imt_de" in s1:
+                if s1.replace(
+                    "to_imt_de",
+                    "to_imt_fr",
+                ) == s2:
+                    return rload + "DE3 & FR4"
+            elif "to_imt_fr" in s1:
+                if s1.replace(
+                    "to_imt_fr",
+                    "to_imt_de",
+                ) == s2:
+                    return rload + "FR3 & DE4"
+    elif ("_uplink_" in s1) and ("_uplink_" in s2):
+        # rload + "DE3 & FR4 RURAL"
+        # rload + "DE3 & FR4 SUBURBAN"
+        # rload + "DE3 & FR4 SUBURBAN"
+        # rload + "FR3 & DE4 RURAL"
+        # rload + "FR3 & DE4 SUBURBAN"
+        # rload + "FR3 & DE4 SUBURBAN"
+        if sys3_name in s1:
+            s1 = s1.replace(
+                sys3_name, sys4_name
+            )
+            if "to_imt_de" in s1:
+                if s1.replace(
+                    "to_imt_de",
+                    "to_imt_fr",
+                ) == s2:
+                    if "rural-macro" in s1:
+                        return rload + "DE3 & FR4 - Rural Macro"
+                    elif "suburban-macro" in s1:
+                        return rload + "DE3 & FR4 - Suburban Macro"
+                    elif "urban-macro" in s1:
+                        return rload + "DE3 & FR4 - Urban Macro"
+            elif "to_imt_fr" in s1:
+                if s1.replace(
+                    "to_imt_fr",
+                    "to_imt_de",
+                ) == s2:
+                    if "rural-macro" in s1:
+                        return rload + "FR3 & DE4 - Rural Macro"
+                    elif "suburban-macro" in s1:
+                        return rload + "FR3 & DE4 - Suburban Macro"
+                    elif "urban-macro" in s1:
+                        return rload + "FR3 & DE4 - Urban Macro"
     return None
 
 plots_to_save = []
 HTMLS_DIR = CAMPAIGN_DIR / "output" / "htmls"
 HTMLS_DIR.mkdir(exist_ok=True)
 
-fig = post_processor.get_plot_by_results_attribute_name("imt_dl_inr", plot_type="ccdf")
-calculate_percentile_for = [
-    # (legend, aggr)
-]
-for i in range(len(ccdf_results)):
-    for j in range(i+1, len(ccdf_results)):
-        r = ccdf_results[i]
-        r2 = ccdf_results[j]
-        legend = compatible_patterns(r.output_directory, r2.output_directory)
-        if legend is not None:
-            if fig is None:
-                # getting same formatting that other plots get
-                fig = list(post_processor.generate_ccdf_plots_from_results([r]))[0]
-                fig.data = []
-                plots_to_save.append((HTMLS_DIR / "aggregated.html", fig))
-            aggregated_inr = 10 * np.log10(
-                10**(np.array(r.imt_dl_inr)/10)
-                + 10**(np.array(r2.imt_dl_inr)/10)
-            )
-            calculate_percentile_for.append((legend, aggregated_inr))
-            x, y = PostProcessor.ccdf_from(aggregated_inr, n_bins=None)
-            linestyle = linestyle_getter(r2)
-            from plotly.colors import DEFAULT_PLOTLY_COLORS
+for link in IMT_LINKS:
+    if link == "downlink":
+        attr = "imt_dl_inr"
+    else:
+        attr = "imt_ul_inr"
+    fig = post_processor.get_plot_by_results_attribute_name(attr, plot_type="ccdf")
+    calculate_percentile_for = [
+        # (legend, aggr)
+    ]
+    for i in range(len(ccdf_results)):
+        for j in range(i+1, len(ccdf_results)):
+            r = ccdf_results[i]
+            r2 = ccdf_results[j]
+            if link in r.output_directory and link in r2.output_directory:
+                legend = compatible_patterns(r.output_directory, r2.output_directory)
+                if legend is not None:
+                    if fig is None:
+                        # getting same formatting that other plots get
+                        fig = list(post_processor.generate_ccdf_plots_from_results([r]))[0]
+                        fig.data = []
+                        plots_to_save.append((HTMLS_DIR / "aggregated.html", fig))
+                    aggregated_inr = 10 * np.log10(
+                        10**(np.array(getattr(r, attr)) / 10) +
+                        10**(np.array(getattr(r2, attr)) / 10)
+                    )
+                    calculate_percentile_for.append((legend, aggregated_inr))
+                    x, y = PostProcessor.ccdf_from(aggregated_inr, n_bins=None)
+                    linestyle = linestyle_getter(r2)
+                    from plotly.colors import DEFAULT_PLOTLY_COLORS
 
-            color_i = 0
-            while True:
-                if color_i >= len(DEFAULT_PLOTLY_COLORS):
                     color_i = 0
-                    break
-                some_has = False
-                for obj in fig.data:
-                    if obj.line.dash == linestyle and obj.line.color == DEFAULT_PLOTLY_COLORS[color_i]:
-                        some_has = True
-                        break
-                if not some_has:
-                    break
-                else:
-                    color_i += 1
-   
-            fig.add_trace(
-                go.Scatter(
-                    x=x,
-                    y=y,
-                    mode="lines",
-                    name=f"{legend}",
-                    line=dict(color=DEFAULT_PLOTLY_COLORS[color_i], dash=linestyle)
-                ),
-            )
-            # print()
-            # print("########################")
-            # print(plot)
-            # print("r.output_directory", r.output_directory)
-            # print("r2.output_directory", r2.output_directory)
-            # print("c", c)
+                    while True:
+                        if color_i >= len(DEFAULT_PLOTLY_COLORS):
+                            color_i = 0
+                            break
+                        some_has = False
+                        for obj in fig.data:
+                            if obj.line.dash == linestyle and obj.line.color == DEFAULT_PLOTLY_COLORS[color_i]:
+                                some_has = True
+                                break
+                        if not some_has:
+                            break
+                        else:
+                            color_i += 1
+        
+                    fig.add_trace(
+                        go.Scatter(
+                            x=x,
+                            y=y,
+                            mode="lines",
+                            name=f"{legend}",
+                            line=dict(color=DEFAULT_PLOTLY_COLORS[color_i], dash=linestyle)
+                        ),
+                    )
+                    # print()
+                    # print("########################")
+                    # print(plot)
+                    # print("r.output_directory", r.output_directory)
+                    # print("r2.output_directory", r2.output_directory)
+                    # print("c", c)
 
 
 print(f"Saving plots in {HTMLS_DIR}")
@@ -261,6 +299,9 @@ for attr in ["imt_dl_inr", "imt_ul_inr"]:
             x=protection_criteria + 0.5, y=perc_time + 0.01,
             font=dict(size=12, color="blue")
         ))
+        plot.update_xaxes(
+            title_text="I/N"
+        )
     else:
         print(f"Warning: No plot found for attribute '{attr}'")
 
