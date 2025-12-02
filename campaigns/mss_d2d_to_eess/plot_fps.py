@@ -48,7 +48,7 @@ if __name__ == "__main__":
         if parameters.imt.bs.antenna.pattern != "ITU-R-S.1528-Taylor":
             raise ValueError("Antenna pattern not supported by this plot script")
         params.antenna_pattern = "ITU-R-S.1528-Taylor"
-        params.antenna_s1528 = parameters.imt.bs.antenna.itu_r_s_1528
+        params.antenna.itu_r_s_1528 = parameters.imt.bs.antenna.itu_r_s_1528
 
         params.sat_is_active_if.conditions = [
             "LAT_LONG_INSIDE_COUNTRY",
