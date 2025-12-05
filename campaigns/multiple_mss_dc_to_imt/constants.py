@@ -179,7 +179,7 @@ def get_readable(
     readable_mss_d2d = SYS_ID_TO_READABLE[mss_d2d_id]
     readable_imt = IMT_ID_TO_READABLE[imt_id]
     if imt_link == "downlink": 
-        readable_str = f"{freq_band_edges_mhz[1]}MHz; {readable_load}; {readbl_countrs}; {readable_mss_d2d}; {imt_link_readable}"
+        readable_str = f"{freq_band_edges_mhz[0]}MHz; {readable_load}; {readbl_countrs}; {readable_mss_d2d}; {imt_link_readable}"
     else:
         readable_str = f"{freq_band_edges_mhz[1]}MHz; {readable_load}; {readbl_countrs}; {readable_mss_d2d}; {readable_imt}; {imt_link_readable}"
     return readable_str
