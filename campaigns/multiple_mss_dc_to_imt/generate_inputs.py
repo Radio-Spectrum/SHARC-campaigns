@@ -17,7 +17,7 @@ general = {
     "output_dir": f"{CAMPAIGN_STR}/output/",
     "output_dir_prefix": "to-update",
     "system": "MSS_D2D",
-    "imt_link": "UPLINK",
+    "imt_link": "DOWNLINK",
 }
 
 def generate_inputs():
@@ -73,30 +73,33 @@ def generate_inputs():
         )
 
         # Configurar cenário
-        params.general.enable_adjacent_channel = False
-        if params.mss_d2d.bandwidth < params.imt.bandwidth:
-            # need to activate adjacent channel so that no samples are -inf
-            params.general.enable_adjacent_channel = True
-
-            params.mss_d2d.adjacent_ch_emissions = "SPECTRAL_MASK"
-            params.imt.adjacent_ch_reception = "OFF"
-
         params.general.enable_cochannel = True
         params.imt.interfered_with = True
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
         # Configure the center frequency
         # We want full overlap of bands
-        params.imt.ue.k = 1
-        params.imt.bandwidth = 5  # MHz
+        params.imt.ue.k = 3
+        params.imt.bandwidth = 20  # MHz
         params.mss_d2d.bandwidth = 5  # MHz
-        params.imt.guard_band_ratio = 0.0  # MHz
+        # params.imt.guard_band_ratio = 0.0  # MHz
         if imt_link == 'downlink':
             params.imt.frequency = freq_band_edges_mhz[1] + params.imt.bandwidth / 2
-            params.mss_d2d.frequency = freq_band_edges_mhz[1] + params.mss_d2d.bandwidth / 2
+            params.mss_d2d.frequency = params.imt.frequency
         else:
             params.imt.frequency = freq_band_edges_mhz[0] + params.imt.bandwidth / 2
-            params.mss_d2d.frequency = freq_band_edges_mhz[0] + params.mss_d2d.bandwidth / 2
+            params.mss_d2d.frequency = params.imt.frequency
+
+        params.general.enable_adjacent_channel = False
+        if params.mss_d2d.bandwidth < params.imt.bandwidth:
+            # need to activate adjacent channel so that no samples are -inf
+            params.general.enable_adjacent_channel = True
+
+            # params.mss_d2d.adjacent_ch_emissions = "SPECTRAL_MASK"
+            # params.mss_d2d.spectral_mask = "MSS"
+            params.mss_d2d.adjacent_ch_emissions = "ACLR"
+            params.mss_d2d.adjacent_ch_leak_ratio = 45.0  # dB
+            params.imt.adjacent_ch_reception = "OFF"
 
         print(f"IMT {imt_link} frequency: {params.imt.frequency}")
 
@@ -143,8 +146,8 @@ def generate_inputs():
         # TODO: check this
         params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 5.0
         # if "system-4" in mss_d2d_id:
-        #     service_grid.minimum_service_angle = 50.0
-        service_grid.minimum_service_angle = 50.0  # set same limits for both systems to compare
+        #     service_grid.minimum_service_angle = 20.0
+        service_grid.minimum_service_angle = 20.0  # set same limits for both systems to compare
 
         params.mss_d2d.sat_is_active_if.lat_long_inside_country.country_names = \
             service_grid.grid_in_zone.from_countries.country_names

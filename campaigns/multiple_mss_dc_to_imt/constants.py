@@ -39,7 +39,7 @@ if CENTER_FREQUENCY == 758.0:
     ]
 else:
     SYS_IDS = [
-        "system-3.2110-2200MHz.525km",
+        # "system-3.2110-2200MHz.525km",
         "system-4.2110-2200MHz.690km",
     ]
 
@@ -57,8 +57,8 @@ if CENTER_FREQUENCY == 758.0:
 else:
     IMT_IDS = [
         "imt.1-3GHz.single-bs.aas-rural-macro-bs",
-        "imt.1-3GHz.single-bs.aas-suburban-macro-bs",
-        "imt.1-3GHz.single-bs.aas-urban-macro-bs",
+        # "imt.1-3GHz.single-bs.aas-suburban-macro-bs",
+        # "imt.1-3GHz.single-bs.aas-urban-macro-bs",
     ]
 
 IMT_ID_TO_READABLE = {
@@ -77,9 +77,9 @@ else:
 
 IMT_LINKS = [
     "downlink",
-    "uplink"
+    # "uplink"
 ]
-MSS_D2D_LOAD_FACTOR = [0.5, 0.2, 0.1]
+MSS_D2D_LOAD_FACTOR = [0.5, 0.2]
 EXCLUSION_ZONE_SYS4_MARGIN_KM = [
     40,
     # rounding to get rid of weird precision errors
@@ -91,7 +91,8 @@ EXCLUSION_ZONE_SYS3_MARGIN_KM = [
     # round(2 * CELL_RADIUS_SYS3_KM, 1),
     # round(3 * CELL_RADIUS_SYS3_KM, 1),
 ]
-EXCLUSION_ZONE_MARGIN_KM = list(set(EXCLUSION_ZONE_SYS3_MARGIN_KM + EXCLUSION_ZONE_SYS4_MARGIN_KM))
+# EXCLUSION_ZONE_MARGIN_KM = list(set(EXCLUSION_ZONE_SYS3_MARGIN_KM + EXCLUSION_ZONE_SYS4_MARGIN_KM))
+EXCLUSION_ZONE_MARGIN_KM = [20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 COVERAGE_COUNTRIES = [
     "Germany",
@@ -116,23 +117,23 @@ def skip_parameters_combination(
     exclusion_zone_margin_km,
     coverage_country,
 ):
-    if "system-3" in sys_id:
-        if exclusion_zone_margin_km not in EXCLUSION_ZONE_SYS3_MARGIN_KM:
-            # only generate parameter for sys3 correct margin border values
-            return True
-        # if coverage_country != "Germany":
-        #     # only generate parameter for sys3 covering Germany
-        #     return True
-    elif "system-4" in sys_id:
-        if exclusion_zone_margin_km not in EXCLUSION_ZONE_SYS4_MARGIN_KM:
-            # only generate parameter for sys4 correct margin border values
-            return True
-        # if coverage_country != "France":
-        #     # only generate parameter for sys4 covering France
-        #     return True
+    # if "system-3" in sys_id:
+    #     if exclusion_zone_margin_km not in EXCLUSION_ZONE_SYS3_MARGIN_KM:
+    #         # only generate parameter for sys3 correct margin border values
+    #         return True
+    #     # if coverage_country != "Germany":
+    #     #     # only generate parameter for sys3 covering Germany
+    #     #     return True
+    # elif "system-4" in sys_id:
+    #     if exclusion_zone_margin_km not in EXCLUSION_ZONE_SYS4_MARGIN_KM:
+    #         # only generate parameter for sys4 correct margin border values
+    #         return True
+    #     # if coverage_country != "France":
+    #     #     # only generate parameter for sys4 covering France
+    #     #     return True
 
     if imt_link == "downlink":
-        if ("rural-macro" in imt_id) or ("suburban-macro" in imt_id):
+        if ("urban-macro" in imt_id) or ("suburban-macro" in imt_id):
             return True
 
     return False
@@ -171,17 +172,17 @@ def get_readable(
     freq_band_edges_mhz: tuple
 ):
     readable_load = f"LF = {float(mss_load_factor) * 100}%"
-    readable_exclusion = f"Excl. R = {exclusion_r_km}km"
+    readable_exclusion = f"Excl. Dist. = {exclusion_r_km}km"
     imt_link_readable = "IMT UE" if imt_link == "downlink" else "IMT BS"
     short_countrs = get_country_short(coverage_country)
     readbl_countrs = ", ".join([x.upper() for x in short_countrs.split("_")])
 
     readable_mss_d2d = SYS_ID_TO_READABLE[mss_d2d_id]
     readable_imt = IMT_ID_TO_READABLE[imt_id]
-    if imt_link == "downlink": 
-        readable_str = f"{freq_band_edges_mhz[0]}MHz; {readable_load}; {readbl_countrs}; {readable_mss_d2d}; {imt_link_readable}"
+    if imt_link == "downlink":
+        readable_str = f"{freq_band_edges_mhz[1]}MHz; {readable_load}; {readable_exclusion}; {readbl_countrs}; {readable_mss_d2d}; {readable_imt}"
     else:
-        readable_str = f"{freq_band_edges_mhz[1]}MHz; {readable_load}; {readbl_countrs}; {readable_mss_d2d}; {readable_imt}; {imt_link_readable}"
+        readable_str = f"{freq_band_edges_mhz[0]}MHz; {readable_load}; {readable_exclusion}; {readbl_countrs}; {readable_mss_d2d}; {readable_imt}"
     return readable_str
 
 

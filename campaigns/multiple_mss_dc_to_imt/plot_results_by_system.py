@@ -102,8 +102,9 @@ plot_group = [
     IMT_LINKS,
     MSS_D2D_LOAD_FACTOR,
     imt_scenarios_str,
-    FREQ_BAND_EDGES_DL_MHZ,
+    # FREQ_BAND_EDGES_DL_MHZ,
     SYS_IDS,
+    ["de", "fr"]
 ]
 
 
@@ -210,8 +211,9 @@ for (
     link,
     load,
     imt_scenario,
-    freq,
+    # freq,
     sys_id,
+    country,
 ) in product(*plot_group):
     
     post_processor = PostProcessor()
@@ -230,10 +232,9 @@ for (
     # sys4_pattern = fr".*_{SYS4_EXCL_DIST_TO_FILTER}exclusion_{load}load_{link}_{freq}mhz_.*{imt_scenario}.*_system-4.*"
     # sys3_pattern = fr".*exclusion_{load}load_{link}_{freq}mhz_.*{imt_scenario}.*_system-3.*"
     # sys4_pattern = fr".*exclusion_{load}load_{link}_{freq}mhz_.*{imt_scenario}.*_system-4.*"
-    result_pattern = fr".*exclusion_{load}load_{link}_.*_.*{imt_scenario}.*{sys_id}*"
+    result_pattern = fr".*_{country}_.*exclusion_{load}load_{link}_.*_.*{imt_scenario}.*{sys_id}*"
     # dir_name_regex = f"({sys3_pattern})|({sys4_pattern})"
     # dir_name_regex = f"{sys4_pattern}"
-    # dir_name_regex = f"{sys3_pattern}"
     dir_name_regex = f"{result_pattern}"
 
     ccdf_results = Results.load_many_from_dir(
@@ -249,7 +250,7 @@ for (
         only_samples=samples_for_cdf)
 
     if len(ccdf_results) == 0:
-        print(f"No results found for {load} load, {imt_scenario}, {freq}mhz. Skipping")
+        print(f"No results found for {load} load, {imt_scenario}, {SYS_ID_TO_READABLE[sys_id]}. Skipping")
         continue
 
     # for res in cdf_results:
@@ -355,7 +356,7 @@ for (
 
     print(f"Saving plots in {HTMLS_DIR}")
     for attr, plot_type in attributes_to_plot:
-        file = HTMLS_DIR / f"{attr}-{freq}mhz-{load}load{imt_scenario}{sys_id}-{plot_type}.html"
+        file = HTMLS_DIR / f"{attr}-{country}-{sys_id}-{load}load{imt_scenario}{plot_type}.html"
         plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=plot_type)
         if plot is None:
             print("Skipping", attr, plot_type)
@@ -457,7 +458,7 @@ for (
             continue
         calculate_percentile_for.append((name, inr_values))
 
-    percentile_file = HTMLS_DIR / f"percentiles-{link}-{freq}mhz-{load}load{imt_scenario[:-1]}-{sys_id}.txt"
+    percentile_file = HTMLS_DIR / f"percentiles-{link}-{SYS_ID_TO_READABLE[sys_id]}-{load}load{imt_scenario[:-1]}.txt"
     with open(percentile_file, 'w') as f:
         f.write("\n")
         f.write("=" * 60 + "\n")
