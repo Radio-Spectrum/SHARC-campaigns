@@ -35,10 +35,10 @@ IMT_LINKS = [
 
 IMT_UE_TYPE = [
     "imt-ue",
-    "imt-cpe",
+    # "imt-cpe",
 ]
 
-MSS_D2D_LOAD_FACTOR = [0.2]
+MSS_D2D_LOAD_FACTOR = [0.2, 0.5]
 
 # Rec. ITU-R M.1036-7 IMT bands - downlink band lower limits
 IMT_A5_DL_BAND_LOW_MHZ = 758.0

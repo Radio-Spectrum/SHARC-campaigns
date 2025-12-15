@@ -49,12 +49,12 @@ def generate_inputs(band_mhz=700):
     factory = ParametersFactory()
 
     # Band specific settings
-    imt_bandwidth_mhz = 5.0  # MHz
+    imt_bandwidth_mhz = 10.0  # MHz
     if band_mhz == 700:
         print("Generating inputs for 700 MHz band...")
         imt_id = "imt.upto-1GHz.single-bs.urban-macro-bs"
         mss_id = "system-4.698-960MHz-block2.690km"
-        exclusion_margins_km = [24, 30, 36, 40]
+        exclusion_margins_km = [20, 30, 40, 50]
         # imt_bandwidth_mhz = 10.0
         imt_frequency_mhz = IMT_A5_DL_BAND_LOW_MHZ + imt_bandwidth_mhz / 2
     else:
@@ -62,7 +62,7 @@ def generate_inputs(band_mhz=700):
         imt_id = "imt.1-3GHz.single-bs.aas-macro-bs"
         mss_id = "system-4.2110-2200MHz.690km"
         exclusion_margins_km = [12, 24, 48]
-        # imt_bandwidth_mhz = 20.0
+        imt_bandwidth_mhz = 20.0
         imt_frequency_mhz = IMT_B4_DL_BAND_LOW_MHZ + imt_bandwidth_mhz / 2
 
     scenario_params = [
@@ -101,17 +101,23 @@ def generate_inputs(band_mhz=700):
         )
 
         # Scenario configuration
-        params.general.enable_adjacent_channel = False
+        params.general.enable_adjacent_channel = True
         params.general.enable_cochannel = True
         params.general.output_dir = f"{CAMPAIGN_STR}/output_{band_mhz}/"
         params.imt.interfered_with = True
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
+        # Parameters for oob-emissions inside IMT band
+        params.imt.adjacent_ch_reception = "OFF"
+        params.mss_d2d.adjacent_ch_emissions = "ACLR"
+        params.mss_d2d.adjacent_ch_leak_ratio = 45.0  # dB - AST typical first adjacent band
+
+
         # IMT UE parameters
         params.imt.ue.distribution_distance = "SQRT(UNIFORM)"
         params.imt.ue.antenna.pattern = "OMNI"
         params.imt.ue.antenna.gain = -3.0
-        params.imt.ue.k = 1  # single user per cell
+        params.imt.ue.k = 3  # single user per cell
         # CPE-speficic parameters
         if imt_ue_type == "imt-cpe":
             params.imt.ue.body_loss = 0.0
@@ -131,7 +137,7 @@ def generate_inputs(band_mhz=700):
         params.mss_d2d.spectral_mask = "MSS"
 
         # Parameters used for P.619
-        # WARNING: Remember to set the lut in propagation/Dataset!
+        # WARNING: Remember to set the lut in propagation/Dataset
         params.mss_d2d.channel_model = "P619"
         params.mss_d2d.param_p619.earth_station_lat_deg = -25.5549751
         params.mss_d2d.param_p619.earth_station_alt_m = 200
@@ -168,13 +174,14 @@ def generate_inputs(band_mhz=700):
             "Brazil",
             "Argentina",
         ]
-        # Set the minimum elevation as the service elevation angle. That way we avoid dealing with multiple patterns
-        # according to System 4 specifications.
-        params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 50.0
+        params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 5.0
         # big number to make it so any visible satellite is ellegible
         service_grid.eligible_sats_margin_from_border = -2 * 1110
         # This parameter define the minium elevation angle for the service grid points
-        service_grid.minimum_service_angle = 50.0
+        service_grid.minimum_service_angle = 20.0
+
+        # AST's specific parameters
+        params.mss_d2d.antenna.pattern = "Satellite Beamforming"
 
         # service_grid.grid_in_zone.type = "CIRCLE"
         # service_grid.grid_in_zone.circle.center_lat = center_lat
