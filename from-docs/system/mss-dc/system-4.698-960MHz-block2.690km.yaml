@@ -65,4 +65,4 @@ mss_d2d:
       apogee_alt_km: 690.0   # Apogee in km
       sats_per_plane: 1      # Number of satellites per plane
       long_asc_deg: 0.0      # Longitude of the first ascending node in degrees
-      phasing_deg: 3.75      # Phasing in degrees
+      phasing_deg: 97.5      # Phasing in degrees

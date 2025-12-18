@@ -12,6 +12,9 @@ from campaigns.ast_mss_d2d_to_imt_cpe.constants import (
     get_readable
 )
 
+# used to cut off the CCDF tails
+cutoff_percentage = 1e-8
+
 # output_ast_mss_d2d_to_imt_cpe_24exclusion_0.2load_imt-cpe_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block2.690km_2025-11-10_01
 output_dir_pattern = re.compile(
     r".*/output_ast_mss_d2d_to_imt_cpe_(\d+)exclusion_(\d+\.\d+)load_imt-(cpe|ue)_"
@@ -31,10 +34,12 @@ band_mhz = args.band_mhz
 imt_bandwidth_mhz = 5.0  # MHz
 if band_mhz == 700:
     print("Generating plots for 700 MHz band...")
-    output_dir_regex = "imt.upto-1GHz.single-bs.urban-macro-bs.*"
+    # output_dir_regex = ".*_0.2load.*imt.upto-1GHz.single-bs.urban-macro-bs.*"
+    output_dir_regex = ".*imt.upto-1GHz.single-bs.urban-macro-bs.*"
     imt_id = "imt.upto-1GHz.single-bs.urban-macro-bs"
     mss_id = "system-4.698-960MHz-block2.690km"
-    exclusion_margins_km = [24, 30, 36, 40]
+    # exclusion_margins_km = [24, 36, 48, 60]
+    exclusion_margins_km = [28]
 else:
     print("Generating plots for 2100 MHz band...")
     output_dir_regex = "1-3GHz.single-bs.aas-macro-bs.*"
@@ -43,11 +48,15 @@ else:
     exclusion_margins_km = [12, 24, 48]
 
 output_dir = f"output_{band_mhz}"
+min_beam_ground_elev_deg = [20, 30, 40, 50]
+
 scenario_params = [
     IMT_UE_TYPE,
     [imt_id],
     [mss_id],
-    MSS_D2D_LOAD_FACTOR,
+    # MSS_D2D_LOAD_FACTOR,
+    # [0.5],  # higher load factor for better statistics
+    min_beam_ground_elev_deg,
     exclusion_margins_km,
 ]
 
@@ -61,6 +70,8 @@ attributes_to_plot = [
     # ("imt_dl_inr", "cdf"),
     # ("imt_ul_inr", "cdf"),
     ("imt_dl_inr", "ccdf"),
+    ("imt_dl_pfd_external", "ccdf"),
+    ("imt_dl_pfd_external_aggregated", "ccdf"),
     # ("imt_ul_inr", "ccdf"),
 ]
 
@@ -144,7 +155,7 @@ for pars in product(*scenario_params):
 
 plots = post_processor.generate_ccdf_plots_from_results(
     ccdf_results,
-    cutoff_percentage=0.0005,
+    cutoff_percentage=cutoff_percentage,
     n_bins=200,
 )
 
@@ -189,6 +200,40 @@ if imt_dl_inr_plot is not None:
         title_text="INR [dB]",
     )
 
+# Add PFD limit line
+imt_dl_pfd_external_plot = post_processor.get_plot_by_results_attribute_name(
+    "imt_dl_pfd_external", plot_type="ccdf")
+if imt_dl_pfd_external_plot is not None:
+    pfd_limit = -114.93  # dBW/m2.MHz
+    imt_dl_pfd_external_plot.add_vline(
+        x=pfd_limit,
+        line_dash="dash",
+        line_color="red",
+        annotation_text=f"PFD Limit ({pfd_limit} dBW/m².MHz)",
+        annotation_position="top left",
+        annotation_font_size=14,
+    )
+    imt_dl_pfd_external_plot.update_yaxes(
+        title_text="CCDF",
+    )
+    imt_dl_pfd_external_plot.update_xaxes(
+        title_text="PFD [dBW/m²]",
+    )
+    imt_dl_pfd_external_plot.update_layout(
+        legend=dict(
+            font=dict(size=14),
+            x=-0.2,
+            y=-0.0,
+            # xanchor='left',
+            orientation='h',
+            xanchor='left',
+            yanchor='bottom',
+            bgcolor='rgba(255,255,255,0.7)',
+            bordercolor='black',
+            borderwidth=1
+        )
+    )
+
 
 HTMLS_DIR = campaign_ouput_dir / "htmls"
 HTMLS_DIR.mkdir(exist_ok=True)
@@ -228,8 +273,8 @@ for attr, plot_type in attributes_to_plot:
     plot.update_layout(
         legend=dict(
             font=dict(size=14),
-            x=0.2,
-            y=-0.5,
+            x=0.01,
+            y=0.02,
             # xanchor='left',
             orientation='h',
             xanchor='left',

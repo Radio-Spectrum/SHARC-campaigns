@@ -15,8 +15,14 @@ from campaigns.ast_mss_d2d_to_imt_cpe.constants import (
     get_specific_pattern
 )
 
-SEED = int(time() * 1000) % 2**32 - 1
-NUM_SNAPSHOTS = int(1e4)
+# SEED = int(time() * 1000) % 2**32 - 1
+SEED = 69
+NUM_SNAPSHOTS = int(100)
+
+# Parameters for analysis
+beam_power_backoff_dB = 10.0  # dB
+# min_beam_ground_elev_deg = 38.0  # degrees
+minimum_elevation_from_es = 5.0  # degrees
 
 general = {
     "seed": SEED,
@@ -49,13 +55,14 @@ def generate_inputs(band_mhz=700):
     factory = ParametersFactory()
 
     # Band specific settings
-    imt_bandwidth_mhz = 10.0  # MHz
     if band_mhz == 700:
         print("Generating inputs for 700 MHz band...")
         imt_id = "imt.upto-1GHz.single-bs.urban-macro-bs"
         mss_id = "system-4.698-960MHz-block2.690km"
-        exclusion_margins_km = [20, 30, 40, 50]
+        # exclusion_margins_km = [24, 36, 48, 60]
+        exclusion_margins_km = [28]
         # imt_bandwidth_mhz = 10.0
+        imt_bandwidth_mhz = 5.0
         imt_frequency_mhz = IMT_A5_DL_BAND_LOW_MHZ + imt_bandwidth_mhz / 2
     else:
         print("Generating inputs for 2100 MHz band...")
@@ -65,11 +72,15 @@ def generate_inputs(band_mhz=700):
         imt_bandwidth_mhz = 20.0
         imt_frequency_mhz = IMT_B4_DL_BAND_LOW_MHZ + imt_bandwidth_mhz / 2
 
+    min_beam_ground_elev_deg = [20, 30, 40, 50]
+
     scenario_params = [
         IMT_UE_TYPE,
         [imt_id],
         [mss_id],
-        MSS_D2D_LOAD_FACTOR,
+        # MSS_D2D_LOAD_FACTOR,
+        # [0.5],  # higher load factor for better statistics
+        min_beam_ground_elev_deg,
         exclusion_margins_km,
     ]
 
@@ -78,8 +89,8 @@ def generate_inputs(band_mhz=700):
         imt_ue_type,
         imt_id,
         mss_d2d_id,
-        mss_d2d_lf,
-        exclusion_margin_km,
+        beam_elev,
+        exclusion_margin_km
     ) in product(*scenario_params):
 
         general["imt_link"] = 'DOWNLINK'  # only downlink for UE/CPE
@@ -89,8 +100,8 @@ def generate_inputs(band_mhz=700):
         print("\timt_ue_type =", imt_ue_type)
         print("\timt_id =", imt_id)
         print("\tmss_d2d_id =", mss_d2d_id)
-        print("\tmss_d2d_lf =", mss_d2d_lf)
-        print("\texclusion_r_km =", exclusion_margin_km)
+        print("\tbeam elev =", beam_elev)
+        print("\texclusion margin =", exclusion_margin_km)
 
         params = (
             factory
@@ -112,12 +123,15 @@ def generate_inputs(band_mhz=700):
         params.mss_d2d.adjacent_ch_emissions = "ACLR"
         params.mss_d2d.adjacent_ch_leak_ratio = 45.0  # dB - AST typical first adjacent band
 
+        # Power per beam
+        params.mss_d2d.tx_power_density = params.mss_d2d.tx_power_density - beam_power_backoff_dB
 
         # IMT UE parameters
         params.imt.ue.distribution_distance = "SQRT(UNIFORM)"
         params.imt.ue.antenna.pattern = "OMNI"
         params.imt.ue.antenna.gain = -3.0
-        params.imt.ue.k = 3  # single user per cell
+        # params.imt.ue.k = 3  # single user per cell
+        params.imt.ue.k = 1  # single user per cell
         # CPE-speficic parameters
         if imt_ue_type == "imt-cpe":
             params.imt.ue.body_loss = 0.0
@@ -154,7 +168,7 @@ def generate_inputs(band_mhz=700):
         params.imt.topology.central_altitude = 200
 
         # Beam management - service grid
-        params.mss_d2d.beams_load_factor = mss_d2d_lf
+        params.mss_d2d.beams_load_factor = 0.5  # 50% load factor - better statistics
         params.mss_d2d.beam_positioning.type = "SERVICE_GRID"
         params.mss_d2d.beam_positioning.service_grid.transform_grid_randomly = True
         service_grid = params.mss_d2d.beam_positioning.service_grid
@@ -174,11 +188,11 @@ def generate_inputs(band_mhz=700):
             "Brazil",
             "Argentina",
         ]
-        params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = 5.0
+        params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = minimum_elevation_from_es
         # big number to make it so any visible satellite is ellegible
-        service_grid.eligible_sats_margin_from_border = -2 * 1110
+        service_grid.eligible_sats_margin_from_border = -200.0
         # This parameter define the minium elevation angle for the service grid points
-        service_grid.minimum_service_angle = 20.0
+        service_grid.minimum_service_angle = beam_elev
 
         # AST's specific parameters
         params.mss_d2d.antenna.pattern = "Satellite Beamforming"
@@ -198,7 +212,7 @@ def generate_inputs(band_mhz=700):
 
         # Generate the filename pattern
         specific = get_specific_pattern(
-            imt_ue_type, imt_id, mss_d2d_id, mss_d2d_lf, exclusion_margin_km,
+            imt_ue_type, imt_id, mss_d2d_id, beam_elev, exclusion_margin_km,
         )
 
         params.general.output_dir_prefix = OUTPUT_START_NAME + specific
