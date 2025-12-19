@@ -66,11 +66,12 @@ def get_specific_pattern(
     mss_id: str,
     beam_elev: float,
     exclusion_r_km: float,
+    power_backoff: float
 ):
     """
     Generate a pattern string identifying the simulation configuration.
     """
-    return f"{exclusion_r_km}exclusion_{beam_elev}beam_elev_{imt_ue_type}_{imt_id}_{mss_id}"
+    return f"{exclusion_r_km}exclusion_{beam_elev}beam_elev_{power_backoff}power_backoff_{imt_ue_type}_{imt_id}_{mss_id}"
 
 
 def get_readable(
@@ -79,6 +80,7 @@ def get_readable(
     mss_d2d_id: str,
     beam_elev: float,
     exclusion_r_km: float,
+    power_backoff: float
 ):
     readable_beam_elev = f"Min. Beam Elev. = {beam_elev}°"
     readable_exclusion = f"Margin = {exclusion_r_km}km"
@@ -86,7 +88,7 @@ def get_readable(
     readable_mss_d2d = SYS_ID_TO_READABLE[mss_d2d_id]
     readable_imt = IMT_ID_TO_READABLE[imt_id]
     # return f"{readable_mss_d2d}; {readable_load}; {readable_exclusion}; {imt_ue_type.upper()}"
-    return f"{readable_mss_d2d}; {readable_exclusion}; {readable_beam_elev}"
+    return f"{readable_mss_d2d}; {readable_exclusion}; {readable_beam_elev}; Power Backoff = {power_backoff} dB"
 
 
 def get_readable_from_str(

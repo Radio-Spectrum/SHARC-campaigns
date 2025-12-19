@@ -17,10 +17,10 @@ from campaigns.ast_mss_d2d_to_imt_cpe.constants import (
 
 # SEED = int(time() * 1000) % 2**32 - 1
 SEED = 69
-NUM_SNAPSHOTS = int(100)
+NUM_SNAPSHOTS = int(10000)
 
 # Parameters for analysis
-beam_power_backoff_dB = 10.0  # dB
+# beam_power_backoff_dB = 5.0  # dB
 # min_beam_ground_elev_deg = 38.0  # degrees
 minimum_elevation_from_es = 5.0  # degrees
 
@@ -82,6 +82,7 @@ def generate_inputs(band_mhz=700):
         # [0.5],  # higher load factor for better statistics
         min_beam_ground_elev_deg,
         exclusion_margins_km,
+        [0.0, 5.0, 10.0],  # power backoff dB
     ]
 
     total_files = 0
@@ -90,7 +91,8 @@ def generate_inputs(band_mhz=700):
         imt_id,
         mss_d2d_id,
         beam_elev,
-        exclusion_margin_km
+        exclusion_margin_km,
+        power_backoff,
     ) in product(*scenario_params):
 
         general["imt_link"] = 'DOWNLINK'  # only downlink for UE/CPE
@@ -124,7 +126,7 @@ def generate_inputs(band_mhz=700):
         params.mss_d2d.adjacent_ch_leak_ratio = 45.0  # dB - AST typical first adjacent band
 
         # Power per beam
-        params.mss_d2d.tx_power_density = params.mss_d2d.tx_power_density - beam_power_backoff_dB
+        params.mss_d2d.tx_power_density = params.mss_d2d.tx_power_density - power_backoff
 
         # IMT UE parameters
         params.imt.ue.distribution_distance = "SQRT(UNIFORM)"
@@ -212,7 +214,7 @@ def generate_inputs(band_mhz=700):
 
         # Generate the filename pattern
         specific = get_specific_pattern(
-            imt_ue_type, imt_id, mss_d2d_id, beam_elev, exclusion_margin_km,
+            imt_ue_type, imt_id, mss_d2d_id, beam_elev, exclusion_margin_km, power_backoff,
         )
 
         params.general.output_dir_prefix = OUTPUT_START_NAME + specific

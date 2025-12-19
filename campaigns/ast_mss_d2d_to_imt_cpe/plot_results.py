@@ -35,7 +35,7 @@ imt_bandwidth_mhz = 5.0  # MHz
 if band_mhz == 700:
     print("Generating plots for 700 MHz band...")
     # output_dir_regex = ".*_0.2load.*imt.upto-1GHz.single-bs.urban-macro-bs.*"
-    output_dir_regex = ".*imt.upto-1GHz.single-bs.urban-macro-bs.*"
+    output_dir_regex = ".*backoff.*imt.upto-1GHz.single-bs.urban-macro-bs.*"
     imt_id = "imt.upto-1GHz.single-bs.urban-macro-bs"
     mss_id = "system-4.698-960MHz-block2.690km"
     # exclusion_margins_km = [24, 36, 48, 60]
@@ -58,6 +58,7 @@ scenario_params = [
     # [0.5],  # higher load factor for better statistics
     min_beam_ground_elev_deg,
     exclusion_margins_km,
+    [0.0, 5.0, 10.0],  # power backoff dB
 ]
 
 post_processor = PostProcessor()
