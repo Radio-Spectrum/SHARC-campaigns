@@ -18,7 +18,7 @@ from campaigns.ast_mss_d2d_to_imt_cpe.constants import (
 
 # SEED = int(time() * 1000) % 2**32 - 1
 SEED = 69
-NUM_SNAPSHOTS = int(10000)
+NUM_SNAPSHOTS = int(100)
 
 # Parameters for analysis
 # beam_power_backoff_dB = 5.0  # dB
@@ -60,7 +60,7 @@ def generate_inputs(band_mhz=700):
         print("Generating inputs for 700 MHz band...")
         imt_id = "imt.upto-1GHz.single-bs.urban-macro-bs"
         mss_id = "system-4.698-960MHz-block2.690km"
-        exclusion_margins_km = [24, 36, 48]
+        exclusion_margins_km = [24]
         # exclusion_margins_km = [28]
         # imt_bandwidth_mhz = 10.0
         imt_bandwidth_mhz = 5.0
@@ -74,7 +74,8 @@ def generate_inputs(band_mhz=700):
         imt_frequency_mhz = IMT_B4_DL_BAND_LOW_MHZ + imt_bandwidth_mhz / 2
 
     # min_beam_ground_elev_deg = [20, 30, 40, 85]
-    min_beam_ground_elev_deg = [20, 30, 40]
+    min_beam_ground_elev_deg = [45]
+    power_backoff = [5.0, 10.0]
 
     scenario_params = [
         IMT_UE_TYPE,
@@ -84,7 +85,7 @@ def generate_inputs(band_mhz=700):
         # [0.5],  # higher load factor for better statistics
         min_beam_ground_elev_deg,
         exclusion_margins_km,
-        [0.0, 5.0, 10.0],  # power backoff dB
+        power_backoff,  # power backoff dB
     ]
 
     total_files = 0
@@ -172,7 +173,7 @@ def generate_inputs(band_mhz=700):
         params.imt.topology.central_altitude = 200
 
         # Beam management - service grid
-        params.mss_d2d.cell_radius = 24.0
+        params.mss_d2d.cell_radius = 24e3
         params.mss_d2d.beams_load_factor = 0.5  # 50% load factor - better statistics
         params.mss_d2d.beam_positioning.type = "SERVICE_GRID"
         params.mss_d2d.beam_positioning.service_grid.transform_grid_randomly = True
@@ -180,7 +181,6 @@ def generate_inputs(band_mhz=700):
         service_grid.grid_in_zone.type = "FROM_COUNTRIES"
         service_grid.grid_in_zone.from_countries.country_names = [
             "Brazil",
-            "Argentina",
         ]
         service_grid.grid_in_zone.from_countries.margin_from_border = exclusion_margin_km
 
@@ -191,7 +191,6 @@ def generate_inputs(band_mhz=700):
         ]
         params.mss_d2d.sat_is_active_if.lat_long_inside_country.country_names = [
             "Brazil",
-            "Argentina",
         ]
         params.mss_d2d.sat_is_active_if.minimum_elevation_from_es = minimum_elevation_from_es
         # big number to make it so any visible satellite is ellegible
