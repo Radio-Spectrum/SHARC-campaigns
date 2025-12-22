@@ -1,5 +1,5 @@
 import numpy as np
-from sharc.antenna.antenna_factory import AntennaFactory
+from sharc.antenna.antenna_s1528 import AntennaS1528
 from pathlib import Path
 from sharc.parameters.parameters_mss_d2d import ParametersMssD2d
 from sharc.parameters.parameters import Parameters
@@ -19,44 +19,39 @@ def plot_antenna():
     parameters.load_parameters_from_file(param_file)
     # parameters.read_params()
     ant_params = parameters.antenna
-    ant = AntennaFactory.create_antenna(ant_params, 0.0, 0.0)
-    off_axis_angle = np.linspace(0, 60, num=int(3e4))
-    gains = ant.calculate_gain(
+    # ant = AntennaFactory.create_antenna(ant_params, 0.0, 0.0)
+    antenna_high = AntennaS1528(ant_params.antenna_system_4.antenna_parameters_high)
+    antenna_low = AntennaS1528(ant_params.antenna_system_4.antenna_parameters_low)
+    off_axis_angle = np.linspace(0, 60, num=int(1e4))
+    gains = antenna_high.calculate_gain(
         off_axis_angle_vec=off_axis_angle
     )
-    idx_4dB = np.where(gains <= ant_params.gain - 7.0)[0][0]
+    idx_4dB = np.where(gains <= ant_params.antenna_system_4.antenna_parameters_high.antenna_gain - 4.0)[0][0]
     angle_4dB = off_axis_angle[idx_4dB]
     g = gains[idx_4dB]
-    print("3dB angle: ", f"{off_axis_angle[np.where(gains <= ant_params.gain - 3.0)[0][0]]:.2f}")
+    print("3dB angle: ", f"{off_axis_angle[np.where(
+        gains <= ant_params.antenna_system_4.antenna_parameters_high.antenna_gain - 3.0)[0][0]]:.2f}")
     print("4dB angle: ", angle_4dB)
     print("for gain of: ", g)
-    print("when it should be eq:", ant_params.gain - 7.0)
+    print("when it should be eq:", ant_params.antenna_system_4.antenna_parameters_high.antenna_gain - 4.0)
     h = parameters.orbits[0].perigee_alt_km * 1e3  # in meters
     r = np.tan(np.deg2rad(angle_4dB)) * h
     print("resulting in radius of: ", r)
 
-    # antenna for lower elevations
-    low_elev_ant_params = ant_params
-    low_elev_ant_params.itu_r_s_1528.antenna_gain = 40.0
-    low_elev_ant_params.itu_r_s_1528.antenna_3_dB_bw = 1.68
-    low_elev_ant_params.itu_r_s_1528.antenna_l_s = -20
-    low_elev_ant_params.itu_r_s_1528.far_out_side_lobe = -15
-    low_elev_ant_params.itu_r_s_1528.validate("opa")
-
-    low_elev_ant = AntennaFactory.create_antenna(low_elev_ant_params, 0.0, 0.0)
-    low_elev_gains = low_elev_ant.calculate_gain(
+    low_elev_gains = antenna_low.calculate_gain(
         off_axis_angle_vec=off_axis_angle
     )
-    idx_4dB = np.where(low_elev_gains <= ant_params.gain - 4.0)[0][0]
+    idx_4dB = np.where(low_elev_gains <= ant_params.antenna_system_4.antenna_parameters_low.antenna_gain - 4.0)[0][0]
     angle_4dB = off_axis_angle[idx_4dB]
     g = low_elev_gains[idx_4dB]
 
     print("---- Low Elevation Antenna ----")
 
-    print("3dB angle: ", f"{off_axis_angle[np.where(low_elev_gains <= ant_params.gain - 3.0)[0][0]]:.2f}")
+    print("3dB angle: ", f"{off_axis_angle[
+        np.where(low_elev_gains <= ant_params.antenna_system_4.antenna_parameters_low.antenna_gain - 3.0)[0][0]]:.2f}")
     print("4dB angle: ", angle_4dB)
     print("for gain of: ", g)
-    print("when it should be eq:", ant_params.gain - 4.0)
+    print("when it should be eq:", ant_params.antenna_system_4.antenna_parameters_low.antenna_gain - 4.0)
     h = parameters.orbits[0].perigee_alt_km * 1e3  # in meters
     r = np.tan(np.deg2rad(angle_4dB)) * h
     print("resulting in radius of: ", r)
@@ -184,30 +179,35 @@ def plot_fps():
         # fig.write_html(f"fps/{par}/fp-3.html")
 
 def plot_pfd_analysis():
+    parameters = ParametersMssD2d()
+    param_file = MY_PATH.parent.parent / "from-docs/system/mss-dc/system-4.698-960MHz-block2.690km.yaml"
+    parameters.load_parameters_from_file(param_file)
     # calculate slant range
-    sat_altitude = 690e3
-    beam_radius_nadir = 24000
+    sat_altitude = parameters.orbits[0].apogee_alt_km * 1000
     # beam_radius_offaxis_angle = np.arctan(beam_radius_nadir / (sat_altitude)) * 180.0 / np.pi
     # print("beam radius offaxis angle: ", beam_radius_offaxis_angle)
+    tx_power_density = parameters.tx_power_density  # in dBW/Hz
     power_backoff_dB = 10.0
     # cell_edge_rolloff_dB = 4.0
 
-    def get_slant_range(beam_ground_elev: float|np.ndarray, sat_altitude: float|np.ndarray) -> float:
+    def get_slant_range(beam_ground_elev: float | np.ndarray, sat_altitude: float | np.ndarray) -> float:
         offaxis_angle = sat_elevation_to_offaxis(beam_ground_elev, sat_altitude)
         phi_rad = np.deg2rad(offaxis_to_sat_elevation(offaxis_angle, sat_altitude) + 90.0)
         central_angle_rad = np.pi - phi_rad - np.deg2rad(offaxis_angle)
-        slant_range = np.sqrt((EARTH_RADIUS_M + sat_altitude)**2 +
-                                EARTH_RADIUS_M**2 -
-                                2 * (EARTH_RADIUS_M + sat_altitude) * EARTH_RADIUS_M * np.cos(central_angle_rad))
+        slant_range = np.sqrt(
+            (EARTH_RADIUS_M + sat_altitude)**2 + EARTH_RADIUS_M**2 -
+            2 * (EARTH_RADIUS_M + sat_altitude) * EARTH_RADIUS_M * np.cos(central_angle_rad))
         return slant_range
 
     # plot PFD per beam elevation
     import matplotlib.pyplot as plt
 
     beam_ground_elevs = np.arange(20.0, 90.0, 1.0)
-    actual_eipr = np.array([34.6 if e >= 50.0 else 40.0 for e in beam_ground_elevs])
+    actual_eipr = np.array([34.6 if e >= 50.0 else 40.0 for e in beam_ground_elevs]) + tx_power_density + 60  # in dBW/Hz to dBW/MHz
     beam_radius_offaxis_angle = np.array([1.85 if e >= 50.0 else 1.02 for e in beam_ground_elevs])
-    cell_edge_rolloff_dB = np.array([4.0 if e >= 50.0 else 10.0 for e in beam_ground_elevs])
+    # beam_radius_offaxis_angle = np.ones_like(beam_ground_elevs) * 1.85
+    cell_edge_rolloff_dB = np.array([4.0 if e >= 50.0 else 4.0 for e in beam_ground_elevs])
+    # cell_edge_rolloff_dB = np.ones_like(beam_ground_elevs) * 4.0
     slant_ranges = get_slant_range(beam_ground_elevs, sat_altitude)
     pfd_per_beam_elev = actual_eipr - 10.0 * np.log10(4.0 * np.pi * slant_ranges**2)  # in dBW/m2.MHz
     cell_edge_offaxis = sat_elevation_to_offaxis(beam_ground_elevs, sat_altitude) + beam_radius_offaxis_angle
@@ -226,7 +226,7 @@ def plot_pfd_analysis():
     plt.grid(True)
     plt.xticks(fontsize=12)
     plt.yticks(fontsize=12)
-    plt.axhline(y=-114.93, color='r', linestyle='--', label='PFD Limit (-114.93 dBW/m².MHz)')
+    plt.axhline(y=-115.0, color='r', linestyle='--', label='PFD Limit (-114.93 dBW/m².MHz)')
     plt.legend(fontsize=12)
     plt.tight_layout()
     plt.savefig("pfd_per_beam_elevation.png", dpi=300)
@@ -257,4 +257,4 @@ def plot_pfd_analysis():
 if __name__ == "__main__":
     plot_antenna()
     # plot_fps()
-    # plot_pfd_analysis()
+    plot_pfd_analysis()

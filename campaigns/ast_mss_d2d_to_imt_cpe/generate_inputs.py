@@ -1,5 +1,6 @@
 from itertools import product
 from pathlib import Path
+from copy import deepcopy, copy
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
 import argparse
@@ -59,8 +60,8 @@ def generate_inputs(band_mhz=700):
         print("Generating inputs for 700 MHz band...")
         imt_id = "imt.upto-1GHz.single-bs.urban-macro-bs"
         mss_id = "system-4.698-960MHz-block2.690km"
-        # exclusion_margins_km = [24, 36, 48, 60]
-        exclusion_margins_km = [28]
+        exclusion_margins_km = [24, 36, 48]
+        # exclusion_margins_km = [28]
         # imt_bandwidth_mhz = 10.0
         imt_bandwidth_mhz = 5.0
         imt_frequency_mhz = IMT_A5_DL_BAND_LOW_MHZ + imt_bandwidth_mhz / 2
@@ -68,11 +69,12 @@ def generate_inputs(band_mhz=700):
         print("Generating inputs for 2100 MHz band...")
         imt_id = "imt.1-3GHz.single-bs.aas-macro-bs"
         mss_id = "system-4.2110-2200MHz.690km"
-        exclusion_margins_km = [12, 24, 48]
+        exclusion_margins_km = [24, 36, 48]
         imt_bandwidth_mhz = 20.0
         imt_frequency_mhz = IMT_B4_DL_BAND_LOW_MHZ + imt_bandwidth_mhz / 2
 
-    min_beam_ground_elev_deg = [20, 30, 40, 50]
+    # min_beam_ground_elev_deg = [20, 30, 40, 85]
+    min_beam_ground_elev_deg = [20, 30, 40]
 
     scenario_params = [
         IMT_UE_TYPE,
@@ -170,6 +172,7 @@ def generate_inputs(band_mhz=700):
         params.imt.topology.central_altitude = 200
 
         # Beam management - service grid
+        params.mss_d2d.cell_radius = 24.0
         params.mss_d2d.beams_load_factor = 0.5  # 50% load factor - better statistics
         params.mss_d2d.beam_positioning.type = "SERVICE_GRID"
         params.mss_d2d.beam_positioning.service_grid.transform_grid_randomly = True
@@ -197,7 +200,19 @@ def generate_inputs(band_mhz=700):
         service_grid.minimum_service_angle = beam_elev
 
         # AST's specific parameters
-        params.mss_d2d.antenna.pattern = "Satellite Beamforming"
+        params.mss_d2d.antenna.pattern = "Antenna System 4"
+
+        # make it have 2 diff objects on array based on default
+        zones = params.mss_d2d.power_control_zones.zones
+        # zones[0].geometry = deepcopy(service_grid.grid_in_zone)
+        # zones[1].geometry = deepcopy(service_grid.grid_in_zone)
+        # km
+        zones[0].geometry.from_countries.margin_from_border = 30
+        # no power backoff on most of the country
+        zones[0].power_backoff_db = 0.
+        # backoff on 0 to 100km margin from border
+        zones[1].geometry.from_countries.margin_from_border = 0
+        zones[1].power_backoff_db = 10
 
         # service_grid.grid_in_zone.type = "CIRCLE"
         # service_grid.grid_in_zone.circle.center_lat = center_lat
