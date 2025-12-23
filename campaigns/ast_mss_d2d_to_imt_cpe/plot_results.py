@@ -37,9 +37,9 @@ if band_mhz == 700:
     # output_dir_regex = ".*_0.2load.*imt.upto-1GHz.single-bs.urban-macro-bs.*"
     output_dir_regex = ".*backoff.*imt.upto-1GHz.single-bs.urban-macro-bs.*"
     imt_id = "imt.upto-1GHz.single-bs.urban-macro-bs"
-    mss_id = "system-4.698-960MHz-block2.690km"
+    mss_id = "system-4.698-960MHz-block2.690km-antenna-update"
     # exclusion_margins_km = [24, 36, 48, 60]
-    exclusion_margins_km = [28]
+    exclusion_margins_km = [24, 30]
 else:
     print("Generating plots for 2100 MHz band...")
     output_dir_regex = "1-3GHz.single-bs.aas-macro-bs.*"
@@ -48,7 +48,15 @@ else:
     exclusion_margins_km = [12, 24, 48]
 
 output_dir = f"output_{band_mhz}"
-min_beam_ground_elev_deg = [20, 30, 40, 50]
+
+##############################################
+# Campaign parameters!
+min_beam_ground_elev_deg = [20, 30, 45, 70, 80]
+exclusion_margins_km = [30]
+power_backoff = [0.0, 10.0, 15.0]
+load_factor = [0.2, 0.5]
+propagation_models = ["P619", "FSPL"]
+##############################################
 
 scenario_params = [
     IMT_UE_TYPE,
@@ -58,7 +66,9 @@ scenario_params = [
     # [0.5],  # higher load factor for better statistics
     min_beam_ground_elev_deg,
     exclusion_margins_km,
-    [0.0, 5.0, 10.0],  # power backoff dB
+    power_backoff,  # power backoff dB
+    load_factor,
+    propagation_models,
 ]
 
 post_processor = PostProcessor()
@@ -275,7 +285,7 @@ for attr, plot_type in attributes_to_plot:
         legend=dict(
             font=dict(size=14),
             x=0.01,
-            y=0.02,
+            y=-2.0,
             # xanchor='left',
             orientation='h',
             xanchor='left',
@@ -285,6 +295,7 @@ for attr, plot_type in attributes_to_plot:
             borderwidth=1
         )
     )
+    plot.update_layout(width=1400, height=2000)
     plot.write_html(file=file, include_plotlyjs="cdn", auto_open=auto_open)
     # plot.show()
 

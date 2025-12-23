@@ -75,7 +75,7 @@ mss_d2d:
           from_countries:
             country_names:
             - Brazil
-            margin_from_border: 100.0
+            margin_from_border: 150.0
       - power_backoff_db: 10.0
         geometry:
           type: FROM_COUNTRIES

@@ -16,6 +16,7 @@ SYS_IDS = [
 
 SYS_ID_TO_READABLE = {
     "system-4.698-960MHz-block2.690km": "MSS DC System 4 @690km Block 2",
+    "system-4.698-960MHz-block2.690km-antenna-update": "MSS DC System 4 @690km Block 2",
     "system-4.2110-2200MHz.690km": "MSS DC System 4 @2GHz",
 }
 
@@ -66,13 +67,14 @@ def get_specific_pattern(
     mss_id: str,
     beam_elev: float,
     exclusion_r_km: float,
-    power_backoff: float
+    power_backoff: float,
+    lf: float,
+    prop: str
 ):
     """
     Generate a pattern string identifying the simulation configuration.
     """
-    return f"{exclusion_r_km}exclusion_{beam_elev}beam_elev_{power_backoff}power_backoff_{imt_ue_type}_{imt_id}_{mss_id}"
-
+    return f"{exclusion_r_km}exclusion_{beam_elev}beam_elev_{power_backoff}power_backoff_{int(lf*100)}load_factor_{prop}prop_{imt_ue_type}_{imt_id}_{mss_id}"
 
 def get_readable(
     imt_ue_type: str,
@@ -80,7 +82,9 @@ def get_readable(
     mss_d2d_id: str,
     beam_elev: float,
     exclusion_r_km: float,
-    power_backoff: float
+    power_backoff: float,
+    lf: float,
+    prop: str
 ):
     readable_beam_elev = f"Min. Beam Elev. = {beam_elev}°"
     readable_exclusion = f"Margin = {exclusion_r_km}km"
@@ -88,7 +92,7 @@ def get_readable(
     readable_mss_d2d = SYS_ID_TO_READABLE[mss_d2d_id]
     readable_imt = IMT_ID_TO_READABLE[imt_id]
     # return f"{readable_mss_d2d}; {readable_load}; {readable_exclusion}; {imt_ue_type.upper()}"
-    return f"{readable_mss_d2d}; {readable_exclusion}; {readable_beam_elev}; Power Backoff = {power_backoff} dB"
+    return f"{readable_mss_d2d}; {readable_exclusion}; {readable_beam_elev}; Power Backoff = {power_backoff} dB; Load Factor = {int(lf*100)}%; Propagation = {prop};"
 
 
 def get_readable_from_str(
