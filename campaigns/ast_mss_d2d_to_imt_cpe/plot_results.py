@@ -17,7 +17,7 @@ cutoff_percentage = 1e-8
 
 # output_ast_mss_d2d_to_imt_cpe_24exclusion_0.2load_imt-cpe_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block2.690km_2025-11-10_01
 output_dir_pattern = re.compile(
-    r".*/output_ast_mss_d2d_to_imt_cpe_(\d+)exclusion_(\d+\.\d+)load_imt-(cpe|ue)_"
+    r".*/output_ast_mss_d2d_to_imt_cpe_(\d+)exclusion_(\d+)beam_elev_(\d+\.\d+)power_backoff_(\d+)load_.*"
 )
 
 parser = argparse.ArgumentParser(description='Generate simulation plots')
@@ -133,24 +133,15 @@ def linestyle_getter(results):
     if not match:
         return "solid"
 
-    exclusion_dist, lf, ue_type = match.groups()
+    exclusion_dist, elev, pwrbo, lf = match.groups()
     i = 3
     styles = ["solid", "dot", "dash", "dashdot"]
-    if band_mhz == 700:
-        if exclusion_dist in ["24"]:
-            i = 0
-        if exclusion_dist in ["48"]:
-            i = 1
-        if exclusion_dist in ["72"]:
-            i = 2
-    else:
-        if exclusion_dist in ["12"]:
-            i = 0
-        if exclusion_dist in ["24"]:
-            i = 1
-        if exclusion_dist in ["36"]:
-            i = 2
-    return styles[i]
+
+    pwr_backoff_strs = [str(p) for p in power_backoff]
+    for i, p in enumerate(pwr_backoff_strs):
+        if pwrbo == p:
+            return styles[i]
+    return "solid"
 
 
 post_processor.add_results_linestyle_getter(linestyle_getter)
@@ -296,6 +287,39 @@ for attr, plot_type in attributes_to_plot:
         )
     )
     plot.update_layout(width=1400, height=2000)
+    # Set color for each beam elevation
+    beam_elev_colors = {
+        20: "#1f77b4",
+        30: "#ff7f0e",
+        45: "#2ca02c",
+        70: "#d62728",
+        80: "#9467bd",
+    }
+
+    for trace in plot.data:
+        if trace.name:
+            match = re.search(r".*Elev\. = (\d+).*", trace.name)
+            if match:
+                beam_elev = int(match.group(1))
+                if beam_elev in beam_elev_colors:
+                    trace.line.color = beam_elev_colors[beam_elev]
+
+    # Set marker for each load factor
+    load_factor_markers = {
+        "20": "circle",
+        "50": "square",
+    }
+
+    for trace in plot.data:
+        if trace.name:
+            match = re.search(r".*Load Factor = ([\d.]+)%;", trace.name)
+            if match:
+                load_factor = match.group(1)
+                if load_factor == "50":
+                    trace.line.width = 4
+                else:
+                    trace.line.width = 2
+
     plot.write_html(file=file, include_plotlyjs="cdn", auto_open=auto_open)
     # plot.show()
 
