@@ -2,7 +2,7 @@ from typing import Any
 from sharc.parameters.parameters import Parameters
 
 class TrackingProxy:
-    def __init__(self, obj: Any, data: dict = None, path: str = ""):
+    def __init__(self, obj: Any, data: dict = None, path: list = []):
         self._obj = obj
         self._path = path
         self._data = data if data is not None else {}
@@ -16,7 +16,8 @@ class TrackingProxy:
         # let it pass to wrapped obj
         setattr(self._obj, name, value)
 
-        full_path = f"{self._path}.{name}" if self._path else name
+        # full_path = f"{self._path}.{name}" if self._path else name
+        full_path = self._path + [name] if self._path else [name]
 
         # record change
         self._update_data(full_path, value)
@@ -32,21 +33,42 @@ class TrackingProxy:
             proxy = TrackingProxy(
                 attr,
                 data=self._data,
-                path=f"{self._path}.{name}" if self._path else name,
+                path=self._path + [name] if self._path else [name],
             )
             object.__setattr__(self, name, proxy)
             return proxy
+        elif isinstance(attr, list):
+            # wrap list items if needed
+            wrapped_list = []
+            for index, item in enumerate(attr):
+                if self._is_trackable(item):
+                    item_proxy = TrackingProxy(
+                        item,
+                        data=self._data,
+                        # path=f"{self._path}.{name}[{index}]"
+                        path=self._path + [name] + [index]
+                        if self._path
+                        else [name] + [index],
+                    )
+                    wrapped_list.append(item_proxy)
+                else:
+                    wrapped_list.append(item)
+            object.__setattr__(self, name, wrapped_list)
+            return wrapped_list
         return attr
 
     def get_data_dict(self):
         return self._data
 
     def _update_data(self, path, value):
-        parts = path.split(".")
         d = self._data
-        for part in parts[:-1]:
-            d = d.setdefault(part, {})
-        d[parts[-1]] = value
+        for key in path[:-1]:
+            if isinstance(d, list):  # we're traversing a list
+                d = d[key]
+                continue
+            d = d.setdefault(key, {})
+        d[path[-1]] = value
+
 
     def _is_trackable(self, value):
         return (
