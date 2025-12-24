@@ -75,23 +75,22 @@ def generate_inputs(band_mhz=700):
 
     ##############################################
     # Campaign parameters!
-    min_beam_ground_elev_deg = [20, 30, 45, 70, 80]
+    pwr_ctrl_zone_margin_from_border = 150.  # km
+    min_beam_ground_elevs_deg = [20, 30, 45, 70, 80]
     exclusion_margins_km = [30]
-    power_backoff = [0.0, 10.0, 15.0]
-    load_factor = [0.2, 0.5]
-    propagation_models = ["P619", "FSPL"]
+    power_backoffs = [0.0, 10.0, 15.0]
+    load_factors = [0.2, 0.5]
+    propagation_models = ["P619"]
     ##############################################
 
     scenario_params = [
         IMT_UE_TYPE,
         [imt_id],
         [mss_id],
-        # MSS_D2D_LOAD_FACTOR,
-        # [0.5],  # higher load factor for better statistics
-        min_beam_ground_elev_deg,
+        min_beam_ground_elevs_deg,
         exclusion_margins_km,
-        power_backoff,  # power backoff dB
-        load_factor,
+        power_backoffs,  # power backoff dB
+        load_factors,
         propagation_models,
     ]
 
@@ -102,7 +101,7 @@ def generate_inputs(band_mhz=700):
         mss_d2d_id,
         beam_elev,
         exclusion_margin_km,
-        power_backoff,
+        pwr_boff,
         lf,
         prop,
     ) in product(*scenario_params):
@@ -137,8 +136,6 @@ def generate_inputs(band_mhz=700):
         params.mss_d2d.adjacent_ch_emissions = "ACLR"
         params.mss_d2d.adjacent_ch_leak_ratio = 45.0  # dB - AST typical first adjacent band
 
-        # Power per beam
-        params.mss_d2d.tx_power_density = params.mss_d2d.tx_power_density - power_backoff
 
         # IMT UE parameters
         params.imt.ue.distribution_distance = "SQRT(UNIFORM)"
@@ -214,21 +211,18 @@ def generate_inputs(band_mhz=700):
         # AST's specific parameters
         params.mss_d2d.antenna.pattern = "Antenna System 4"
 
-        # make it have 2 diff objects on array based on default
-        # zones = params.mss_d2d.power_control_zones.zones
-        # zones[0].geometry = deepcopy(service_grid.grid_in_zone)
-        # zones[1].geometry = deepcopy(service_grid.grid_in_zone)
+        zones = params.mss_d2d.power_control_zones.zones
         # km
-        # zones[0].geometry.from_countries.country_names = \
-        #     service_grid.grid_in_zone.from_countries.country_names
-        # zones[0].geometry.from_countries.margin_from_border = 150
-        # # no power backoff on most of the country
-        # zones[0].power_backoff_db = 0.
-        # # backoff on 0 to 100km margin from border
-        # zones[1].geometry.from_countries.country_names = \
-        #     service_grid.grid_in_zone.from_countries.country_names
-        # zones[1].geometry.from_countries.margin_from_border = 0
-        # zones[1].power_backoff_db = 10
+        zones[0].geometry.from_countries.country_names = \
+            deepcopy(service_grid.grid_in_zone.from_countries.country_names)
+        zones[0].geometry.from_countries.margin_from_border = pwr_ctrl_zone_margin_from_border
+        # no power backoff on most of the country
+        zones[0].power_backoff_db = 0.
+        # backoff on 0 to 100km margin from border
+        zones[1].geometry.from_countries.country_names = \
+            deepcopy(service_grid.grid_in_zone.from_countries.country_names)
+        zones[1].geometry.from_countries.margin_from_border = 0
+        zones[1].power_backoff_db = pwr_boff
 
         # service_grid.grid_in_zone.type = "CIRCLE"
         # service_grid.grid_in_zone.circle.center_lat = center_lat
@@ -245,7 +239,7 @@ def generate_inputs(band_mhz=700):
 
         # Generate the filename pattern
         specific = get_specific_pattern(
-            imt_ue_type, imt_id, mss_d2d_id, beam_elev, exclusion_margin_km, power_backoff, lf, prop
+            imt_ue_type, imt_id, mss_d2d_id, beam_elev, exclusion_margin_km, pwr_boff, lf, prop
         )
 
         params.general.output_dir_prefix = OUTPUT_START_NAME + specific
