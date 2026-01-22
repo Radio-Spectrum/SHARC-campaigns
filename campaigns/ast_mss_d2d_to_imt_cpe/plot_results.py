@@ -1,3 +1,4 @@
+import numpy as np
 from itertools import product
 import argparse
 import re as re
@@ -13,7 +14,7 @@ from campaigns.ast_mss_d2d_to_imt_cpe.constants import (
 )
 
 # used to cut off the CCDF tails
-cutoff_percentage = 1e-8
+cutoff_percentage = 1e-6
 
 # output_ast_mss_d2d_to_imt_cpe_24exclusion_0.2load_imt-cpe_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block2.690km_2025-11-10_01
 output_dir_pattern = re.compile(
@@ -81,8 +82,8 @@ attributes_to_plot = [
     # ("imt_dl_inr", "cdf"),
     # ("imt_ul_inr", "cdf"),
     ("imt_dl_inr", "ccdf"),
-    ("imt_dl_pfd_external", "ccdf"),
-    ("imt_dl_pfd_external_aggregated", "ccdf"),
+    ("imt_dl_pfd", "ccdf"),
+    ("imt_dl_interf_power", "ccdf"),
     # ("imt_ul_inr", "ccdf"),
 ]
 
@@ -105,6 +106,31 @@ cdf_results = Results.load_many_from_dir(
     only_latest=True,
     only_samples=samples_for_cdf)
 
+# Convert interferece power to PFD
+for res in ccdf_results:
+    if hasattr(res, "imt_dl_interf_power"):
+        imt_dl_interf_power_samples = np.array(res.imt_dl_interf_power)
+        # NOTE: Make sure all the parameters used here are aligned with the campaign settings!!
+        imt_freq_mhz = 758.0  # MHz
+        imt_bw_mhz = 5.0  # MHz
+        guard_band_fraction = 0.1  # 10% guard band
+        # UE band calculated from the number PRBs
+        ue_bandwidth_mhz = int(5.0 * (1 - guard_band_fraction) / 0.18) * 0.18  # MHz
+        ue_body_loss = 4.0  # dB
+        ue_antenna_gain = -3.0  # dBi
+        wavelen = 3e8 / (imt_freq_mhz * 1e6)  # m
+        imt_dl_pfd_aggregated = imt_dl_interf_power_samples - ue_antenna_gain \
+            - 10 * np.log10(wavelen**2 / (4 * np.pi)) + ue_body_loss - 10 * np.log10(ue_bandwidth_mhz)
+        # Store as SampleList in Result object - NOTE: imt_dl_pfd_aggregated attribute does not exist in the 
+        # Results class
+        res.imt_dl_pfd_aggregated = SampleList(imt_dl_pfd_aggregated)
+
+post_processor.RESULT_FIELDNAME_TO_PLOT_INFO.update({
+    "imt_dl_pfd_aggregated": {
+        "x_label": "PFD [dBW/m²/MHz]",
+        "title": "[IMT] DL Aggregated PFD",
+    },
+})
 # for res in cdf_results:
 #     print("res.output_directory", res.output_directory)
 
@@ -171,12 +197,6 @@ plots = post_processor.generate_cdf_plots_from_results(
 
 post_processor.add_plots(plots)
 
-# system_dl_interf_power_per_mhz = post_processor.get_plot_by_results_attribute_name(
-#     "system_dl_interf_power_per_mhz", plot_type="ccdf")
-# if system_dl_interf_power_per_mhz is not None:
-#     system_dl_interf_power_per_mhz.update_xaxes(
-#         title_text="dB[W/MHz]",
-#     )
 
 # Add protection criteria line
 imt_dl_inr_plot = post_processor.get_plot_by_results_attribute_name(
@@ -204,14 +224,14 @@ if imt_dl_inr_plot is not None:
 
 # Add PFD limit line
 imt_dl_pfd_external_plot = post_processor.get_plot_by_results_attribute_name(
-    "imt_dl_pfd_external", plot_type="ccdf")
+    "imt_dl_pfd", plot_type="ccdf")
 if imt_dl_pfd_external_plot is not None:
     pfd_limit = -114.93  # dBW/m2.MHz
     imt_dl_pfd_external_plot.add_vline(
         x=pfd_limit,
         line_dash="dash",
         line_color="red",
-        annotation_text=f"PFD Limit ({pfd_limit} dBW/m².MHz)",
+        annotation_text=f"PFD Limit ({pfd_limit} dBW/m²/MHz)",
         annotation_position="top left",
         annotation_font_size=14,
     )
@@ -219,7 +239,7 @@ if imt_dl_pfd_external_plot is not None:
         title_text="CCDF",
     )
     imt_dl_pfd_external_plot.update_xaxes(
-        title_text="PFD [dBW/m²]",
+        title_text="PFD [dBW/m²/MHz]",
     )
     imt_dl_pfd_external_plot.update_layout(
         legend=dict(
@@ -236,10 +256,11 @@ if imt_dl_pfd_external_plot is not None:
         )
     )
 
-
 HTMLS_DIR = campaign_ouput_dir / "htmls"
 HTMLS_DIR.mkdir(exist_ok=True)
 print(f"Saving plots in {HTMLS_DIR}")
+# Adding PFD aggregated to attributes to plot
+attributes_to_plot.append(("imt_dl_pfd_aggregated", "ccdf"))
 for attr, plot_type in attributes_to_plot:
     file = HTMLS_DIR / f"{attr}-{plot_type}.html"
     plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=plot_type)
