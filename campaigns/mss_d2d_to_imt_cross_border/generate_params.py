@@ -108,108 +108,98 @@ def generate(
         # Turn-on adjacent antenna model for both co-channel and adjacent channel studies.
         params.mss_d2d.use_oob_antenna = True
 
-        for mask in ["eirp", "mss"]:
-            # Setup adjacent channel emissions
-            if mask == "eirp":
-                # In-band antenna
-                params.mss_d2d.antenna_pattern = "ITU-R-S.1528-Taylor"
-                params.mss_d2d.antenna.pattern = "ITU-R-S.1528-Taylor"
-                params.mss_d2d.antenna.gain = 34.1
+        # Setup adjacent channel emissions
+        # In-band antenna
+        params.mss_d2d.antenna_pattern = "ITU-R-S.1528-Taylor"
+        params.mss_d2d.antenna.pattern = "ITU-R-S.1528-Taylor"
+        params.mss_d2d.antenna.gain = 34.1
 
-                # NOTE: Single fixed beam pointing nadir for OOB
-                # Accoring to SpaceX the adjacent channel emissions are measured per satellite, not per beam.
-                # We set a single beam pointing nadir. Note that we must keep the exclusion margin, but for this case
-                # it should be set from sat_is_active_if conditions.
-                # params.mss_d2d.beam_positioning.type = "ANGLE_FROM_SUBSATELLITE"  # Single fixed beam used for oob
-                # params.mss_d2d.beam_positioning.angle_from_subsatellite_theta.type = "FIXED"
-                # params.mss_d2d.beam_positioning.angle_from_subsatellite_theta.fixed = 0.0
-                # params.mss_d2d.beam_positioning.angle_from_subsatellite_phi.type = "FIXED"
-                # params.mss_d2d.beam_positioning.angle_from_subsatellite_phi.fixed = 0.0
-                # params.mss_d2d.num_sectors = 1
-                # Adjacent antenna parameters
-                params.mss_d2d.use_oob_antenna = True
-                params.mss_d2d.oob_antenna.pattern = "Cosine Antenna"
-                params.mss_d2d.oob_antenna.gain = 0.0
-                # params.mss_d2d.spectral_mask = "MSS"
-                # NOTE: Testing the multiple-beam to OOBE model apporach!
-                system3_eirp_mask_vals = \
-                        np.array([-55.6, -73.6, -83.6]) + 90 + \
-                        20 * np.log10(params.mss_d2d.frequency / 2000.0)
-                params.mss_d2d.spectral_mask = "STEPPED"
-                params.mss_d2d.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
-            else:  # "mss"
-                # Here we use the default antenna pattern and gain from the system file
-                params.mss_d2d.antenna_pattern = "ITU-R-S.1528-Taylor"
-                params.mss_d2d.antenna.pattern = "ITU-R-S.1528-Taylor"
-                params.mss_d2d.antenna.gain = 34.1
-                params.mss_d2d.use_oob_antenna = False
-                params.mss_d2d.spectral_mask = "MSS"
+        # Adjacent antenna parameters
+        # NOTE: Specific to System3 model
+        # Accoring to SpaceX the adjacent channel emissions are measured per satellite, not per beam.
+        # To cope with SpaceX OOBE model we use a "virtual" antenna for each beam that points to nadir.
+        # The gain of this virutal antenna is set in such a way that the summation of all beams is equivalent
+        # to a single beam for the whole satellite.
+        params.mss_d2d.use_oob_antenna = True
+        params.mss_d2d.oob_antenna.pattern = "Cosine Antenna"
+        params.mss_d2d.oob_antenna.gain = 0.0
 
-            # Beam pointing
-            params.mss_d2d.beam_positioning.type = "SERVICE_GRID"
-            # add per drop rand rotation + transl. to grid
-            params.mss_d2d.beam_positioning.service_grid.transform_grid_randomly = True
-            params.mss_d2d.beam_positioning.service_grid.grid_in_zone.type = "FROM_COUNTRIES"
-            params.mss_d2d.beam_positioning.service_grid.grid_in_zone.from_countries.country_names = [
-                "Brazil", "Argentina"]
-            # this is distance in km so that actual best satellite is used for each grid point
-            angle_dist_between_planes = 360 / params.mss_d2d.orbits[0].n_planes
-            margin = -np.ceil((angle_dist_between_planes / 2) * 111)
-            params.mss_d2d.beam_positioning.service_grid.eligible_sats_margin_from_border = int(
-                margin)
-            params.mss_d2d.sat_is_active_if.lat_long_inside_country.margin_from_border = int(margin)
+        # OOBE mask
+        params.mss_d2d.spectral_mask = "STEPPED"
+        system3_eirp_mask_vals = \
+            np.array([-55.6, -73.6, -83.6]) + 90 + \
+            20 * np.log10(params.mss_d2d.frequency / 2000.0)
+        params.mss_d2d.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
 
-            params.mss_d2d.param_p619.below_rooftop = 0.0 if link == "dl" else 50.0
+        # Here we use the default antenna pattern and gain from the system file
+        params.mss_d2d.antenna_pattern = "ITU-R-S.1528-Taylor"
+        params.mss_d2d.antenna.pattern = "ITU-R-S.1528-Taylor"
+        params.mss_d2d.antenna.gain = 34.1
 
-            # Get cell radius
-            # params.mss_d2d.antenna_s1528.frequency = params.mss_d2d.frequency
-            params.mss_d2d.antenna.itu_r_s_1528.frequency = 2000.0  # fix lambda=0.15m
-            # NOTE: max frequency yields smaller cell radius
-            # params.mss_d2d.antenna_s1528.frequency = max(ul_imt_freq, dl_imt_freq)
-            antenna = AntennaS1528Taylor(
-                params.mss_d2d.antenna.itu_r_s_1528
-            )
-            off_axis = np.linspace(0, 20, int(1e6))
-            gains = antenna.calculate_gain(
-                off_axis_angle_vec=off_axis,
-                theta_vec=0,
-            )
-            angle_7dB_i = np.where(
-                gains <= 34.1 - 7)[0][0]
-            angle_7dB = off_axis[angle_7dB_i]
-            cell_radius = np.tan(np.deg2rad(angle_7dB)) * \
-                params.mss_d2d.orbits[0].apogee_alt_km * 1e3
+        # Beam pointing
+        params.mss_d2d.beam_positioning.type = "SERVICE_GRID"
+        # add per drop rand rotation + transl. to grid
+        params.mss_d2d.beam_positioning.service_grid.transform_grid_randomly = True
+        params.mss_d2d.beam_positioning.service_grid.grid_in_zone.type = "FROM_COUNTRIES"
+        params.mss_d2d.beam_positioning.service_grid.grid_in_zone.from_countries.country_names = [
+            "Brazil", "Argentina"]
+        # this is distance in km so that actual best satellite is used for each grid point
+        angle_dist_between_planes = 360 / params.mss_d2d.orbits[0].n_planes
+        margin = -np.ceil((angle_dist_between_planes / 2) * 111)
+        params.mss_d2d.beam_positioning.service_grid.eligible_sats_margin_from_border = int(
+            margin)
+        params.mss_d2d.sat_is_active_if.lat_long_inside_country.margin_from_border = int(margin)
 
-            # apprx. 36675.5
-            params.mss_d2d.cell_radius = int(cell_radius)
-            print(f"[IMT TN {params.general.imt_link}]:")
-            print(f"\tCalculated cell radius: ", params.mss_d2d.cell_radius)
+        params.mss_d2d.param_p619.below_rooftop = 0.0 if link == "dl" else 50.0
 
-            min_margin = round(params.mss_d2d.cell_radius / 1e3, 0)
-            # distances = [min_margin, 2 * min_margin]
-            distances = [min_margin]
-            print("\tScenarios of grid border as ", distances)
+        # Get cell radius
+        # params.mss_d2d.antenna_s1528.frequency = params.mss_d2d.frequency
+        params.mss_d2d.antenna.itu_r_s_1528.frequency = 2000.0  # fix lambda=0.15m
+        # NOTE: max frequency yields smaller cell radius
+        # params.mss_d2d.antenna_s1528.frequency = max(ul_imt_freq, dl_imt_freq)
+        antenna = AntennaS1528Taylor(
+            params.mss_d2d.antenna.itu_r_s_1528
+        )
+        off_axis = np.linspace(0, 20, int(1e6))
+        gains = antenna.calculate_gain(
+            off_axis_angle_vec=off_axis,
+            theta_vec=0,
+        )
+        angle_7dB_i = np.where(
+            gains <= 34.1 - 7)[0][0]
+        angle_7dB = off_axis[angle_7dB_i]
+        cell_radius = np.tan(np.deg2rad(angle_7dB)) * \
+            params.mss_d2d.orbits[0].apogee_alt_km * 1e3
 
-            # Point the IMT-BS to east - worst case scenario
-            params.imt.topology.single_bs.azimuth = [0.0]
+        # apprx. 36675.5
+        params.mss_d2d.cell_radius = int(cell_radius)
+        print(f"[IMT TN {params.general.imt_link}]:")
+        print(f"\tCalculated cell radius: ", params.mss_d2d.cell_radius)
 
-            for load in [0.1, 0.2, 0.5]:
-                params.mss_d2d.beams_load_factor = load
-                for border in distances:
-                    params.mss_d2d.beam_positioning.service_grid.grid_in_zone.from_countries.margin_from_border = border
+        min_margin = round(params.mss_d2d.cell_radius / 1e3, 0)
+        distances = [min_margin, 2 * min_margin]
+        print("\tScenarios of grid border as ", distances)
 
-                    output_start = get_output_dir_start(mss_id, co_channel)
-                    params.general.output_dir = f"{CAMPAIGN_STR}/{output_start}_{link}/"
+        # Point the IMT-BS to east - worst case scenario
+        params.imt.topology.single_bs.azimuth = [0.0]
 
-                    postfix = f"mss_d2d_to_imt_cross_border_{mask}_mask_{border}km_{load}load_{link}"
-                    params.general.output_dir_prefix = f"output_{postfix}"
-                    file = INPUTS_DIR / \
-                        f"parameter_{mss_id}_{"co" if co_channel else "adj"}_{postfix}.yaml"
+        for load in [0.1, 0.2, 0.5]:
+            params.mss_d2d.beams_load_factor = load
+            for border in distances:
+                params.mss_d2d.beam_positioning.service_grid.grid_in_zone.from_countries.margin_from_border = border
 
-                    # Create parent directories if they don't exist
-                    dump_parameters(
-                        file, params
-                    )
+                output_start = get_output_dir_start(mss_id, co_channel)
+                params.general.output_dir = f"{CAMPAIGN_STR}/{output_start}_{link}/"
+
+                postfix = f"mss_d2d_to_imt_cross_border_{border}km_{load}load_{link}"
+                params.general.output_dir_prefix = f"output_{postfix}"
+                file = INPUTS_DIR / \
+                    f"parameter_{mss_id}_{"co" if co_channel else "adj"}_{postfix}.yaml"
+
+                # Create parent directories if they don't exist
+                dump_parameters(
+                    file, params
+                )
 
 
 if __name__ == "__main__":

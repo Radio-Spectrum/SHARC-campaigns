@@ -13,7 +13,7 @@ from campaigns.utils.constants import SHARC_SIM_ROOT_DIR
 
 OUTPUT_ROOT_FOLDER = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 
-OUTPUT_FOLDER_REGEX = r"output_mss_d2d_to_imt_cross_border_(eirp|mss)_mask_(\d+\.\d+)km_(\d+\.\d+)load_([ud]l)_"
+OUTPUT_FOLDER_REGEX = r"output_mss_d2d_to_imt_cross_border_(\d+\.\d+)km_(\d+\.\d+)load_([ud]l)_"
 if __name__ == "__main__":
     post_processor = PostProcessor()
 
@@ -46,12 +46,12 @@ if __name__ == "__main__":
             print(f"Could not parse dirname for legend: {dirname}")
             return "Unknown"
 
-        mask, border_km, load_pct, link_type = match.groups()
+        border_km, load_pct, link_type = match.groups()
 
         link_type = link_type.upper()
         load_pct = float(load_pct) * 100
 
-        return f"{load_pct}% lf, {border_km} km excl. zone, IMT-{link_type}, MASK-{mask}"
+        return f"{load_pct}% lf, {border_km} km margin, IMT-{link_type}"
 
     post_processor.add_plot_legend_generator(legend_gen)
 
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         if not match:
             return "solid"
 
-        mask, border_km, load_pct, link_type = match.groups()
+        border_km, load_pct, link_type = match.groups()
 
         if load_pct == "0.1":
             return "solid"
@@ -124,7 +124,7 @@ if __name__ == "__main__":
         )
         match = pattern.match(res.output_directory)
         if match:
-            mask, border_km, load_pct, link_type = match.groups()
+            border_km, load_pct, link_type = match.groups()
         else:
             print(f"Could not parse dirname: {res.output_directory}")
             continue
@@ -143,7 +143,7 @@ if __name__ == "__main__":
 
         percentile_values = np.percentile(inr_values, percentiles, method='inverted_cdf')
         for i, p in enumerate(percentiles):
-            print(f"{mask}, {orbit_altitude_km}km, {link_type.upper()}, {border_km}km, {100 * float(load_pct):.1f}%, p{p}, {np.round(percentile_values[i] - inr_protection_criteria, 2)}")
+            print(f"{orbit_altitude_km}km, {link_type.upper()}, {border_km}km, {100 * float(load_pct):.1f}%, p{p}, {np.round(percentile_values[i] - inr_protection_criteria, 2)}")
 
     # If set to True the plots will be opened in the browser automatically
     auto_open = False
