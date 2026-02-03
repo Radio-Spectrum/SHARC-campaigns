@@ -43,6 +43,7 @@ if __name__ == "__main__":
         )
         match = pattern.match(dirname)
         if not match:
+            print(f"Could not parse dirname for legend: {dirname}")
             return "Unknown"
 
         mask, border_km, load_pct, link_type = match.groups()
