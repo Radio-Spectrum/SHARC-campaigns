@@ -88,8 +88,7 @@ def generate(
     # Polarization loss - following Item 2.2 of the Rec. ITU-P.619
     params.mss_d2d.polarization_loss = 3.0  # dB
 
-    # for link in ["dl", "ul"]:
-    for link in ["dl"]:
+    for link in ["dl", "ul"]:
         params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
         params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
         # Brings DC-MSS to 2110-2120 DL or 1920-1930 ULband
