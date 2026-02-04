@@ -121,7 +121,7 @@ def generate(
         # The gain of this virutal antenna is set in such a way that the summation of all beams is equivalent
         # to a single beam for the whole satellite.
         params.mss_d2d.use_oob_antenna = True
-        params.mss_d2d.oob_antenna.pattern = "Cosine Antenna"
+        params.mss_d2d.oob_antenna.pattern = "Antenna System3 OOB"
         params.mss_d2d.oob_antenna.gain = 0.0
 
         # OOBE mask
