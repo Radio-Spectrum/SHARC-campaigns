@@ -15,7 +15,9 @@ mss_d2d:
     # however editor's note specifies that 1528 is still valid for oob
     # In a later editor's note, it is specified that REC ITU-R SM.1541
     # should model oob power emissions when missing specs
-    spectral_mask: MSS
+    spectral_mask: STEPPED
+    # Steps of the chosen spectral mask in dB (PER SCENARIO)
+    spectral_mask_steps: !!python/tuple [34.4, 16.4,  6.4]
     # MSS_D2D system center frequency in MHz (PER SCENARIO)
     frequency: -1
     # MSS_D2d system bandwidth in MHz
