@@ -48,140 +48,6 @@ def get_taylor_cell_radius(
     return int(cell_radius)
 
 
-def calculate_equivalent_acs(
-    ue_f_MHz,
-    ue_bw_MHz,
-    other_f_MHz,
-    other_bw_MHz,
-):
-    """
-    Returns the equivalent ACS considering the freqs and bws
-    """
-    # NOTE: this function probably should not be here, but somehow
-    # together with from-docs equipment definition
-
-    ue_lim_s = ue_f_MHz - ue_bw_MHz / 2
-    ue_lim_e = ue_f_MHz + ue_bw_MHz / 2
-    other_lim_s = other_f_MHz - other_bw_MHz / 2
-    other_lim_e = other_f_MHz + other_bw_MHz / 2
-
-    if (
-        ue_lim_s < other_lim_s < ue_lim_e
-    ) or (
-        ue_lim_s < other_lim_e < ue_lim_e
-    ):
-        # may not be needed?
-        raise ValueError(
-            "Expected adjacent channel to calculate for ACS"
-        )
-    if other_lim_s >= ue_lim_e:
-        df_s = other_lim_s - ue_lim_e
-        df_e = other_lim_e - ue_lim_e
-    elif other_lim_e <= ue_lim_s:
-        df_s = ue_lim_s - other_lim_e
-        df_e = ue_lim_s - other_lim_s
-
-    mask_lims = np.array([
-        0.,
-        ue_bw_MHz,
-        3 * ue_bw_MHz,
-        np.inf,
-    ])
-    mask_vals_dBc = np.array([
-        15., 25., 30.
-    ])
-
-    mask_bins_overlap_MHz = np.zeros_like(mask_vals_dBc)
-    for i in range(len(mask_lims) - 1):
-        win_s = max(mask_lims[i], df_s)
-        win_e = min(mask_lims[i + 1], df_e)
-        mask_bins_overlap_MHz[i] = max(win_e - win_s, 0)
-
-    equivalent_attenuation = -10 * np.log10(
-        np.sum(mask_bins_overlap_MHz * 10 ** (-0.1 * mask_vals_dBc))
-        / other_bw_MHz
-    )
-
-    return float(equivalent_attenuation)
-
-
-def test_calculate_equivalent_acs():
-    """
-    Tests and plots mask calculation for this system acs
-    """
-    # NOTE: this function probably should not be here, but somehow
-    # together with from-docs equipment definition
-
-    plot = False
-    # plot = True
-    if plot:
-        import matplotlib.pyplot as plt
-        mask_lims = np.array([
-            1.23/2 + 0.,
-            1.23/2 + 1.23,
-            1.23/2 + 3 * 1.23,
-            10,
-        ])
-        mask_lims = np.concatenate((
-            -mask_lims[::-1],
-            mask_lims
-        ))
-        mask_lims = np.repeat(mask_lims, 2)
-        mask_lims[::2] -= 1e-4
-        mask_lims = mask_lims[1:-1]
-        mask_vals_dBc = -np.array([
-            0, 15., 25., 30.
-        ])
-        mask_vals_dBc = np.roll(np.repeat(mask_vals_dBc, 2), -1)
-        mask_vals_dBc = np.concatenate((
-            mask_vals_dBc[::-1],
-            mask_vals_dBc
-        ))
-        mask_vals_dBc = mask_vals_dBc[1:-1]
-
-        plt.plot(
-            mask_lims,
-            mask_vals_dBc
-        )
-        plt.scatter(
-            mask_lims,
-            mask_vals_dBc
-        )
-        plt.xlim(-15, 15)
-        plt.ylim(-35, 0.1)
-        plt.grid(True)
-        plt.show()
-    print("hey")
-    acs = calculate_equivalent_acs(
-        2500 - 1.23/2, 1.23,
-        2500 + 1.23/2, 1.23,
-    )
-
-    if abs(acs - 15) > 1e-5:
-        raise Exception(f"{acs} != 15")
-
-    acs = calculate_equivalent_acs(
-        2500 - 1.23/2, 1.23,
-        2500 + 1.23/2 + 1.23, 1.23,
-    )
-
-    if abs(acs - 25) > 1e-5:
-        raise Exception(f"{acs} != 25")
-
-    acs = calculate_equivalent_acs(
-        2500 - 1.23/2, 1.23,
-        2500 + 5/2, 5,
-    )
-
-    # PSD = 0 dBW/MHz
-    # => attenuated = 10 * log10(1.23*10**(-1.5) + (2 * 1.23) * 10**(-2.5) + (5 - 3.69)*10**(-3))
-    # => non_attenuated = 10*log10(5)
-    # attenuation = -(attenuated - non_attenuated) = 20.1786252944
-
-    if abs(acs - 20.1786252944) > 1e-5:
-        raise Exception(f"{acs} != 20.1786252944")
-
-
 def generate_inputs():
     """Generates all campaign input files"""
     OUTPUT_START_NAME = f"output_{CAMPAIGN_NAME}_"
@@ -205,24 +71,39 @@ def generate_inputs():
         ##########
         # Scenario
 
+        # NOTE: Generating only for adjacent channel case!!
         params.general.enable_adjacent_channel = True
         params.general.enable_cochannel = False
         params.imt.interfered_with = False
         # NOTE: needed for performance. Discards unnecessary calcs.
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
-        params.imt.adjacent_ch_emissions = "ACLR"
-        # We set this as the EIRP value already includes the adjacent emissions
-        params.imt.bs.adjacent_ch_leak_ratio = 0
-        # dBW based on the EIRP for first adjacent band: -55.6 dBW/Hz
-        params.imt.bs.conducted_power = 42.128
-
         params.imt.frequency = 2172.5 + params.imt.bandwidth
         params.single_earth_station.frequency = 2172.5
 
+        ############## ADJ EMISSIONS MODEL PART ################
+        # Adjacent emissions model for System3 only!
         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
+        params.imt.spectral_mask = "STEPPED"
+        system3_eirp_mask_vals = \
+            np.array([-55.6, -73.6, -83.6]) + 90 + \
+            20 * np.log10(params.imt.frequency / 2000.0)
+        params.imt.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
+
+        # Adjacent antenna parameters
+        # NOTE: Specific to System3 model
+        # Accoring to SpaceX the adjacent channel emissions are measured per satellite, not per beam.
+        # To cope with SpaceX OOBE model we use a "virtual" antenna for each beam that points to nadir.
+        # The gain of this virutal antenna is set in such a way that the summation of all beams is equivalent
+        # to a single beam for the whole satellite.
+        params.mss_d2d.use_oob_antenna = True
+        params.mss_d2d.oob_antenna.pattern = "Antenna System3 OOB"
+        params.mss_d2d.oob_antenna.gain = 0.0
+
         params.single_earth_station.adjacent_ch_reception = "ACS"
+
+        ###################################
+
 
         # params.single_earth_station.adjacent_ch_selectivity = calculate_equivalent_acs(
         #     params.single_earth_station.frequency,
@@ -294,10 +175,10 @@ def generate_inputs():
 
         # Set adjacent antenna pattern
 
+        # NOTE: Only applicable for system 3!!
         # Get cell radius based on co-channel antenna pattern
-        params.imt.bs.antenna.itu_r_s_1528.frequency = 2000
         params.imt.bs.antenna.set_external_parameters(
-            frequency=params.imt.frequency,
+            frequency=2000,
         )
         params.imt.topology.mss_dc.beam_radius = get_taylor_cell_radius(
             params.imt.bs.antenna.itu_r_s_1528,
@@ -305,12 +186,6 @@ def generate_inputs():
         )
         print(
             f"\tA cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
-
-        params.imt.bs.antenna.pattern = "MSS Adjacent"
-        params.imt.bs.antenna.mss_adjacent.frequency = params.imt.frequency
-        params.imt.bs.antenna.set_external_parameters(
-            frequency=params.imt.frequency,
-        )
 
         # also do uniform dist of elevation angles
         params.single_earth_station.geometry.elevation.type = "UNIFORM_DIST"
