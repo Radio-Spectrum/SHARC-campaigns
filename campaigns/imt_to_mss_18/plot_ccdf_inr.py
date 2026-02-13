@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 import re
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Union
@@ -8,15 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-# Allow running this script directly: add project root and SHARC to path
-_project_root = Path(__file__).resolve().parent.parent.parent
-if str(_project_root) not in sys.path:
-    sys.path.insert(0, str(_project_root))
-_sharc_root = _project_root.parent / "SHARC"
-if _sharc_root.exists() and str(_sharc_root) not in sys.path:
-    sys.path.insert(0, str(_sharc_root))
-
-from constants import OUTPUT_DIR
+from campaigns.imt_to_mss_18.constants import OUTPUT_DIR
 
 # ===================== USER SETTINGS =====================
 # Protection criteria: (threshold_dB, CCDF_probability)
@@ -505,34 +496,51 @@ def plot_ccdf_inr(
     if show_protection_criteria and protection_criteria:
         print_protection_margins_table(curves_data, protection_criteria)
     
+    # Sort curves by distance (R value) to ensure consistent color ordering
+    # This matches the behavior of the reference plot file
+    def get_distance_for_sorting(features: Dict) -> float:
+        """Get distance in km for sorting purposes"""
+        if features.get("R") is not None:
+            return (features["R"] - 1600) / 1000.0
+        return float('inf')  # Put curves without R at the end
+    
+    curves_data_sorted = sorted(curves_data, key=lambda c: get_distance_for_sorting(c["features"]))
+    
     # Create plot
     fig, ax = plt.subplots(figsize=FIGSIZE)
     
-    # Plot each curve
-    for curve in curves_data:
+    # Plot each curve (matplotlib will use its default color cycle automatically)
+    # This ensures colors match the reference plot when curves are in the same order
+    for curve in curves_data_sorted:
         xs, ccdf = ecdf_to_ccdf(curve["data"])
         if xs.size > 0:
-            ax.semilogy(xs, ccdf, drawstyle="steps-post", label=curve["label"], linewidth=1.5)
+            ax.semilogy(xs, ccdf, drawstyle="steps-post", label=curve["label"], 
+                       linewidth=1.5)
     
     # Add protection criteria lines
     pc_handles = []
     if show_protection_criteria:
-        # Define different colors for each protection criterion
-        colors = ['red', 'blue', 'green', 'orange', 'purple', 'brown', 'pink', 'gray']
+        # Protection criteria styles matching the reference plot
+        # 1º limiar: vermelho tracejado | 2º: laranja tracejado | 3º: marrom pontilhado
+        PROTECTION_STYLES = [
+            dict(color="#d62728", linestyle="--", linewidth=1.6),  # -6 dB
+            dict(color="#ff7f0e", linestyle="--", linewidth=1.6),  # -7 dB
+            dict(color="#5c1919", linestyle=":",  linewidth=1.8),  # -10.5 dB
+        ]
         
         for idx, (thr_db, prob) in enumerate(protection_criteria):
-            # Use different color for each criterion
-            color = colors[idx % len(colors)]
+            st = PROTECTION_STYLES[idx % len(PROTECTION_STYLES)]
             
             # Vertical line at threshold
-            ax.axvline(thr_db, linestyle="--", linewidth=1.5, color=color, alpha=0.7)
+            ax.axvline(thr_db, alpha=0.95, zorder=3, **st)
             # Horizontal line at probability
-            ax.axhline(prob, linestyle="--", linewidth=1.5, color=color, alpha=0.7)
-            # Removed: intersection point marker
+            ax.axhline(prob, alpha=0.95, zorder=3, **st)
             
+            # Legend: threshold with 1 decimal place; probability in %
             pc_handles.append(Line2D(
-                [], [], linestyle="--", color=color, linewidth=1.5,
-                label=f"Protection: {thr_db} dB @ {prob*100:.2f}%"
+                [], [], color=st["color"], linestyle=st["linestyle"], 
+                linewidth=st["linewidth"],
+                label=f"Protection Criteria ({thr_db:.1f} dB, {prob*100:.2g}%)"
             ))
     
     # Configure plot
@@ -567,8 +575,8 @@ def plot_ccdf_inr(
 
 if __name__ == "__main__":
     import sys
-    height = [40]
-    distance = [230000, 235000, 240000, 245000, 250000]
+    height = [1]
+    distance = [1000, 2000, 5000, 10000]
     # ===================== CONFIGURATION =====================
     # Configure which curves to plot
     # Format: (R, x_pos, height, clutter, location_type, custom_label)
@@ -597,12 +605,13 @@ if __name__ == "__main__":
         #(1600 + distance[3], (1600 + distance[3]), height[0], "one_end", "FIXED", f"To the right, h={height[0]}m, Distance = {distance[3]/1000}Km"),
         #(1600 + distance[4], (1600 + distance[4]), height[0], "one_end", "FIXED", f"To the right, h={height[0]}m, Distance = {distance[4]/1000}Km"),
 
-        (1600 + distance[0], None, height[0], "one_end", "UNIFORM", f"UNIFORM, h={height[0]}m, Distance = {distance[0]/1000}Km"),
-        (1600 + distance[1], None, height[0], "one_end", "UNIFORM", f"UNIFORM, h={height[0]}m, Distance = {distance[1]/1000}Km"),
-        (1600 + distance[2], None, height[0], "one_end", "UNIFORM", f"UNIFORM, h={height[0]}m, Distance = {distance[2]/1000}Km"),
-        (1600 + distance[3], None, height[0], "one_end", "UNIFORM", f"UNIFORM, h={height[0]}m, Distance = {distance[3]/1000}Km"),
-        (1600 + distance[4], None, height[0], "one_end", "UNIFORM", f"UNIFORM, h={height[0]}m, Distance = {distance[4]/1000}Km"),
-
+        (1600 + distance[0], -(1600 + distance[0]), height[0], "both_ends", "FIXED", f"Δ = {distance[0]/1000} km, To the left"),
+        (1600 + distance[0], (1600 + distance[0]), height[0], "both_ends", "FIXED", f"Δ = {distance[0]/1000} km, To the right"),
+        (1600 + distance[1],None, height[0], "both_ends", "UNIFORM", f"Δ = {distance[0]/1000} km, UNIFORM"),
+        #(1600 + distance[1], -(1600 + distance[1]), height[0], "both_ends", "FIXED", f"Δ = {distance[1]/1000} km"),
+        #(1600 + distance[2], -(1600 + distance[2]), height[0], "both_ends", "FIXED", f"Δ = {distance[2]/1000} km"),
+        #(1600 + distance[3], -(1600 + distance[3]), height[0], "both_ends", "FIXED", f"Δ = {distance[3]/1000} km"),
+        
          #(1600 + 30000, None, 45, "both_ends", "UNIFORM", "UNIFORM, h=40m, Distance = 30Km"),
          #(1600 + distance[0], None, height[0], "both_ends", "UNIFORM", f"UNIFORM, h={height[0]}m, Distance = {distance[0]/1000}Km"),
          #(1600 + distance[1], None, height[0], "both_ends", "UNIFORM", f"UNIFORM, h={height[0]}m, Distance = {distance[1]/1000}Km"),

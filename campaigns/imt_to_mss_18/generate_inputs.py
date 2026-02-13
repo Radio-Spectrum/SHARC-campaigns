@@ -2,12 +2,12 @@ from itertools import product
 from pathlib import Path
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.imt_to_mss_14.constants import CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR
+from campaigns.imt_to_mss_18.constants import CAMPAIGN_STR, CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR
 
 SEED = 83
 
 # Configuration
-CLUTTER_TYPES = ['one_end']
+CLUTTER_TYPES = ['both_ends']
 ALLOWED_CLUTTER_TYPES = {'one_end', 'both_ends'}
 
 general = {
@@ -97,21 +97,21 @@ def generate_inputs():
 
     # Campaign parameters
     Ro = 1600
-    R_values = [Ro + 230000, Ro + 235000, Ro + 240000, Ro + 245000, Ro + 250000]
+    R_values = [Ro + 1000, Ro + 2000, Ro + 5000, Ro + 10000]
     load_probabilities = [50]
     p_modes = ["RANDOM_CENARIO"]
     
     # Earth Station position parameters
     use_fixed_options = [True, False]  # Iterate between FIXED and UNIFORM_DIST
     x_positions = [1, -1]  # Multipliers: 1 for x=R, -1 for x=-R
-    heights = [5, 40]  # Heights in meters
+    heights = [1]  # Heights in meters
 
     for imt_link in ["DOWNLINK"]:
         general["imt_link"] = imt_link
         imt_link_tag = _shorten_link_tag(imt_link)  # Use shortened link tag
 
         for imt_id in ["imt.7300MHz.macrocell"]:
-            for mss_id in ["mss.7300MHz.hubType-14"]:
+            for mss_id in ["mss.7300MHz.hubType-18"]:
                 for R, load_pct, p_mode, clutter_type, use_fixed, x_mult, height in product(
                     R_values, load_probabilities, p_modes, clutter_types, use_fixed_options, x_positions, heights
                 ):
