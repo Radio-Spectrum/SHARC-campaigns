@@ -35,6 +35,9 @@ mss_d2d:
     polarization_loss: 0
     # Number of sectors (PER SCENARIO)
     num_sectors: 19
+    # The maximum number of beams per satellite.
+    # NOTE: This is used when implementing System3 OOBE model
+    max_num_of_beams: 90
     # Satellite antenna pattern
     # Antenna pattern from ITU-R S.1528
     # Possible values: "ITU-R-S.1528-Section1.2", "ITU-R-S.1528-LEO"

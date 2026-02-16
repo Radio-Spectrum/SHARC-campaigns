@@ -68,6 +68,9 @@ imt:
         ###########################################################################
         # Single Base Station Topology parameters. Relevant when imt.topology.type == "SINGLE_BS"
         mss_dc:
+            # The maximum number of beams per satellite.
+            # NOTE: This is used when implementing System3 OOBE model
+            max_num_of_beams: 90
             orbits:
                 # Number of planes
               - n_planes: 28
