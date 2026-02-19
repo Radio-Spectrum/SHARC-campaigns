@@ -1,9 +1,9 @@
-from campaigns.utils.constants import ROOT_DIR, SHARC_SIM_ROOT_DIR
+from campaigns.utils.constants import ROOT_DIR
 
 CAMPAIGN_NAME = "mss_d2d_to_mss_study"
 CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 
-CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
+CAMPAIGN_DIR = ROOT_DIR / CAMPAIGN_STR
 INPUTS_DIR = CAMPAIGN_DIR / "input/"
 OUTPUT_DIR = CAMPAIGN_DIR / "output/"
 
