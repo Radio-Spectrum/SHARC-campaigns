@@ -1,15 +1,16 @@
-from campaigns.utils.constants import SHARC_SIM_ROOT_DIR
+from campaigns.utils.constants import ROOT_DIR, SHARC_SIM_ROOT_DIR
 
-CAMPAIGN_NAME = "mss_d2d_to_mss_2500MHz"
+CAMPAIGN_NAME = "mss_d2d_to_mss_study"
 CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 
 CAMPAIGN_DIR = SHARC_SIM_ROOT_DIR / CAMPAIGN_STR
 INPUTS_DIR = CAMPAIGN_DIR / "input/"
+OUTPUT_DIR = CAMPAIGN_DIR / "output/"
 
 # MSS DC as IMT
 IMT_MSS_DC_IDS = [
     "imt.2300-2690MHz.mss-dc.system3-525km",
-    "imt.2300-2690MHz.mss-dc.system3-340km",
+#    "imt.2300-2690MHz.mss-dc.system3-340km",
 ]
 MSS_DC_LOAD_FACTORS = [
     0.1,
@@ -22,20 +23,20 @@ USE_RANDOM_GRID_TRANSFORMATION = [
 ]
 # MSS victim earth station/user terminal
 SINGLE_ES_MSS_IDS = [
-    "mss.2500MHz.hibleo-x",
-    "mss.2500MHz.hibleo-xl-1",
-    "mss.2500MHz.ast-ng-c-3",
+    "mss.2100MHz.7.1.4-forward-R",
+    "mss.2100MHz.7.1.5-ES-type-1",
+    "mss.2100MHz.7.1.5-ES-type-2",
 ]
 
 MSS_ES_TO_READABLE = {
-    "mss.2500MHz.hibleo-x": "Hibleo-X",
-    "mss.2500MHz.hibleo-xl-1": "Hibleo-XL-1",
-    "mss.2500MHz.ast-ng-c-3": "AST-NG-C-3",
+    "mss.2100MHz.7.1.4-forward-R": "System R (Forward)",
+    "mss.2100MHz.7.1.5-ES-type-1": "ES Type-1 (G=2dBi)",
+    "mss.2100MHz.7.1.5-ES-type-2": "ES Type-2 (G=10dBi)",
 }
 
 IMT_MSS_DC_ID_TO_READABLE = {
     "imt.2300-2690MHz.mss-dc.system3-525km": "MSS DC @525km",
-    "imt.2300-2690MHz.mss-dc.system3-340km": "MSS DC @340km",
+#    "imt.2300-2690MHz.mss-dc.system3-340km": "MSS DC @340km",
 }
 
 

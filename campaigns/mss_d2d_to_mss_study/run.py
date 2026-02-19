@@ -1,9 +1,8 @@
 import argparse
 import sys
 from sharc.run_multiple_campaigns_mut_thread import run_campaign
-
-from campaigns.mss_d2d_to_mss_2500MHz.generate_inputs import clear_inputs, generate_inputs, test_calculate_equivalent_acs
-from campaigns.mss_d2d_to_mss_2500MHz.constants import CAMPAIGN_NAME, INPUTS_DIR
+from campaigns.mss_d2d_to_mss_study.constants import CAMPAIGN_NAME, INPUTS_DIR
+from campaigns.mss_d2d_to_mss_study.generate_inputs import clear_inputs, generate_inputs
 
 def main():
     parser = argparse.ArgumentParser(description="MSS D2D to MSS campaign runner")
@@ -16,7 +15,7 @@ def main():
 
     if not args.dont_generate:
         # TODO: add unit testing to campaigns?
-        test_calculate_equivalent_acs()
+        #test_calculate_equivalent_acs()
         clear_inputs()
         generate_inputs()
     else:

@@ -57,6 +57,24 @@ def generate(
     #######
     # mss parameters
 
+     # Adjacent antenna parameters
+    # NOTE: Specific to System3 model
+    # Accoring to SpaceX the adjacent channel emissions are measured per satellite, not per beam.
+    # To cope with SpaceX OOBE model we use a "virtual" antenna for each beam that points to nadir.
+    # The gain of this virutal antenna is set in such a way that the summation of all beams is equivalent
+    # to a single beam for the whole satellite.
+    params.mss_d2d.use_oob_antenna = True
+    params.mss_d2d.oob_antenna.pattern = "Antenna System3 OOB"
+    params.mss_d2d.oob_antenna.gain = 0.0
+
+    # OOBE mask
+    params.mss_d2d.spectral_mask = "STEPPED"
+    system3_eirp_mask_vals = \
+        np.array([-55.6, -73.6, -83.6]) + 90 + \
+        20 * np.log10(params.mss_d2d.frequency / 2000.0)
+    params.mss_d2d.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
+
+
     # Beam pointing
     params.mss_d2d.beam_positioning.type = "SERVICE_GRID"
     params.mss_d2d.beam_positioning.service_grid.country_names = ["Brazil", "Argentina"]
@@ -84,7 +102,7 @@ def generate(
     # Polarization loss - following Item 2.2 of the Rec. ITU-P.61
     params.mss_d2d.polarization_loss = 3.0  # dB
 
-    for link in ["dl", "ul"]:
+    for link in ["dl"]:
         params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
         params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
         if co_channel:
