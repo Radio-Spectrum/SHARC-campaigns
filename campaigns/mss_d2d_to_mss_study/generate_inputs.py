@@ -78,43 +78,36 @@ def generate_inputs():
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
         # lower bound of closest DL MSS DC band
-        params.imt.frequency = 2162.5   
+        params.imt.frequency = 2162.5
         # upper bound of MSS UE rx band
         params.single_earth_station.frequency = 2157.5   # From REGION 2
 
+        # Victim's adjacent channel reception characteristics
         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
         params.imt.spurious_emissions = -13
-        params.single_earth_station.adjacent_ch_reception = "OFF"
-    
-
+        # NOTE: Check the ACS values!!
+        params.single_earth_station.adjacent_ch_reception = "ACS"
+        params.single_earth_station.adjacent_ch_selectivity = 45
 
         # Geometry
-        # imt parameters
-        # International Friendship Bridge
-        params.imt.topology.central_latitude = -25.5549751
-        params.imt.topology.central_longitude = -54.5746686
+        # Set the simulaltion reference to City of Asunción, Paraguay
+        params.imt.topology.central_latitude = -25.2637
+        params.imt.topology.central_longitude = -57.5759
         params.imt.topology.central_altitude = 200
 
         # Channel Model
-        params.single_earth_station.season = "SUMMER"
-        params.single_earth_station.channel_model = "FSPL"#"P619"
+        params.single_earth_station.channel_model = "FSPL"  # "P619"
 
+        # P.619 model parameters.
         # 3dB polarization loss, as suggested by P.619
         params.single_earth_station.polarization_loss = 3
-
         params.single_earth_station.param_p619.earth_station_lat_deg = params.imt.topology.central_latitude
         params.single_earth_station.param_p619.earth_station_alt_m = params.imt.topology.central_altitude
         # NOTE: we chose rural/low cluttered environment since MSS UEs are normally there
         params.single_earth_station.param_p619.mean_clutter_height = "low"
-        params.single_earth_station.param_p619.below_rooftop = 0
+        params.single_earth_station.param_p619.below_rooftop = 0.  # zero means clutter loss is not applied
 
-       
-
-        ##########
-        # MSS DC Parameters
-            #######
-        # mss parameters
-
+        ########## MSS DC Parameters ##########
         # Adjacent antenna parameters
         # NOTE: Specific to System3 model
         # Accoring to SpaceX the adjacent channel emissions are measured per satellite, not per beam.
@@ -132,48 +125,35 @@ def generate_inputs():
             20 * np.log10(params.imt.frequency / 2000.0)
         params.imt.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
 
+        if "340km" in imt_id:
+            params.imt.topology.mss_dc.max_num_of_beams = 105
+        elif "525km" in imt_id:
+            params.imt.topology.mss_dc.max_num_of_beams = 90
 
-        # Beam pointing
-        params.imt.topology.mss_dc.max_num_of_beams = 90 # 525 
-        #params.imt.topology.mss_dc.max_num_of_beams = 105 # 340
-
+        ########### SERVICE GRID ###########
+        # Create a circular service grid centered at Asunción with 1000 km of radius.
         params.imt.topology.mss_dc.beam_positioning.type = "SERVICE_GRID"
-        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.type = "FROM_COUNTRIES"
-        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.from_countries.country_names = [
-            "Brazil", "Argentina"
-        ]
-        
-        #params.imt.topology.mss_dc.beam_positioning.service_grid.beam_radius = 40 # a 525
-        #params.imt.topology.mss_dc.beam_positioning.service_grid.beam_radius = 40 # a 340
-        #params.imt.topology.mss_dc.beam_radius = 40000 # em metros (a 525 Km)
-        #params.imt.topology.mss_dc.beam_radius = 26000 # em metros (a 340 Km)
+        params.imt.topology.mss_dc.beam_positioning.service_grid.transform_grid_randomly = True
+        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.type = "CIRCLE"
+        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.center_lat = -25.2637
+        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.center_lon = -57.5759
+        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.radius_km = 1000.0
+        params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = -200.0
 
-        # km, just for defining the grid. It will be updated later based on the co-channel antenna pattern and satellite altitude
-        # this is distance in km so that actual best satellite is used for each grid point
-        angle_dist_between_planes = 360 / params.imt.topology.mss_dc.orbits[0].n_planes
-        margin = -np.ceil((angle_dist_between_planes / 2) * 111)
-        params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = int(margin)
+        # The grid is transformed randomly at each snapshot to add more variability to the results.
         params.imt.topology.mss_dc.beam_positioning.service_grid.transform_grid_randomly = True
 
-
-        # Beam is active if satellite
+        ########### Active Satellite conditions ###########
+        # This is used for the circular grid.
+        # Service grid eligible_sats_margin_from_border parameter will limit the extension of active satellites.
         params.imt.topology.mss_dc.sat_is_active_if.conditions = [
-            "LAT_LONG_INSIDE_COUNTRY",
-            "MINIMUM_ELEVATION_FROM_ES", 
-        ] 
-        params.imt.topology.mss_dc.sat_is_active_if.lat_long_inside_country.country_names = [
-            "Brazil", "Argentina"
+            "MINIMUM_ELEVATION_FROM_ES",
         ]
         params.imt.topology.mss_dc.sat_is_active_if.minimum_elevation_from_es = 5.  # Degree
 
-        params.imt.topology.mss_dc.sat_is_active_if.lat_long_inside_country.margin_from_border = \
-            params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border
-        
-
         # Set adjacent antenna pattern
-
         # Get cell radius based on co-channel antenna pattern
-        params.imt.bs.antenna.itu_r_s_1528.frequency = 2000 # MHz. O D/lambda é fixo para essa antena.
+        params.imt.bs.antenna.itu_r_s_1528.frequency = 2000.  # MHz. O D/lambda é fixo para essa antena.
         params.imt.bs.antenna.set_external_parameters(
             frequency=2000,
         ) # 2000 MHz. O D/lambda é fixo para essa antena.
@@ -183,27 +163,26 @@ def generate_inputs():
         )
         print(f"\tA cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
 
-        # also do uniform dist of elevation angles
-        params.single_earth_station.geometry.elevation.type = "UNIFORM_DIST"
-        params.single_earth_station.geometry.elevation.uniform_dist.min = 10.
-        params.single_earth_station.geometry.elevation.uniform_dist.max = 90.
-
+        #################### MSS Earth Station geometry ##############
         # position ES at reference
         es_geom = params.single_earth_station.geometry
-        es_geom.location.type = "FIXED"
-        es_geom.location.fixed.x = 0
-        es_geom.location.fixed.y = 0
+        es_geom.height = 1.5  # meters
+        # Let the MSS Earth station be randomly located within the service area.
+        es_geom.location.type = "NETWORK"
+        # These coordinates are relative to the topology central longitude - Asunción in this case.
+        # es_geom.location.uniform_dist.min_dist_to_center = 1e-2  # make it small - close to center
+        # es_geom.location.uniform_dist.max_dist_to_center = 1000e3
+        es_geom.location.network.min_dist_to_bs = params.imt.topology.mss_dc.beam_radius
 
+        # Vary antenna pointinhg angles uniformly.
         es_geom.azimuth.type = "UNIFORM_DIST"
         es_geom.azimuth.uniform_dist.max = 180.
         es_geom.azimuth.uniform_dist.min = -180.
-
         es_geom.elevation.type = "UNIFORM_DIST"
         es_geom.elevation.uniform_dist.max = 90.
         es_geom.elevation.uniform_dist.min = 5.
 
-        for mss_dc_load in  MSS_DC_LOAD_FACTORS:
-            
+        for mss_dc_load in MSS_DC_LOAD_FACTORS:
             params.imt.bs.load_probability = mss_dc_load
             specific = get_specific_pattern(
                 imt_id, single_es_id, mss_dc_load, True
