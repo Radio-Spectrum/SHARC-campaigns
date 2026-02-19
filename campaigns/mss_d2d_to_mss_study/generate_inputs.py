@@ -9,7 +9,7 @@ from campaigns.utils.dump_parameters import dump_parameters
 from campaigns.mss_d2d_to_mss_study.constants import (
     CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
-    USE_RANDOM_GRID_TRANSFORMATION, get_specific_pattern
+    get_specific_pattern
 )
 
 SEED = 82
@@ -140,9 +140,6 @@ def generate_inputs():
         params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.radius_km = 1000.0
         params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = -200.0
 
-        # The grid is transformed randomly at each snapshot to add more variability to the results.
-        params.imt.topology.mss_dc.beam_positioning.service_grid.transform_grid_randomly = True
-
         ########### Active Satellite conditions ###########
         # This is used for the circular grid.
         # Service grid eligible_sats_margin_from_border parameter will limit the extension of active satellites.
@@ -185,7 +182,7 @@ def generate_inputs():
         for mss_dc_load in MSS_DC_LOAD_FACTORS:
             params.imt.bs.load_probability = mss_dc_load
             specific = get_specific_pattern(
-                imt_id, single_es_id, mss_dc_load, True
+                imt_id, single_es_id, mss_dc_load
             )
             params.general.output_dir_prefix = OUTPUT_START_NAME + specific
 

@@ -6,7 +6,7 @@ from sharc.post_processor import PostProcessor
 from campaigns.mss_d2d_to_mss_2500MHz.constants import (
     CAMPAIGN_DIR, MSS_ES_TO_READABLE, IMT_MSS_DC_ID_TO_READABLE,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
-    USE_RANDOM_GRID_TRANSFORMATION, get_specific_pattern,
+    get_specific_pattern,
 )
 
 auto_open = False
@@ -73,20 +73,19 @@ def linestyle_getter(results):
 
 post_processor.add_results_linestyle_getter(linestyle_getter)
 
-for mss_dc_id, mss_es_id, load_factor, rand_grid_transf in product(
-   IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS , MSS_DC_LOAD_FACTORS, USE_RANDOM_GRID_TRANSFORMATION
+for mss_dc_id, mss_es_id, load_factor in product(
+    IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS, MSS_DC_LOAD_FACTORS
 ):
     readable_mss = IMT_MSS_DC_ID_TO_READABLE[mss_dc_id]
     readable_sys = MSS_ES_TO_READABLE[mss_es_id]
     readable_load = f"Load = {load_factor * 100}%"
-    readable_grid_t = "Rand. grid" if rand_grid_transf else "Static grid"
     # IMT-MSS-D2D-DL to EESS
     post_processor\
         .add_plot_legend_pattern(
             dir_name_contains=get_specific_pattern(
-                mss_dc_id, mss_es_id, load_factor, rand_grid_transf
+                mss_dc_id, mss_es_id, load_factor
             ),
-            legend=f"{readable_sys}; {readable_mss}, {readable_grid_t}, {readable_load}"
+            legend=f"{readable_sys}; {readable_mss}, {readable_load}"
         )
 # ^: typing.List[Results]
 

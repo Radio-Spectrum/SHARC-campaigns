@@ -34,6 +34,6 @@ single_earth_station:
         y: 0.0
 
   antenna:
-    pattern: OMNI  # Custom pattern for Hibleo-X MSS UE
+    pattern: OMNI  # Custom pattern for Hibleo-X MSS UE #https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1091-0-199409-I!!PDF-E.pdf 
     gain: 6.36 # Gain calculated by G/T = -18 dBi defined in document table 4B
     

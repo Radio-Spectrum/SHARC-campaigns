@@ -10,7 +10,7 @@ OUTPUT_DIR = CAMPAIGN_DIR / "output/"
 # MSS DC as IMT
 IMT_MSS_DC_IDS = [
     "imt.2300-2690MHz.mss-dc.system3-525km",
-#    "imt.2300-2690MHz.mss-dc.system3-340km",
+    "imt.2300-2690MHz.mss-dc.system3-340km",
 ]
 MSS_DC_LOAD_FACTORS = [
     0.1,
@@ -36,7 +36,7 @@ MSS_ES_TO_READABLE = {
 
 IMT_MSS_DC_ID_TO_READABLE = {
     "imt.2300-2690MHz.mss-dc.system3-525km": "MSS DC @525km",
-#    "imt.2300-2690MHz.mss-dc.system3-340km": "MSS DC @340km",
+    "imt.2300-2690MHz.mss-dc.system3-340km": "MSS DC @340km",
 }
 
 
@@ -44,16 +44,11 @@ def get_specific_pattern(
     mss_d2d_id: str,
     mss_es_id: str,
     mss_d2d_load_factor: float,
-    use_random_grid_transf: bool,
 ):
     """
     Generate a pattern string identifying the simulation configuration.
     """
-    grid_used = "static"
-    if use_random_grid_transf:
-        grid_used = "rand"
-
-    return f"{mss_d2d_load_factor}load_{grid_used}_grid_es_{mss_es_id}_mss_d2d_{mss_d2d_id}"
+    return f"{mss_d2d_load_factor}load_es_{mss_es_id}_mss_d2d_{mss_d2d_id}"
 
 
 if __name__ == "__main__":
