@@ -6,9 +6,10 @@ from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.mss_d2d_to_mss_study.constants import (
+from campaigns.mss_d2d_to_mss_adj_study.constants import (
     CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
+    ES_RX_OFFSETS,
     get_specific_pattern
 )
 
@@ -79,8 +80,7 @@ def generate_inputs():
 
         # lower bound of closest DL MSS DC band
         params.imt.frequency = 2162.5
-        # upper bound of MSS UE rx band
-        params.single_earth_station.frequency = 2157.5   # From REGION 2
+        # Note: ES receive frequency will be varied in loop below
 
         # Victim's adjacent channel reception characteristics
         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
@@ -180,17 +180,20 @@ def generate_inputs():
         es_geom.elevation.uniform_dist.min = 5.
 
         for mss_dc_load in MSS_DC_LOAD_FACTORS:
-            params.imt.bs.load_probability = mss_dc_load
-            specific = get_specific_pattern(
-                imt_id, single_es_id, mss_dc_load
-            )
-            params.general.output_dir_prefix = OUTPUT_START_NAME + specific
+            for es_freq, offset_label, _ in ES_RX_OFFSETS:
+                params.imt.bs.load_probability = mss_dc_load
+                params.single_earth_station.frequency = es_freq
+                
+                specific = get_specific_pattern(
+                    imt_id, single_es_id, mss_dc_load, offset_label
+                )
+                params.general.output_dir_prefix = OUTPUT_START_NAME + specific
 
-            total += 1
-            dump_parameters(
-                INPUTS_DIR / (PARAMETER_START_NAME + specific + ".yaml"),
-                params,
-            )
+                total += 1
+                dump_parameters(
+                    INPUTS_DIR / (PARAMETER_START_NAME + specific + ".yaml"),
+                    params,
+                )
 
 
     print(f"\nFiles generated on this run: {total}\n")

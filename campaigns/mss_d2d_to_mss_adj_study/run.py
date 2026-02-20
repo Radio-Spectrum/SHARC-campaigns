@@ -5,8 +5,8 @@ from pathlib import Path
 import subprocess
 import sys
 import sharc
-from campaigns.mss_d2d_to_mss_study.constants import CAMPAIGN_NAME, INPUTS_DIR
-from campaigns.mss_d2d_to_mss_study.generate_inputs import (
+from campaigns.mss_d2d_to_mss_adj_study.constants import CAMPAIGN_NAME, INPUTS_DIR
+from campaigns.mss_d2d_to_mss_adj_study.generate_inputs import (
     clear_inputs,
     generate_inputs,
 )
