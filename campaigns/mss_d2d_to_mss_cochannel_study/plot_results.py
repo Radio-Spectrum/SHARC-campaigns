@@ -9,12 +9,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-from campaigns.mss_d2d_to_mss_adj_study.constants import CAMPAIGN_DIR
+from campaigns.mss_d2d_to_mss_cochannel_study.constants import CAMPAIGN_DIR
 
 # ===================== USER SETTINGS =====================
 # Protection criteria: (threshold_dB, CCDF_probability)
 PROTECTION_CRITERIA: List[Tuple[float, float]] = [
-    (-6.0, 0.001),   # -3 dB at 0.1% (example)
+    (-3.0, 0.001),   # -3 dB at 0.1% (example)
 ]
 
 # Plot appearance
@@ -54,7 +54,7 @@ DUPLICATE_HANDLING = "latest"
 
 
 def parse_features_from_path(path: Path) -> Dict[str, Optional[str]]:
-    """Parse features from output directory path for mss_d2d_to_mss_adj_study."""
+    """Parse features from output directory path for mss_d2d_to_mss_cochannel_study."""
     s = str(path).lower()
     s_original = str(path)
     
@@ -576,22 +576,22 @@ if __name__ == "__main__":
         # ========== System R (7.1.4-forward-R) ==========
         # @ 525 km
         #(0.1, "offset_0MHz", "7.1.4-forward-R", "525km", "System R @ 525km - Nominal (2162.5 MHz)"),
-        #(0.1, "offset_minus5MHz", "7.1.4-forward-R", "525km", "System R @ 525km - (2157.5 MHz)"),
-        #(0.1, "offset_minus10MHz", "7.1.4-forward-R", "525km", "System R @ 525km - (2152.5 MHz)"),
-        #(0.1, "offset_minus15MHz", "7.1.4-forward-R", "525km", "System R @ 525km - (2142.5 MHz)"),
+        (0.1, "offset_minus5MHz", "7.1.4-forward-R", "525km", "System R @ 525km - (2157.5 MHz)"),
+        (0.1, "offset_minus10MHz", "7.1.4-forward-R", "525km", "System R @ 525km - (2152.5 MHz)"),
+        (0.1, "offset_minus15MHz", "7.1.4-forward-R", "525km", "System R @ 525km - (2142.5 MHz)"),
         
         # @ 340 km
         #(0.1, "offset_0MHz", "7.1.4-forward-R", "340km", "System R @ 340km - Nominal (2162.5 MHz)"),
-        #(0.1, "offset_minus5MHz", "7.1.4-forward-R", "340km", "System R @ 340km - (2157.5 MHz)"),
-        #(0.1, "offset_minus10MHz", "7.1.4-forward-R", "340km", "System R @ 340km - (2152.5 MHz)"),
-        #(0.1, "offset_minus15MHz", "7.1.4-forward-R", "340km", "System R @ 340km - (2142.5 MHz)"),
+        (0.1, "offset_minus5MHz", "7.1.4-forward-R", "340km", "System R @ 340km - (2157.5 MHz)"),
+        (0.1, "offset_minus10MHz", "7.1.4-forward-R", "340km", "System R @ 340km - (2152.5 MHz)"),
+        (0.1, "offset_minus15MHz", "7.1.4-forward-R", "340km", "System R @ 340km - (2142.5 MHz)"),
         
         # ========== ES Type-1 (7.1.5-ES-type-1) ==========
         # @ 525 km
         #(0.1, "offset_0MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - Nominal (2162.5 MHz)"),
-        #(0.1, "offset_minus5MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - (2157.5 MHz)"),
-        #(0.1, "offset_minus10MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - (2152.5 MHz)"),
-        #(0.1, "offset_minus15MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - (2142.5 MHz)"),
+        (0.1, "offset_minus5MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - (2157.5 MHz)"),
+        (0.1, "offset_minus10MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - (2152.5 MHz)"),
+        (0.1, "offset_minus15MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - (2142.5 MHz)"),
         
         # @ 340 km
         #(0.1, "offset_0MHz", "7.1.5-ES-type-1", "340km", "ES Type-1 @ 340km - Nominal (2162.5 MHz)"),
@@ -602,15 +602,15 @@ if __name__ == "__main__":
         # ========== ES Type-2 (7.1.5-ES-type-2) ==========
         # @ 525 km
         #(0.1, "offset_0MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - Nominal (2162.5 MHz)"),
-        (0.1, "offset_minus5MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-5 MHz, 2157.5 MHz)"),
-        (0.1, "offset_minus10MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-10 MHz, 2152.5 MHz)"),
-        (0.1, "offset_minus15MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-15 MHz, 2142.5 MHz)"),
+        #(0.1, "offset_minus5MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-5 MHz, 2157.5 MHz)"),
+        #(0.1, "offset_minus10MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-10 MHz, 2152.5 MHz)"),
+        #(0.1, "offset_minus15MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-15 MHz, 2142.5 MHz)"),
         
         # @ 340 km
         #(0.1, "offset_0MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - Nominal (2162.5 MHz)"),
-        (0.1, "offset_minus5MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-5 MHz, 2157.5 MHz)"),
-        (0.1, "offset_minus10MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-10 MHz, 2152.5 MHz)"),
-        (0.1, "offset_minus15MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-15 MHz, 2142.5 MHz)"),
+        #(0.1, "offset_minus5MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-5 MHz, 2157.5 MHz)"),
+        #(0.1, "offset_minus10MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-10 MHz, 2152.5 MHz)"),
+        #(0.1, "offset_minus15MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-15 MHz, 2142.5 MHz)"),
     ]
     # Legend configuration
     legend_location = "best"

@@ -6,10 +6,9 @@ from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.mss_d2d_to_mss_adj_study.constants import (
+from campaigns.mss_d2d_to_mss_cochannel_study.constants import (
     CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
-    ES_RX_OFFSETS,
     get_specific_pattern
 )
 
@@ -39,7 +38,7 @@ def get_taylor_cell_radius(
 
 general = {
     "seed": SEED,
-    "num_snapshots": 5000,
+    "num_snapshots": 10,
     "overwrite_output": False,
     "output_dir": str(OUTPUT_DIR),
     "output_dir_prefix": "to-update",
@@ -72,8 +71,8 @@ def generate_inputs():
         ##########
         # Scenario
 
-        params.general.enable_adjacent_channel = False # We will set it to True for adjacent channel scenarios in loop below
-        params.general.enable_cochannel = True # We will set it to False for adjacent channel scenarios in loop below
+        params.general.enable_adjacent_channel = False
+        params.general.enable_cochannel = True
         params.imt.interfered_with = False
         # NOTE: needed for performance. Discards unnecessary calcs.
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
@@ -85,14 +84,12 @@ def generate_inputs():
         # Victim's adjacent channel reception characteristics
         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
         params.imt.spurious_emissions = -13
-
-        
         # NOTE: Check the ACS values!!
-        params.single_earth_station.adjacent_ch_reception = "OFF" 
+        params.single_earth_station.adjacent_ch_reception = "OFF"
         params.single_earth_station.adjacent_ch_selectivity = 45
 
         # Geometry
-        # Set the simulation reference to City of Asunción, Paraguay
+        # Set the simulaltion reference to City of Asunción, Paraguay
         params.imt.topology.central_latitude = -25.2637
         params.imt.topology.central_longitude = -57.5759
         params.imt.topology.central_altitude = 200
@@ -110,6 +107,22 @@ def generate_inputs():
         params.single_earth_station.param_p619.below_rooftop = 0.  # zero means clutter loss is not applied
 
         ########## MSS DC Parameters ##########
+        # Adjacent antenna parameters
+        # NOTE: Specific to System3 model
+        # Accoring to SpaceX the adjacent channel emissions are measured per satellite, not per beam.
+        # To cope with SpaceX OOBE model we use a "virtual" antenna for each beam that points to nadir.
+        # The gain of this virutal antenna is set in such a way that the summation of all beams is equivalent
+        # to a single beam for the whole satellite.
+        #params.imt.bs.use_oob_antenna = True
+        #params.imt.bs.oob_antenna.pattern = "Antenna System3 OOB"
+        #params.imt.bs.oob_antenna.gain = 0.0
+
+        # OOBE mask
+        #params.imt.spectral_mask = "STEPPED"
+        #system3_eirp_mask_vals = \
+        #    np.array([-55.6, -73.6, -83.6]) + 90 + \
+        #    20 * np.log10(params.imt.frequency / 2000.0)
+        #params.imt.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
 
         if "340km" in imt_id:
             params.imt.topology.mss_dc.max_num_of_beams = 105
@@ -145,7 +158,6 @@ def generate_inputs():
             params.imt.topology.mss_dc.orbits[0].apogee_alt_km,
         )
         print(f"\tA cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
-        params.imt.bs.use_oob_antenna = False  # will be set to True for adjacent channel scenarios in loop below
 
         #################### MSS Earth Station geometry ##############
         # position ES at reference
@@ -166,46 +178,21 @@ def generate_inputs():
         es_geom.elevation.uniform_dist.max = 90.
         es_geom.elevation.uniform_dist.min = 5.
 
-
         for mss_dc_load in MSS_DC_LOAD_FACTORS:
-            for es_freq, offset_label, _ in ES_RX_OFFSETS:
-                params.imt.bs.load_probability = mss_dc_load
-                params.single_earth_station.frequency = es_freq
+            # Co-channel scenario: ES frequency = MSS DC center frequency
+            params.imt.bs.load_probability = mss_dc_load
+            params.single_earth_station.frequency = params.imt.frequency  # 2162.5 MHz (co-channel)
+            
+            specific = get_specific_pattern(
+                imt_id, single_es_id, mss_dc_load
+            )
+            params.general.output_dir_prefix = OUTPUT_START_NAME + specific
 
-                is_zero_offset = np.isclose(es_freq, params.imt.frequency)
-               
-
-                if not is_zero_offset:
-
-                    params.general.enable_adjacent_channel = True
-                    params.general.enable_cochannel = False
-                    # Adjacent antenna parameters
-                    # NOTE: Specific to System3 model
-                    # Accoring to SpaceX the adjacent channel emissions are measured per satellite, not per beam.
-                    # To cope with SpaceX OOBE model we use a "virtual" antenna for each beam that points to nadir.
-                    # The gain of this virutal antenna is set in such a way that the summation of all beams is equivalent
-                    # to a single beam for the whole satellite.
-                    params.imt.bs.use_oob_antenna = True
-                    params.imt.bs.oob_antenna.pattern = "Antenna System3 OOB"
-                    params.imt.bs.oob_antenna.gain = 0.0
-
-                    # OOBE mask
-                    params.imt.spectral_mask = "STEPPED"
-                    system3_eirp_mask_vals = \
-                        np.array([-55.6, -73.6, -83.6]) + 90 + \
-                        20 * np.log10(params.imt.frequency / 2000.0)
-                    params.imt.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
-                
-                specific = get_specific_pattern(
-                    imt_id, single_es_id, mss_dc_load, offset_label
-                )
-                params.general.output_dir_prefix = OUTPUT_START_NAME + specific
-
-                total += 1
-                dump_parameters(
-                    INPUTS_DIR / (PARAMETER_START_NAME + specific + ".yaml"),
-                    params,
-                )
+            total += 1
+            dump_parameters(
+                INPUTS_DIR / (PARAMETER_START_NAME + specific + ".yaml"),
+                params,
+            )
 
 
     print(f"\nFiles generated on this run: {total}\n")
