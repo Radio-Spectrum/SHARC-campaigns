@@ -16,8 +16,8 @@ from campaigns.mss_d2d_to_mss_adj_study.constants import CAMPAIGN_DIR
 
 # Protection criteria: (threshold_dB, CCDF_probability)
 PROTECTION_CRITERIA = [
-    (-6.0, 0.2),   
-    (-12.0, 0.001),  
+    (-6.0, 0.001),   # -6 dB at 0.1% (CCDF)
+    (-12.0, 0.20),   # -12 dB at 80% of time (20% CCDF)
 ]
 
 INR_FILE = "system_inr.csv"
