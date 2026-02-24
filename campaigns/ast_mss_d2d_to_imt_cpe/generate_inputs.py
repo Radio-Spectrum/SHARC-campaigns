@@ -211,7 +211,7 @@ def generate_inputs(band_mhz=700):
         # AST's specific parameters
         # params.mss_d2d.antenna.pattern = "Antenna System 4"
         params.mss_d2d.antenna.pattern = "ARRAY System 4"
-        params.mss_d2d.antenna.array.element_max_g = 4.15
+        params.mss_d2d.antenna.array.element_max_g = 4.86
         params.mss_d2d.antenna.array.n_rows = 80
         params.mss_d2d.antenna.array.n_columns = 96
         params.mss_d2d.antenna.array.element_horiz_spacing = 0.5
