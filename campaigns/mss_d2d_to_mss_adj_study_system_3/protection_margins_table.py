@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict, Optional, Tuple, List
 import numpy as np
 
-from campaigns.mss_d2d_to_mss_adj_study.constants import CAMPAIGN_DIR
+from campaigns.mss_d2d_to_mss_adj_study_system_3.constants import CAMPAIGN_DIR
 
 # Protection criteria: (threshold_dB, CCDF_probability)
 PROTECTION_CRITERIA = [

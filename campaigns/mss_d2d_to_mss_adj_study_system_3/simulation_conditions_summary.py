@@ -6,7 +6,7 @@ Extracts real simulation parameters from input filenames and output directory st
 from pathlib import Path
 import re
 from campaigns.utils.constants import ROOT_DIR
-from campaigns.mss_d2d_to_mss_adj_study.constants import CAMPAIGN_DIR, INPUTS_DIR, OUTPUT_DIR
+from campaigns.mss_d2d_to_mss_adj_study_system_3.constants import CAMPAIGN_DIR, INPUTS_DIR, OUTPUT_DIR
 
 def extract_simulation_info():
     """Extract real simulation information from filenames and file structure."""

@@ -6,7 +6,7 @@ from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.mss_d2d_to_mss_adj_study.constants import (
+from campaigns.mss_d2d_to_mss_adj_study_system_4.constants import (
     CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
     ES_RX_OFFSETS,
@@ -39,7 +39,7 @@ def get_taylor_cell_radius(
 
 general = {
     "seed": SEED,
-    "num_snapshots": 5000,
+    "num_snapshots": 10,
     "overwrite_output": False,
     "output_dir": str(OUTPUT_DIR),
     "output_dir_prefix": "to-update",
@@ -84,7 +84,7 @@ def generate_inputs():
 
         params.imt.adjacent_ch_emissions = "ACLR"
         
-    
+
         
         params.single_earth_station.adjacent_ch_reception = "OFF"
 
@@ -120,7 +120,7 @@ def generate_inputs():
         params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.type = "CIRCLE"
         params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.center_lat = -25.2637
         params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.center_lon = -57.5759
-        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.radius_km = 1000.0
+        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.radius_km = 1500.0
         params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = -200.0
 
         ########### Active Satellite conditions ###########
@@ -173,9 +173,9 @@ def generate_inputs():
                 # Primeira adjacência (índice 0): 45 dB
                 # Segunda adjacência em diante (índice >= 1): 50 dB
                 if idx == 0:
-                    params.imt.adjacent_ch_leak_ratio = 45.0
+                    params.imt.bs.adjacent_ch_leak_ratio = 45.0
                 else:
-                    params.imt.adjacent_ch_leak_ratio = 50.0
+                    params.imt.bs.adjacent_ch_leak_ratio = 50.0
                 
                 specific = get_specific_pattern(
                     imt_id, single_es_id, mss_dc_load, offset_label

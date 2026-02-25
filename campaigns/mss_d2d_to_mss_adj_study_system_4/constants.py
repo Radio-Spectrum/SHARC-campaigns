@@ -1,6 +1,6 @@
 from campaigns.utils.constants import ROOT_DIR
 
-CAMPAIGN_NAME = "mss_d2d_to_mss_adj_study"
+CAMPAIGN_NAME = "mss_d2d_to_mss_adj_study_system_4"
 CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 
 CAMPAIGN_DIR = ROOT_DIR / CAMPAIGN_STR
@@ -24,7 +24,7 @@ ES_RX_OFFSETS = [  # (frequency, offset_label, description)
  #   (2162.5, "offset_0MHz", "nominal - 2162.5 MHz"),
     (2157.5, "offset_minus5MHz", "2162.5 - 5 MHz"),
     (2152.5, "offset_minus10MHz", "2162.5 - 10 MHz"),
-    (2147.5, "offset_minus15MHz", "2162.5 - 15 MHz"),
+ #   (2147.5, "offset_minus15MHz", "2162.5 - 15 MHz"),
 ]
 
 # MSS victim earth station/user terminal

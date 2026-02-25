@@ -9,12 +9,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-from campaigns.mss_d2d_to_mss_adj_study.constants import CAMPAIGN_DIR
+from campaigns.mss_d2d_to_mss_adj_study_system_4.constants import CAMPAIGN_DIR
 
 # ===================== USER SETTINGS =====================
 # Protection criteria: (threshold_dB, CCDF_probability)
 PROTECTION_CRITERIA: List[Tuple[float, float]] = [
-    (-6.0, 0.001),   # -3 dB at 0.1% (example)
+    (-12.0, 0.001),  # -12 dB at 0.1%
+    (-6.0, 0.2),     # -6 dB at 20%
 ]
 
 # Plot appearance
@@ -620,6 +621,10 @@ if __name__ == "__main__":
     
     # Protection criteria
     show_protection = True
+    protection_criteria = [
+        (-12.0, 0.001),
+        (-6.0, 0.2),
+    ]
     
     # Duplicate handling
     duplicate_handling = "latest"
@@ -632,5 +637,6 @@ if __name__ == "__main__":
         legend_ncol=legend_columns,
         legend_framealpha=legend_alpha,
         show_protection_criteria=show_protection,
+        protection_criteria=protection_criteria,
         duplicate_handling=duplicate_handling
     )

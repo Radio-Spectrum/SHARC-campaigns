@@ -1,6 +1,6 @@
 from campaigns.utils.constants import ROOT_DIR
 
-CAMPAIGN_NAME = "mss_d2d_to_mss_adj_study"
+CAMPAIGN_NAME = "mss_d2d_to_mss_adj_study_system_3"
 CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 
 CAMPAIGN_DIR = ROOT_DIR / CAMPAIGN_STR

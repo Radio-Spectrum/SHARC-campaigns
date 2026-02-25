@@ -6,7 +6,7 @@ from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.mss_d2d_to_mss_adj_study.constants import (
+from campaigns.mss_d2d_to_mss_adj_study_system_3.constants import (
     CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
     ES_RX_OFFSETS,

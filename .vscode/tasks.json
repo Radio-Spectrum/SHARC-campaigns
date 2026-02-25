@@ -15,7 +15,8 @@
       "options": {
         "env": {
           "SHARC_HOME": "/home/daniel/opt/SharcSimulator/SHARC",
-          "PYTHONPATH": "/home/daniel/opt/SharcSimulator/SHARC:/home/daniel/opt/SharcSimulator/SHARC-campaigns"
+          "PYTHONPATH": "/home/daniel/opt/SharcSimulator/SHARC:/home/daniel/opt/SharcSimulator/SHARC-campaigns",
+          "PYTHONWARNINGS": "ignore::UserWarning"
         }
       },
       "problemMatcher": []
