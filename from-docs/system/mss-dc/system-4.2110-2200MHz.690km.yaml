@@ -39,14 +39,34 @@ mss_d2d:
     # Satellite antenna pattern
     # Antenna pattern from ITU-R S.1528 Section 1.2
     antenna:
-        pattern: ITU-R-S.1528-Section1.2
-        # FIXME: peak gain should be different when beam is at max steering angle
-        gain: 41.0
-        itu_r_s_1528:
-            # FIXME: L_F is currently hardcoded to 0 in simulator
-            antenna_3_dB_bw: 1.50
-            # FIXME: fix parameter name. While we pass as L_S, it actually means L_N
-            antenna_l_s: -35
+        pattern: "ARRAY System 4"
+        array:
+            element_max_g: 4.86
+            n_rows: 80
+            n_columns: 96
+            element_horiz_spacing: 0.5
+            element_vert_spacing: 0.5
+            element_pattern: "FIXED"
+    # Uncomment to use the S.1528 antenna instead of the Array System 4
+    # antenna:
+    #   pattern: Antenna System 4
+    #   antenna_system_4:
+    #     antenna_parameters_high:
+    #       antenna_gain: 41.0
+    #       # FIXME: L_F is currently hardcoded to 0 in simulator
+    #       antenna_3_dB_bw: 1.50
+    #       # FIXME: fix parameter name. While we pass as L_S, it actually means L_N
+    #       antenna_l_s: -35
+    #       # far-out side-lobe level
+    #       far_out_side_lobe: -20
+    #     antenna_parameters_low:
+    #       antenna_gain: 46.0
+    #       # FIXME: L_F is currently hardcoded to 0 in simulator
+    #       antenna_3_dB_bw: 0.82
+    #       # FIXME: fix parameter name. While we pass as L_S, it actually means L_N
+    #       antenna_l_s: -20
+    #       # far-out side-lobe level
+    #       far_out_side_lobe: -10
     sat_is_active_if: # (PER SCENARIO)
         # for a satellite to be active, it needs to respect ALL conditions
         conditions:
