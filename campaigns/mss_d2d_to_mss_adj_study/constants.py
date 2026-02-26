@@ -11,6 +11,7 @@ OUTPUT_DIR = CAMPAIGN_DIR / "output/"
 IMT_MSS_DC_IDS = [
     "imt.2300-2690MHz.mss-dc.system3-525km",
     "imt.2300-2690MHz.mss-dc.system3-340km",
+    "imt.1427-2690MHz.mss-dc.system4-690km",
 ]
 MSS_DC_LOAD_FACTORS = [
     0.2,
@@ -54,6 +55,7 @@ MSS_ES_TO_READABLE = {
 IMT_MSS_DC_ID_TO_READABLE = {
     "imt.2300-2690MHz.mss-dc.system3-525km": "MSS DC @525km",
     "imt.2300-2690MHz.mss-dc.system3-340km": "MSS DC @340km",
+    "imt.1427-2690MHz.mss-dc.system4-690km": "SYS4 @690km"
 }
 
 
