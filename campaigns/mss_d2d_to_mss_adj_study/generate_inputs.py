@@ -47,7 +47,7 @@ def get_taylor_cell_radius(
 
 general = {
     "seed": SEED,
-    "num_snapshots": 1e5,
+    "num_snapshots": int(1e4),
     "overwrite_output": False,
     "output_dir": str(OUTPUT_DIR),
     "output_dir_prefix": "to-update",
@@ -198,6 +198,7 @@ def generate_inputs():
                     system3_eirp_mask_vals = \
                         np.array([-55.6, -73.6, -83.6]) + 90 + \
                         20 * np.log10(params.imt.frequency / 2000.0)
+                    system3_eirp_mask_vals =np.concatenate((system3_eirp_mask_vals, [params.imt.spurious_emissions]))
                     params.imt.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
                 
                 specific = get_specific_pattern(
