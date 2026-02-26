@@ -7,13 +7,21 @@ from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
 from campaigns.mss_d2d_to_mss_adj_study.constants import (
-    CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR,
+    CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR, OFFSET_LABELS,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
-    ES_RX_OFFSETS,
     get_specific_pattern
 )
 
 SEED = 82
+
+MSS_DC_CENTER_FREQ = 2502.5  # Mhz
+
+MSS_DC_TX_OFFSETS = [
+    (MSS_DC_CENTER_FREQ, "offset_0MHz", "First adjcent"),
+    (MSS_DC_CENTER_FREQ + 5, "offset_5MHz", "Second adjacent"),
+    (MSS_DC_CENTER_FREQ + 10, "offset_10MHz", "Third adjacent"),
+    (MSS_DC_CENTER_FREQ + 120, "offset_120MHz", "Spurious domain"),
+]
 
 def get_taylor_cell_radius(
     params_s1528: ParametersAntennaS1528,
@@ -39,7 +47,7 @@ def get_taylor_cell_radius(
 
 general = {
     "seed": SEED,
-    "num_snapshots": 5000,
+    "num_snapshots": 1e5,
     "overwrite_output": False,
     "output_dir": str(OUTPUT_DIR),
     "output_dir_prefix": "to-update",
@@ -71,24 +79,19 @@ def generate_inputs():
 
         ##########
         # Scenario
-
+        # Co-channel by default
         params.general.enable_adjacent_channel = False # We will set it to True for adjacent channel scenarios in loop below
         params.general.enable_cochannel = True # We will set it to False for adjacent channel scenarios in loop below
         params.imt.interfered_with = False
         # NOTE: needed for performance. Discards unnecessary calcs.
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        # lower bound of closest DL MSS DC band
-        params.imt.frequency = 2162.5
-        # Note: ES receive frequency will be varied in loop below
-
         # Victim's adjacent channel reception characteristics
         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
         params.imt.spurious_emissions = -13
 
-        
         # NOTE: Check the ACS values!!
-        params.single_earth_station.adjacent_ch_reception = "OFF" 
+        params.single_earth_station.adjacent_ch_reception = "OFF"
         params.single_earth_station.adjacent_ch_selectivity = 45
 
         # Geometry
@@ -147,7 +150,9 @@ def generate_inputs():
         print(f"\tA cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
         params.imt.bs.use_oob_antenna = False  # will be set to True for adjacent channel scenarios in loop below
 
-        #################### MSS Earth Station geometry ##############
+        #################### MSS Earth Station Parameters ##############
+        # MHz. Setting to the center of the victim ES band (Hibleo-X) to be more conservative.
+        params.single_earth_station.frequency = 2500 - params.single_earth_station.bandwidth / 2
         # position ES at reference
         es_geom = params.single_earth_station.geometry
         es_geom.height = 1.5  # meters
@@ -168,14 +173,13 @@ def generate_inputs():
 
 
         for mss_dc_load in MSS_DC_LOAD_FACTORS:
-            for es_freq, offset_label, _ in ES_RX_OFFSETS:
+            for mss_dc_freq, offset_label, _ in MSS_DC_TX_OFFSETS:
+                params.imt.frequency = mss_dc_freq
                 params.imt.bs.load_probability = mss_dc_load
-                params.single_earth_station.frequency = es_freq
 
-                is_zero_offset = np.isclose(es_freq, params.imt.frequency)
-               
+                is_zero_offset = np.isclose(params.single_earth_station.frequency, params.imt.frequency)
 
-                if not is_zero_offset:
+                if not is_zero_offset:  # Adjacent channel scenario
 
                     params.general.enable_adjacent_channel = True
                     params.general.enable_cochannel = False

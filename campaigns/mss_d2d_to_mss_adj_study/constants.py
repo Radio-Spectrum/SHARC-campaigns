@@ -20,24 +20,35 @@ MSS_DC_LOAD_FACTORS = [
 # Base frequency: 2162.5 MHz (lower bound of DCM band)
 # Variations: 2162.5 - offset values
 # All are adjacent-band scenarios
-ES_RX_OFFSETS = [  # (frequency, offset_label, description)
- #   (2162.5, "offset_0MHz", "nominal - 2162.5 MHz"),
-    (2157.5, "offset_minus5MHz", "2162.5 - 5 MHz"),
-    (2152.5, "offset_minus10MHz", "2162.5 - 10 MHz"),
-    (2147.5, "offset_minus15MHz", "2162.5 - 15 MHz"),
-]
+# ES_RX_OFFSETS = [  # (frequency, offset_label, description)
+#  #   (2162.5, "offset_0MHz", "nominal - 2162.5 MHz"),
+#     (2157.5, "offset_minus5MHz", "2162.5 - 5 MHz"),
+#     (2152.5, "offset_minus10MHz", "2162.5 - 10 MHz"),
+#     (2147.5, "offset_minus15MHz", "2162.5 - 15 MHz"),
+# ]
+
 
 # MSS victim earth station/user terminal
 SINGLE_ES_MSS_IDS = [
-    "mss.2100MHz.7.1.4-forward-R",
-    "mss.2100MHz.7.1.5-ES-type-1",
-    "mss.2100MHz.7.1.5-ES-type-2",
+
+    "mss.2500MHz.hibleo-x",
+    "mss.2500MHz.hibleo-xl-1",
+    "mss.2500MHz.ast-ng-c-3",
+
+    # "mss.2100MHz.7.1.4-forward-R",  # 2100 MHz band systems
+    # "mss.2100MHz.7.1.5-ES-type-2",
+    # "mss.2100MHz.7.1.5-ES-type-1"
 ]
 
 MSS_ES_TO_READABLE = {
-    "mss.2100MHz.7.1.4-forward-R": "System R (Forward)",
-    "mss.2100MHz.7.1.5-ES-type-1": "ES Type-1 (G=2dBi)",
-    "mss.2100MHz.7.1.5-ES-type-2": "ES Type-2 (G=10dBi)",
+    "mss.2500MHz.hibleo-x": "Hibleo-X",
+    "mss.2500MHz.hibleo-xl-1": "Hibleo-XL-1",
+    "mss.2500MHz.ast-ng-c-3": "AST-NG-C-3",
+
+    # "mss.2100MHz.7.1.4-forward-R": "7.1.4_forward-R",  # 2100 MHz band systems
+    # "mss.2100MHz.7.1.5-ES-type-2": "ES_type-2",
+    # "mss.2100MHz.7.1.5-ES-type-1": "ES_type-1"
+
 }
 
 IMT_MSS_DC_ID_TO_READABLE = {
@@ -45,6 +56,20 @@ IMT_MSS_DC_ID_TO_READABLE = {
     "imt.2300-2690MHz.mss-dc.system3-340km": "MSS DC @340km",
 }
 
+
+OFFSET_LABELS = [
+    "offset_0MHz",
+    "offset_5MHz",
+    "offset_10MHz",
+    "offset_120MHz"
+]
+
+OFFSET_LABELS_READABLE = {
+    "offset_0MHz": "First adjacent",
+    "offset_5MHz": "Second adjacent",
+    "offset_10MHz": "Third adjacent",
+    "offset_120MHz": "Spurious domain",
+}
 
 def get_specific_pattern(
     mss_d2d_id: str,

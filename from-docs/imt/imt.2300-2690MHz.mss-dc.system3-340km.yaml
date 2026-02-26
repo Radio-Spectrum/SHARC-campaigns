@@ -105,8 +105,9 @@ imt:
                 #     # if negative, makes border bigger by x km
                 #     margin_from_border: 0
             beam_positioning:
-                # minimum angle between satellite nadir and the direction of the beam center in degrees
-                minimum_service_angle: 20. 
+                service_grid:
+                    # minimum angle between satellite nadir and the direction of the beam center in degrees
+                    minimum_service_angle: 20. 
     ###########################################################################
     # Defines the antenna model to be used in compatibility studies between
     # IMT and other services in adjacent band
@@ -156,6 +157,7 @@ imt:
                 n_side_lobes: 2
                 # Radial (l_r) and transverse (l_t) sizes of the effective radiating area of the satellite transmitt antenna (m)
                 l_r: 1.6
+                l_t: 1.6
 
     ###########################################################################
     # User Equipment parameters:
