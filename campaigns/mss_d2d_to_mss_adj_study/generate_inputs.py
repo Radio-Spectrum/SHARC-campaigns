@@ -184,7 +184,6 @@ def generate_inputs():
 
                     params.general.enable_adjacent_channel = True
                     params.general.enable_cochannel = False
-                    params.imt.spurious_emissions = -13
                     # Adjacent antenna parameters
                     if "system3" in imt_id:
                         # NOTE: Specific to System3 model
@@ -197,6 +196,7 @@ def generate_inputs():
                         params.imt.bs.oob_antenna.gain = 0.0
 
                         # OOBE mask
+                        params.imt.spurious_emissions = -13
                         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
                         params.imt.spectral_mask = "STEPPED"
                         system3_eirp_mask_vals = \
@@ -206,7 +206,15 @@ def generate_inputs():
                         params.imt.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
                     elif "system4" in imt_id:
                         # Adjacente antenna model is the same as in-band.
-                        params.imt.adjacent_ch_emissions = "ACLR"
+                        # params.imt.adjacent_ch_emissions = "ACLR"
+                        # OOBE mask
+                        params.imt.spurious_emissions = -30
+                        params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
+                        params.imt.spectral_mask = "STEPPED"
+                        system3_eirp_mask_vals = \
+                            params.imt.bs.conducted_power - 10 * np.log10(params.imt.bandwidth) - np.array([45, 50])
+                        system3_eirp_mask_vals = np.concatenate((system3_eirp_mask_vals, [params.imt.spurious_emissions]))
+                        params.imt.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
                         params.imt.bs.use_oob_antenna = False
 
                 specific = get_specific_pattern(
