@@ -211,10 +211,7 @@ def generate(
         params.mss_d2d.beams_load_factor = load_factor
         for border in distances:
             params.mss_d2d.beam_positioning.service_grid.grid_in_zone.from_countries.margin_from_border = border
-
-            output_start = get_output_dir_start(dc_mss_id, co_channel)
-            params.general.output_dir = f"{CAMPAIGN_DIR}/{output_start}_{link}/"
-
+            params.general.output_dir = f"{CAMPAIGN_DIR}/output/"
             postfix = get_specific_pattern(
                 imt_id,
                 dc_mss_id,
