@@ -23,7 +23,7 @@ mss_d2d:
     # MSS_D2d system bandwidth in MHz
     bandwidth: 5
     # MSS_D2D cell radius in network topology [m] (PER SCENARIO)
-    cell_radius: 1
+    cell_radius: 39684
     # Satellite power density in dBW/Hz
     # NOTE:
     # EIRP density @nadir = -20.1 dBW/Hz

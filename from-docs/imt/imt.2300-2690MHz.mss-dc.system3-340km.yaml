@@ -107,7 +107,7 @@ imt:
             beam_positioning:
                 service_grid:
                     # minimum angle between satellite nadir and the direction of the beam center in degrees
-                    minimum_service_angle: 20. 
+                    minimum_service_angle: 20.
     ###########################################################################
     # Defines the antenna model to be used in compatibility studies between
     # IMT and other services in adjacent band

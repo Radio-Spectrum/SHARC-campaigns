@@ -1,4 +1,4 @@
-id: system-4.2110-2200MHz.690km
+id: system-4.698-960MHz.block2.690km
 
 metadata:
   referenced_documents:
@@ -10,7 +10,7 @@ metadata:
 
 mss_d2d:
     # MSS_D2D system name
-    name: system-4.2110-2200MHz.690km
+    name: system-4.698-960MHz.block2.690km
     # Adjacent channel emissions type
     # Possible values are "ACLR", "SPECTRAL_MASK" and "OFF"
     adjacent_ch_emissions: SPECTRAL_MASK # (PER SCENARIO)
@@ -21,36 +21,37 @@ mss_d2d:
     # MSS_D2d system bandwidth in MHz
     bandwidth: 20
     # MSS_D2D cell radius in network topology [m] (PER SCENARIO)
-    cell_radius: 1
+    cell_radius: 24000
     # Satellite power density in dBW/Hz
-    # NOTE: for different BWs these values change
-    # NOTE: 50.41~55.41 EIRP per beam
-    # or -22.6~-17.6 EIRP spectral density
-    # or -90.4 PFD on the ground
-    # or tx power 9.41 dBW with power control +/- 10 dB
-    # CALC: (power/bw) -> 9.41 - 10 * log10(20e6) = -63.6
-    # OR: (EIRP/Hz / gain) -> -22.6 -41 = 63.6
     tx_power_density: -63.6
     # Polarization loss [dB] (PER SCENARIO)
     # P.619 suggests 3dB polarization loss as good constant value for monte carlo
     polarization_loss: 0
     # Number of sectors (PER SCENARIO)
     num_sectors: 19
-    # Satellite antenna pattern
-    # Antenna pattern from ITU-R S.1528
-    # Possible values: "ITU-R-S.1528-Section1.2", "ITU-R-S.1528-LEO"
-    antenna_pattern: ITU-R-S.1528-Section1.2
-    # TODO: L_F is currently hardcoded to 0 in simulator
-    antenna_3_dB_bw: 0.375
-    # FIXME:
-    # document DOES NOT provide enough information about using L_n = -35
-    # since document S.1528 does not provide enough information to use it
-    # as is
-    antenna_l_s: -35
-    antenna_s1528:
-        # Maximum Antenna gain in dBi
-        # NOTE: doc. specifies 41 dBi only at nadir, 46 at maximum steering angle
-        antenna_gain: 41
+    # Base Station Antenna parameters:
+    antenna:
+        # pattern: ARRAY System 4  # Uncomment to use System4 phased array antenna
+        pattern: Antenna System 4
+        gain: 0.0
+        antenna_system_4:
+            antenna_parameters_high:
+                antenna_gain: 34.6
+                antenna_3_dB_bw: 3.06
+                antenna_l_s: -35
+                far_out_side_lobe: -25
+            antenna_parameters_low:
+                antenna_gain: 40.0
+                antenna_3_dB_bw: 1.68
+                antenna_l_s: -20
+                far_out_side_lobe: -15
+        array:
+            element_max_g: 4.86
+            n_rows: 80
+            n_columns: 96
+            element_horiz_spacing: 0.5
+            element_vert_spacing: 0.5
+            element_pattern: FIXED
     sat_is_active_if: # (PER SCENARIO)
         # for a satellite to be active, it needs to respect ALL conditions
         conditions:
