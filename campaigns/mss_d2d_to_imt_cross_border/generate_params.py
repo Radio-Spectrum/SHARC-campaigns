@@ -9,12 +9,15 @@ from campaigns.mss_d2d_to_imt_cross_border.run import CAMPAIGN_STR, CAMPAIGN_DIR
 from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 DC_MSS_BANDWIDTH_MHZ = 5.0
+# Band configurations
+# IMT frequency is set in such a way that DC-MSS is at the edge of the band for adjacent band studies
+# DC-MSS-IMT band is assumed to be 5MHz
 IMT_BAND_CONFIG_MAP = {
-    "B1": {"lower": 698.0,  "upper": 960.0,  "typical_bw": 10.0, "imt_dl_center_f_mhz": 864. + 5,   "imt_ul_center_f_mhz": 819. + 5},
-    "B2": {"lower": 1427.0, "upper": 1528.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 1427. + 10, "imt_ul_center_f_mhz": 1427. + 10},  # TDD band in Brazil
-    "B3": {"lower": 1710.0, "upper": 2200.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2110. + 10, "imt_ul_center_f_mhz": 1920. + 10},
-    "B4": {"lower": 2300.0, "upper": 2400.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2300. + 10, "imt_ul_center_f_mhz": 2300. + 10},  # TDD band in Brazil
-    "B5": {"lower": 2500.0, "upper": 2690.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2620. + 10, "imt_ul_center_f_mhz": 2500. + 10},
+    "B1": {"lower": 698.0,  "upper": 960.0,  "typical_bw": 10.0, "imt_dl_center_f_mhz": 864. + DC_MSS_BANDWIDTH_MHZ + 5,   "imt_ul_center_f_mhz": 819. + DC_MSS_BANDWIDTH_MHZ + 5},
+    "B2": {"lower": 1427.0, "upper": 1528.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 1427. + DC_MSS_BANDWIDTH_MHZ + 10, "imt_ul_center_f_mhz": 1427. + DC_MSS_BANDWIDTH_MHZ + 10},  # TDD band in Brazil
+    "B3": {"lower": 1710.0, "upper": 2200.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2125. + DC_MSS_BANDWIDTH_MHZ + 10, "imt_ul_center_f_mhz": 1920. + DC_MSS_BANDWIDTH_MHZ + 10},
+    "B4": {"lower": 2300.0, "upper": 2400.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2315. + DC_MSS_BANDWIDTH_MHZ + 10, "imt_ul_center_f_mhz": 2300. + DC_MSS_BANDWIDTH_MHZ + 10},  # TDD band in Brazil
+    "B5": {"lower": 2500.0, "upper": 2690.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2635. + DC_MSS_BANDWIDTH_MHZ + 10, "imt_ul_center_f_mhz": 2500. + DC_MSS_BANDWIDTH_MHZ + 10},
 }
 
 # MSS-DC systems for simulation
@@ -107,14 +110,9 @@ def generate(
         # scenario
         params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
         params.imt.interfered_with = True
-
-        ul_imt_freq = 1930.0
-        dl_imt_freq = 2120.0
-
-        params.imt.frequency = dl_imt_freq if link == "dl" else ul_imt_freq
-        # Brings DC-MSS to 2110-2120 DL or 1920-1930 ULband
-        params.mss_d2d.frequency = params.imt.frequency - 7.5
-
+        params.imt.frequency = IMT_BAND_CONFIG_MAP[band_id]['imt_dl_center_f_mhz'] if link == "dl" \
+            else IMT_BAND_CONFIG_MAP[band_id]['imt_ul_center_f_mhz']
+        params.imt.bandwidth = IMT_BAND_CONFIG_MAP[band_id]['typical_bw']
         params.general.enable_cochannel = co_channel
         params.general.enable_adjacent_channel = True  # always on to generate out-of-band emissions
         params.imt.adjacent_ch_reception = "OFF"  # we want only the interference inside IMT rx band
@@ -137,6 +135,10 @@ def generate(
         # Polarization loss - following Item 2.2 of the Rec. ITU-P.619
         params.mss_d2d.polarization_loss = 3.0  # dB
 
+        # Co-channel frequency configuretion - adjacent channel case is set below
+        # Overlaps with the left edge of the IMT band.
+        params.mss_d2d.frequency = params.imt.frequency - params.imt.bandwidth / 2 + params.mss_d2d.bandwidth / 2
+
         ###### Adjust parameters for adjacent channel case
         if not co_channel:
             params.imt.adjacent_ch_reception = "ACS"
@@ -145,8 +147,8 @@ def generate(
                 params.imt.bs.adjacent_ch_selectivity = 46.0  # dB
             else:
                 params.imt.ue.adjacent_ch_selectivity = 33.0  # dB
-            # Set IMT frequency to be adjacent to DC-MSS
-            params.imt.frequency = params.imt.frequency + params.mss_d2d.bandwidth
+            # Set DC-MSS frequency to the left edge of the IMT band.
+            params.mss_d2d.frequency = params.mss_d2d.frequency - params.mss_d2d.bandwidth
 
         # Set system specific adjacent channel emissions parameters
         if "system3" in dc_mss_id:
