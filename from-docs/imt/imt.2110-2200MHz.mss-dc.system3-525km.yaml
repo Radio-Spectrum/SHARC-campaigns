@@ -34,11 +34,14 @@ imt:
     # IMT resource block bandwidth [MHz]
     adjacent_ch_emissions: SPECTRAL_MASK
     ###########################################################################
-    # IMT spectrum emission mask. Options are:
-    #   "IMT-2020" : for mmWave as described in ITU-R TG 5/1 Contribution 36
-    #   "3GPP E-UTRA" : for E-UTRA bands > 1 GHz as described in
-    #                   TS 36.104 v11.2.0 (BS) and TS 36.101 v11.2.0 (UE)
-    spectral_mask: MSS
+    # IMT spectrum emission mask.
+    # The stepped mask is specific to System3 characterisctics.
+    spectral_mask: STEPPED
+    # Defines the steps of the spectral mask in dB relative to the in-band power
+    spectral_mask_steps: !!python/tuple
+    - 34.05672705618975
+    - 16.056727056189754
+    - 6.0567270561897555
     ###########################################################################
     # level of spurious emissions [dBm/MHz]
     spurious_emissions: -13.0
@@ -68,6 +71,7 @@ imt:
         ###########################################################################
         # Single Base Station Topology parameters. Relevant when imt.topology.type == "SINGLE_BS"
         mss_dc:
+            beam_radius: 40000. # cell radius in m
             orbits:
                 # Number of planes
               - n_planes: 28
@@ -101,6 +105,9 @@ imt:
                 #     # if positive, makes border smaller by x km
                 #     # if negative, makes border bigger by x km
                 #     margin_from_border: 0
+            beam_positioning:
+                # minimum angle between satellite nadir and the direction of the beam center in degrees
+                minimum_service_angle: 20. 
     ###########################################################################
     # Defines the antenna model to be used in compatibility studies between
     # IMT and other services in adjacent band
@@ -150,46 +157,6 @@ imt:
                 n_side_lobes: 2
                 # Radial (l_r) and transverse (l_t) sizes of the effective radiating area of the satellite transmitt antenna (m)
                 l_r: 1.6
-                l_t: 1.6
-            array:
-                ###########################################################################
-                # If normalization of M2101 should be applied for BS
-                normalization: FALSE
-                ###########################################################################
-                # Radiation pattern of each antenna element
-                # Possible values: "M2101", "F1336", "FIXED"
-                element_pattern: M2101
-                ###########################################################################
-                # BS/UE maximum transmit/receive element gain [dBi]
-                # default: element_max_g = 5, for M.2101
-                #                           = 15, for M.2292
-                #                           = -3, for M.2292
-                element_max_g: 6.4
-                ###########################################################################
-                # BS/UE horizontal 3dB beamwidth of single element [degrees]
-                element_phi_3db: 90
-                ###########################################################################
-                # BS/UE vertical 3dB beamwidth of single element [degrees]
-                # For F1336: if equal to 0, then beamwidth is calculated automaticaly
-                element_theta_3db: 65
-                ###########################################################################
-                # BS/UE number of rows in antenna array
-                n_rows: 1
-                ###########################################################################
-                # BS/UE number of columns in antenna array
-                n_columns: 1
-                ###########################################################################
-                # BS/UE front to back ratio of single element [dB]
-                element_am: 30
-                ###########################################################################
-                # BS/UE single element vertical sidelobe attenuation [dB]
-                element_sla_v: 30
-                ###########################################################################
-                # Multiplication factor k that is used to adjust the single-element pattern.
-                # According to Report ITU-R M.[IMT.AAS], this may give a closer match of the 
-                # side lobes when beamforming is assumed in adjacent channel.
-                #       Original value: 12 (Rec. ITU-R M.2101)
-                multiplication_factor: 12
 
     ###########################################################################
     # User Equipment parameters:
