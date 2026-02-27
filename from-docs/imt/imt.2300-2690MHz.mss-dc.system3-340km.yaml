@@ -1,6 +1,5 @@
-# TODO: have an actual source of truth for equipment independent of topology
-# it may not even be possible though, considering SHARC's architecture
-id: imt.2110-2200MHz.mss-dc.system3-525km
+# NOTE: these parameters can be used for 2300-2400MHz or 2500-2690MHz
+id: imt.2300-2690MHz.mss-dc.system3-340km
 
 metadata:
   referenced_documents:
@@ -71,25 +70,22 @@ imt:
         ###########################################################################
         # Single Base Station Topology parameters. Relevant when imt.topology.type == "SINGLE_BS"
         mss_dc:
-            beam_radius: 40000. # cell radius in m
-            # The maximum number of beams per satellite.
-            # NOTE: This is used when implementing System3 OOBE model
-            max_num_of_beams: 90
+            beam_radius: 26000. # cell radius in m
             orbits:
                 # Number of planes
-              - n_planes: 28
-                # Inclination in degrees
-                inclination_deg: 53.0
-                # Perigee in km
-                perigee_alt_km: 525.0
-                # Apogee in km
-                apogee_alt_km: 525.0
-                # Number of satellites per plane
-                sats_per_plane: 120
-                # Longitude of the first ascending node in degrees
-                long_asc_deg: 0.0
-                # Phasing in degrees
-                phasing_deg: 1.5
+                - n_planes: 48
+                  # Inclination in degrees
+                  inclination_deg: 53.0
+                  # Perigee in km
+                  perigee_alt_km: 340.0
+                  # Apogee in km
+                  apogee_alt_km: 340.0
+                  # Number of satellites per plane
+                  sats_per_plane: 110
+                  # Longitude of the first ascending node in degrees
+                  long_asc_deg: 0.0
+                  # Phasing in degrees
+                  phasing_deg: 1.636
             sat_is_active_if: # (PER SCENARIO)
                 # for a satellite to be active, it needs to respect ALL conditions
                 conditions:
@@ -109,8 +105,9 @@ imt:
                 #     # if negative, makes border bigger by x km
                 #     margin_from_border: 0
             beam_positioning:
-                # minimum angle between satellite nadir and the direction of the beam center in degrees
-                minimum_service_angle: 20. 
+                service_grid:
+                    # minimum angle between satellite nadir and the direction of the beam center in degrees
+                    minimum_service_angle: 20. 
     ###########################################################################
     # Defines the antenna model to be used in compatibility studies between
     # IMT and other services in adjacent band
@@ -125,10 +122,10 @@ imt:
         load_probability: 1.0
         ###########################################################################
         # Conducted power per antenna element [dBm/bandwidth]
-        conducted_power: 42.8  # -54.2 [dB/Hz] + 10log(5*1e6)[Hz] + 30.0
+        conducted_power: 42.8  # -22.9 [dB/Hz] + 10log(5*1e6)[Hz] - 34.1 + 30.0
         ###########################################################################
         # Base station height [m]
-        height: 525000 # VALUE NOT USED
+        height: 340000 # VALUE NOT USED
         ###########################################################################
         # Base station noise figure [dB]
         noise_figure: 5.0
@@ -160,6 +157,7 @@ imt:
                 n_side_lobes: 2
                 # Radial (l_r) and transverse (l_t) sizes of the effective radiating area of the satellite transmitt antenna (m)
                 l_r: 1.6
+                l_t: 1.6
 
     ###########################################################################
     # User Equipment parameters:

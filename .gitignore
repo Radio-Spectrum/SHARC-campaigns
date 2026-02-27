@@ -3,6 +3,20 @@ logs/
 output/
 output*/
 
+# Figures, PDFs, and CSVs
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.gif
+*.tif
+*.tiff
+*.eps
+*.pdf
+*.csv
+*.yaml
+*.yml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
