@@ -32,9 +32,9 @@ DC_MSS_IDS = [
 BAND_TO_DC_MSS_ID_MAP = {
     "B1": ["system-3.698-960MHz.340km", "system-3.698-960MHz.525km", "system-4.698-960MHz.block2.690km"],
     "B2": ["system-3.1427-2690MHz.340km", "system-3.1427-2690MHz.525km", "system-4.1427-2690MHz.690km"],
-    "B3": ["system-3.2110-2200MHz.340km", "system-3.2110-2200MHz.525km"],
-    "B4": ["system-3.2300-2690MHz.340km", "system-3.2300-2690MHz.525km"],
-    "B5": ["system-3.2300-2690MHz.340km", "system-3.2300-2690MHz.525km"],
+    "B3": ["system-3.2110-2200MHz.340km", "system-3.2110-2200MHz.525km", "system-4.1427-2690MHz.690km"],
+    "B4": ["system-3.2300-2690MHz.340km", "system-3.2300-2690MHz.525km", "system-4.1427-2690MHz.690km"],
+    "B5": ["system-3.2300-2690MHz.340km", "system-3.2300-2690MHz.525km", "system-4.1427-2690MHz.690km"],
 }
 
 DC_MSS_LOAD_FACTORS = [
