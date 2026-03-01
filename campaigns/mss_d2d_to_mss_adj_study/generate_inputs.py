@@ -208,12 +208,10 @@ def generate_inputs():
                         # Adjacente antenna model is the same as in-band.
                         # params.imt.adjacent_ch_emissions = "ACLR"
                         # OOBE mask
-                        params.imt.spurious_emissions = -30
                         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
                         params.imt.spectral_mask = "STEPPED"
                         system3_eirp_mask_vals = \
                             params.imt.bs.conducted_power - 10 * np.log10(params.imt.bandwidth) - np.array([45, 50])
-                        system3_eirp_mask_vals = np.concatenate((system3_eirp_mask_vals, [params.imt.spurious_emissions]))
                         params.imt.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
                         params.imt.bs.use_oob_antenna = False
 
