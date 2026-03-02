@@ -177,7 +177,7 @@ def generate(
 
         elif "system-4" in dc_mss_id:
             # Adjacente antenna model is the same as in-band.
-            params.mss_d2d.bs.use_oob_antenna = False
+            params.mss_d2d.use_oob_antenna = False
             params.mss_d2d.adjacent_ch_emissions = "SPECTRAL_MASK"
             params.mss_d2d.spectral_mask = "STEPPED"
             system3_eirp_mask_vals = \
