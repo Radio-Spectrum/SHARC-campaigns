@@ -80,10 +80,12 @@ if __name__ == "__main__":
         "imt_ul_inr"
     ]
 
+    adj_ch_readable = "adj" if args.adj else "co"
+
     results = Results.load_many_from_dir(
         OUTPUT_ROOT_FOLDER,
         only_latest=True,
-        filter_fn=lambda s: any(mss_id in str(s) for mss_id in args.mss_ids),
+        filter_fn=lambda s: any(mss_id in str(s) and adj_ch_readable in str(s) for mss_id in args.mss_ids),
         only_samples=attributes_to_plot
     )
 
