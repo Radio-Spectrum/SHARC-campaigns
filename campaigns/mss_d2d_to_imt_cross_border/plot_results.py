@@ -159,6 +159,11 @@ if __name__ == "__main__":
 
     # Ensure the "htmls" directory exists relative to the script directory
     htmls_dir = OUTPUT_ROOT_FOLDER / "htmls"
+    html_file_prefix = ""
+    for mss_id in args.mss_ids:
+        html_file_prefix += f"{mss_id}_"
+    html_file_prefix += f"{args.band_id}_"
+    html_file_prefix += f"{args.plot_type}"
     htmls_dir.mkdir(exist_ok=True)
 
     for attr in attributes_to_plot:
@@ -213,7 +218,7 @@ if __name__ == "__main__":
         # Make grid lines darker
         if plot is None:
             print(f"Warning: No plot found for attribute '{attr}'")
-            continue
-        plot.write_html(htmls_dir / f"{attr}.html")
+            continue 
+        plot.write_html(htmls_dir / f"{html_file_prefix}_{attr}.html")
         # plot.show()
 
