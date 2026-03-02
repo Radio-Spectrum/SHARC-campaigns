@@ -150,6 +150,10 @@ def generate(
             # Set DC-MSS frequency to the left edge of the IMT band.
             params.mss_d2d.frequency = params.mss_d2d.frequency - params.mss_d2d.bandwidth
 
+        # if "system4" in dc_mss_id:
+        #     print("Using Phased Array antenna pattern for System4")
+        #     params.mss_d2d.antenna.pattern = "ARRAY System 4"
+
         # Set system specific adjacent channel emissions parameters
         if "system3" in dc_mss_id:
             # Adjacent antenna parameters
