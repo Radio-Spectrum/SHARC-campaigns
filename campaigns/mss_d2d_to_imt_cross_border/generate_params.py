@@ -156,7 +156,7 @@ def generate(
         #     params.mss_d2d.antenna.pattern = "ARRAY System 4"
 
         # Set system specific adjacent channel emissions parameters
-        if "system3" in dc_mss_id:
+        if "system-3" in dc_mss_id:
             # Adjacent antenna parameters
             # NOTE: Specific to System3 model
             # Accoring to SpaceX the adjacent channel emissions are measured per satellite, not per beam.
@@ -175,7 +175,7 @@ def generate(
             system3_eirp_mask_vals = np.concatenate((system3_eirp_mask_vals, [params.mss_d2d.spurious_emissions]))
             params.mss_d2d.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
 
-        elif "system4" in dc_mss_id:
+        elif "system-4" in dc_mss_id:
             # Adjacente antenna model is the same as in-band.
             params.mss_d2d.bs.use_oob_antenna = False
             params.mss_d2d.adjacent_ch_emissions = "SPECTRAL_MASK"
