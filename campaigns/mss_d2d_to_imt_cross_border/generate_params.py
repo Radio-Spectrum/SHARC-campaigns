@@ -13,11 +13,11 @@ DC_MSS_BANDWIDTH_MHZ = 5.0
 # IMT frequency is set in such a way that DC-MSS is at the edge of the band for adjacent band studies
 # DC-MSS-IMT band is assumed to be 5MHz
 IMT_BAND_CONFIG_MAP = {
-    "B1": {"lower": 698.0,  "upper": 960.0,  "typical_bw": 10.0, "imt_dl_center_f_mhz": 864. + DC_MSS_BANDWIDTH_MHZ + 5,   "imt_ul_center_f_mhz": 819. + DC_MSS_BANDWIDTH_MHZ + 5},
-    "B2": {"lower": 1427.0, "upper": 1528.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 1427. + DC_MSS_BANDWIDTH_MHZ + 10, "imt_ul_center_f_mhz": 1427. + DC_MSS_BANDWIDTH_MHZ + 10},  # TDD band in Brazil
-    "B3": {"lower": 1710.0, "upper": 2200.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2125. + DC_MSS_BANDWIDTH_MHZ + 10, "imt_ul_center_f_mhz": 1920. + DC_MSS_BANDWIDTH_MHZ + 10},
-    "B4": {"lower": 2300.0, "upper": 2400.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2315. + DC_MSS_BANDWIDTH_MHZ + 10, "imt_ul_center_f_mhz": 2300. + DC_MSS_BANDWIDTH_MHZ + 10},  # TDD band in Brazil
-    "B5": {"lower": 2500.0, "upper": 2690.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2635. + DC_MSS_BANDWIDTH_MHZ + 10, "imt_ul_center_f_mhz": 2500. + DC_MSS_BANDWIDTH_MHZ + 10},
+    "B1": {"lower": 698.0,  "upper": 960.0,  "typical_bw": 10.0, "imt_dl_center_f_mhz": 874.,  "imt_ul_center_f_mhz": 834.},
+    "B2": {"lower": 1427.0, "upper": 1528.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 1442., "imt_ul_center_f_mhz": 1442.},  # TDD band in Brazil
+    "B3": {"lower": 1710.0, "upper": 2200.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2125., "imt_ul_center_f_mhz": 1935.},
+    "B4": {"lower": 2300.0, "upper": 2400.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2330., "imt_ul_center_f_mhz": 2330.},  # TDD band in Brazil
+    "B5": {"lower": 2500.0, "upper": 2690.0, "typical_bw": 20.0, "imt_dl_center_f_mhz": 2635., "imt_ul_center_f_mhz": 2515.},
 }
 
 # MSS-DC systems for simulation
@@ -137,6 +137,7 @@ def generate(
 
         # Co-channel frequency configuretion - adjacent channel case is set below
         # Overlaps with the left edge of the IMT band.
+        params.mss_d2d.bandwidth = DC_MSS_BANDWIDTH_MHZ
         params.mss_d2d.frequency = params.imt.frequency - params.imt.bandwidth / 2 + params.mss_d2d.bandwidth / 2
 
         ###### Adjust parameters for adjacent channel case
