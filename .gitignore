@@ -1,6 +1,7 @@
 logs/
 .tmp.yaml
 output/
+input/
 output*/
 
 # Figures, PDFs, and CSVs
@@ -14,8 +15,8 @@ output*/
 *.eps
 *.pdf
 *.csv
-*.yaml
-*.yml
+# *.yaml
+# *.yml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,0 +1,54 @@
+id: system-2.1805-1920MHz.2110-2170MHz.500km
+# written document aludes to certain other frequencies working the same way:
+# 1 710-1 785/1 805-1 880
+# 1 920-1 980/2 110-2 170
+# 2 010-2 025/1 880-1 920
+
+metadata:
+  referenced_documents:
+    - WP4C-Working-Document-4C-356, Annex 7
+
+mss_d2d:
+    name: system-2.1805-1920MHz.2110-2170MHz.500km
+    adjacent_ch_emissions: ACLR
+    adjacent_ch_leak_ratio: 25.0
+    frequency: null
+    bandwidth: 5.0
+    cell_radius: 17862
+    # power per beam = 13 dBW
+    # EIRP = 48.2
+    # Gmax = 10*log10(36*36)+4.11 = 35.2
+    tx_power_density: -54.0
+    num_sectors: 19
+    antenna:
+        pattern: ARRAY Satellite
+        array:
+          element_pattern: M2101                    # Element pattern: M2101, F1336, or FIXED
+          minimum_array_gain: -200                  # Minimum allowed array gain [dBi]
+          element_max_g: 4.11                       # Max element gain [dBi]
+          element_phi_3db: 118                      # Horizontal 3dB beamwidth [deg]
+          element_theta_3db: 112                    # Vertical 3dB beamwidth [deg]
+          n_rows: 36                                # Rows in the array
+          n_columns: 36                             # Columns in the array
+          element_horiz_spacing: 0.5                # Horizontal spacing [in wavelengths]
+          element_vert_spacing: 0.5                 # Vertical spacing [in wavelengths]
+          element_am: 30                            # Front-to-back ratio [dB]
+          element_sla_v: 30                         # Vertical sidelobe attenuation [dB]
+          multiplication_factor: 12                 # Pattern scaling factor
+    sat_is_active_if:
+        conditions:
+            - MINIMUM_ELEVATION_FROM_ES
+        minimum_elevation_from_es: 5
+    beam_positioning:
+      service_grid:
+        minimum_service_angle: 35
+    channel_model: FSPL
+    polarization_loss: 0
+    orbits:
+      - n_planes: 60
+        inclination_deg: 55.0
+        perigee_alt_km: 500.0
+        apogee_alt_km: 500.0
+        sats_per_plane: 60
+        long_asc_deg: 0.0
+        phasing_deg: 0.0 # NOTE: did not find
