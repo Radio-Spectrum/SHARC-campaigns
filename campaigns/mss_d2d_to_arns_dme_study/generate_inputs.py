@@ -6,7 +6,7 @@ from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.mss_d2d_to_arns_study.constants import (
+from campaigns.mss_d2d_to_arns_dme_study.constants import (
     CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR, OFFSET_LABELS,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
     get_specific_pattern
@@ -14,15 +14,15 @@ from campaigns.mss_d2d_to_arns_study.constants import (
 
 SEED = 82
 
-MSS_DC_CENTER_FREQ = 2502.5  # Mhz
+MSS_DC_CENTER_FREQ = 970.5  # Mhz
 # wp4c 107
 # R23 wp4c 528
 
 MSS_DC_TX_OFFSETS = [
     (MSS_DC_CENTER_FREQ, "offset_0MHz", "First adjcent"),
-    (MSS_DC_CENTER_FREQ + 5, "offset_5MHz", "Second adjacent"),
-    (MSS_DC_CENTER_FREQ + 10, "offset_10MHz", "Third adjacent"),
-    (MSS_DC_CENTER_FREQ + 120, "offset_120MHz", "Spurious domain"),
+    #(MSS_DC_CENTER_FREQ + 5, "offset_5MHz", "Second adjacent"),
+    #(MSS_DC_CENTER_FREQ + 10, "offset_10MHz", "Third adjacent"),
+    #(MSS_DC_CENTER_FREQ + , "offset_120MHz", "Spurious domain"),
 ]
 
 def get_taylor_cell_radius(
@@ -97,7 +97,7 @@ def generate_inputs():
         params.imt.topology.central_altitude = 200
 
         # Channel Model
-        params.single_earth_station.channel_model = "P619"
+        params.single_earth_station.channel_model = "FPSL"
 
         # P.619 model parameters.
         # 3dB polarization loss, as suggested by P.619
@@ -156,10 +156,10 @@ def generate_inputs():
 
         #################### MSS Earth Station Parameters ##############
         # MHz. Setting to the center of the victim ES band (Hibleo-X) to be more conservative.
-        params.single_earth_station.frequency = 2500 - params.single_earth_station.bandwidth / 2
+        params.single_earth_station.frequency = 964.5 - params.single_earth_station.bandwidth / 2
         # position ES at reference
         es_geom = params.single_earth_station.geometry
-        es_geom.height = 1.5  # meters
+        es_geom.height = 10000  # meters
         # Let the MSS Earth station be randomly located within the service area.
         es_geom.location.type = "NETWORK"
         # These coordinates are relative to the topology central longitude - Asunción in this case.
