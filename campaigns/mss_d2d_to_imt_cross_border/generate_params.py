@@ -22,6 +22,11 @@ IMT_BAND_CONFIG_MAP = {
 
 # MSS-DC systems for simulation
 DC_MSS_IDS = [
+    "system-2.694MHz.698-960MHz.500km",
+    "system-2.1427-1518MHz.500km",
+    "system-2.1805-1920MHz.2110-2170MHz.500km",
+    "system-2.2300-2400MHz.500km",
+    "system-2.2500-2690MHz.500km",
     "system-3.698-960MHz.340km",
     "system-3.698-960MHz.525km",
     "system-3.2110-2200MHz.340km",
@@ -33,11 +38,16 @@ DC_MSS_IDS = [
 ]
 
 BAND_TO_DC_MSS_ID_MAP = {
-    "B1": ["system-3.698-960MHz.340km", "system-3.698-960MHz.525km", "system-4.698-960MHz.block2.690km"],
-    "B2": ["system-3.1427-2690MHz.340km", "system-3.1427-2690MHz.525km", "system-4.1427-2690MHz.690km"],
-    "B3": ["system-3.2110-2200MHz.340km", "system-3.2110-2200MHz.525km", "system-4.1427-2690MHz.690km"],
-    "B4": ["system-3.2300-2690MHz.340km", "system-3.2300-2690MHz.525km", "system-4.1427-2690MHz.690km"],
-    "B5": ["system-3.2300-2690MHz.340km", "system-3.2300-2690MHz.525km", "system-4.1427-2690MHz.690km"],
+    "B1": ["system-2.694MHz.698-960MHz.500km", "system-3.698-960MHz.340km",
+           "system-3.698-960MHz.525km", "system-4.698-960MHz.block2.690km"],
+    "B2": ["system-2.1427-1518MHz.500km", "system-3.1427-2690MHz.340km",
+           "system-3.1427-2690MHz.525km", "system-4.1427-2690MHz.690km"],
+    "B3": ["system-2.1805-1920MHz.2110-2170MHz.500km", "system-3.2110-2200MHz.340km",
+           "system-3.2110-2200MHz.525km", "system-4.1427-2690MHz.690km"],
+    "B4": ["system-2.2300-2400MHz.500km", "system-3.2300-2690MHz.340km",
+           "system-3.2300-2690MHz.525km", "system-4.1427-2690MHz.690km"],
+    "B5": ["system-2.2500-2690MHz.500km", "system-3.2300-2690MHz.340km",
+           "system-3.2300-2690MHz.525km", "system-4.1427-2690MHz.690km"],
 }
 
 DC_MSS_LOAD_FACTORS = [
