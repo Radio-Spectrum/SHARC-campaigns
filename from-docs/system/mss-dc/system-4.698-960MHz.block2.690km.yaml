@@ -70,6 +70,9 @@ mss_d2d:
         #     # if positive, makes border smaller by x km
         #     # if negative, makes border bigger by x km
         #     margin_from_border: 0
+    beam_positioning:
+      service_grid:
+        minimum_service_angle: 32
     # channel model, possible values are "FSPL" (free-space path loss),
     #                                    "SatelliteSimple" (FSPL + 4 + clutter loss)
     #                                    "P619"

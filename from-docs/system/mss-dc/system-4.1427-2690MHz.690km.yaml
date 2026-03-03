@@ -46,7 +46,7 @@ mss_d2d:
                 antenna_gain: 41.0
                 antenna_3_dB_bw: 1.5
                 antenna_l_s: -35
-                far_out_side_lobe: -2
+                far_out_side_lobe: -20
             antenna_parameters_low:
                 antenna_gain: 46.0
                 antenna_3_dB_bw: 0.82
@@ -77,6 +77,9 @@ mss_d2d:
         #     # if positive, makes border smaller by x km
         #     # if negative, makes border bigger by x km
         #     margin_from_border: 0
+    beam_positioning:
+      service_grid:
+        minimum_service_angle: 32
     # channel model, possible values are "FSPL" (free-space path loss),
     #                                    "SatelliteSimple" (FSPL + 4 + clutter loss)
     #                                    "P619"
