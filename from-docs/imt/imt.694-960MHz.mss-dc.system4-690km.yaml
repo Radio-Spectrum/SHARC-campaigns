@@ -135,15 +135,15 @@ imt:
             gain: 0.0
             antenna_system_4:
                 antenna_parameters_high:
-                    antenna_gain: 41.0
-                    antenna_3_dB_bw: 1.5
+                    antenna_gain: 34.6
+                    antenna_3_dB_bw: 1.53
                     antenna_l_s: -35
-                    far_out_side_lobe: -2
+                    far_out_side_lobe: -25
                 antenna_parameters_low:
-                    antenna_gain: 46.0
-                    antenna_3_dB_bw: 0.82
+                    antenna_gain: 40.0
+                    antenna_3_dB_bw: 0.84
                     antenna_l_s: -20
-                    far_out_side_lobe: -10
+                    far_out_side_lobe: -15
             array:
                 element_max_g: 4.86
                 n_rows: 80

@@ -161,11 +161,11 @@ def generate_inputs():
         es_geom = params.single_earth_station.geometry
         es_geom.height = 1.5  # meters
         # Let the MSS Earth station be randomly located within the service area.
-        es_geom.location.type = "NETWORK"
+        es_geom.location.type = "UNIFORM_DIST"
         # These coordinates are relative to the topology central longitude - Asunción in this case.
-        # es_geom.location.uniform_dist.min_dist_to_center = 1e-2  # make it small - close to center
-        # es_geom.location.uniform_dist.max_dist_to_center = 1000e3
-        es_geom.location.network.min_dist_to_bs = params.imt.topology.mss_dc.beam_radius
+        es_geom.location.uniform_dist.min_dist_to_center = 1e-2  # make it small - close to center
+        es_geom.location.uniform_dist.max_dist_to_center = 1000e3
+        #es_geom.location.network.min_dist_to_bs = params.imt.topology.mss_dc.beam_radius
 
         # Vary antenna pointinhg angles uniformly.
         es_geom.azimuth.type = "UNIFORM_DIST"
