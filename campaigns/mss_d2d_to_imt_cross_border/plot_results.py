@@ -106,7 +106,7 @@ if __name__ == "__main__":
             postfix_str = get_specific_pattern(
                 imt_id,
                 dc_mss_id,
-                args.adj,
+                not args.adj,
                 args.band_id,
                 border,
                 load_factor,
