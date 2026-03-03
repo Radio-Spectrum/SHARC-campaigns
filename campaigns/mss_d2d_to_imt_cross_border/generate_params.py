@@ -62,6 +62,11 @@ IMT_IDS = [
 LINKS = ["dl", "ul"]
 
 IMT_MSS_DC_ID_TO_READABLE = {
+    "system-2.694MHz.698-960MHz.500km": "Sys2",
+    "system-2.1427-1518MHz.500km": "Sys2",
+    "system-2.1805-1920MHz.2110-2170MHz.500km": "Sys2",
+    "system-2.2300-2400MHz.500km": "Sys2",
+    "system-2.2500-2690MHz.500km": "Sys2",
     "system-3.698-960MHz.340km": "Sys3 340km",
     "system-3.698-960MHz.525km": "Sys3 525km",
     "system-3.2110-2200MHz.340km": "Sys3 340km",
