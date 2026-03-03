@@ -6,8 +6,11 @@ metadata:
 
 mss_d2d:
     name: system-2.694MHz.698-960MHz.500km
-    adjacent_ch_emissions: ACLR
-    adjacent_ch_leak_ratio: 25.0
+    adjacent_ch_emissions: SPECTRAL_MASK
+    spectral_mask: STEPPED
+    # adjacent_ch_leak_ratio: 25.0
+    # -58.0(dBW/Hz) + 60(/MHz) + 30(dBm) - 25(dBsd) = 7
+    spectral_mask_steps: !!python/tuple [7, 7, -13]
     frequency: null
     bandwidth: 5.0
     cell_radius: 22972
@@ -48,4 +51,3 @@ mss_d2d:
         sats_per_plane: 60
         long_asc_deg: 0.0
         phasing_deg: 0.0 # NOTE: did not find
-
