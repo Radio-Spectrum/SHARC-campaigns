@@ -240,6 +240,10 @@ def generate_inputs():
         # service_grid.grid_exclusion_zone.from_countries.country_names = ["Paraguay"]
         # service_grid.grid_exclusion_zone.from_countries.margin_from_border = -exclusion_margin_km
 
+        #######################
+        # Set power backoff
+        # Set only to the inner region
+        params.mss_d2d.power_control_zones.zones[1].power_backoff_db = pwr_boff
         # Generate the filename pattern
         specific = get_specific_pattern(
             imt_ue_type, imt_id, imt_frequency_mhz, mss_d2d_id, beam_elev, exclusion_margin_km, pwr_boff, lf, use_phased_array
