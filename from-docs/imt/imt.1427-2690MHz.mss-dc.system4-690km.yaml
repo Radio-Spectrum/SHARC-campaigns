@@ -138,7 +138,7 @@ imt:
                     antenna_gain: 41.0
                     antenna_3_dB_bw: 1.5
                     antenna_l_s: -35
-                    far_out_side_lobe: -2
+                    far_out_side_lobe: -20
                 antenna_parameters_low:
                     antenna_gain: 46.0
                     antenna_3_dB_bw: 0.82
