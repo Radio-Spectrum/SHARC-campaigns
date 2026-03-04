@@ -3,14 +3,14 @@
 ## Document Information
 - **Generated**: 20 de fevereiro de 2026
 - **Data Source**: Real simulation inputs and outputs
-- **Campaign**: mss_d2d_to_arns_study (Adjacent Channel Scenario)
+- **Campaign**: mss_d2d_to_arns_dme_study (Adjacent Channel Scenario)
 
 ---
 
 ## MSS D2D-to-MSS Adjacent Channel Simulation Campaign
 
 ### Campaign Overview
-- **Name**: mss_d2d_to_arns_study
+- **Name**: mss_d2d_to_arns_dme_study
 - **Type**: Adjacent Channel Interference Analysis
 - **Victim Receiver**: MSS Earth Station (at offset frequencies)
 - **Interferer**: IMT D2D (System 3) at MSS DC band center
@@ -70,7 +70,7 @@
 
 ### Directory Structure
 ```
-mss_d2d_to_arns_study/
+mss_d2d_to_arns_dme_study/
 ├── input/
 │   └── parameter_*.yaml (18 files)
 ├── output/

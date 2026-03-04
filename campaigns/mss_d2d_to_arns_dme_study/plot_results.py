@@ -3,7 +3,7 @@ import numpy as np
 from sharc.results import Results, SampleList
 from sharc.post_processor import PostProcessor
 
-from campaigns.mss_d2d_to_arns_study.constants import (
+from campaigns.mss_d2d_to_arns_dme_study.constants import (
     CAMPAIGN_DIR, MSS_ES_TO_READABLE, IMT_MSS_DC_ID_TO_READABLE, OFFSET_LABELS,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS, OFFSET_LABELS_READABLE,
     get_specific_pattern,
@@ -52,7 +52,7 @@ for res in ccdf_results:
         )
 
     # Convert INR to dB (dimensionless) if simulator exported it like dBm
-    if hasattr(res, "system_inr"):
+    if hasattr(res, "system_inr") and len(res.system_inr):
         arr = np.array(res.system_inr)
         # INR should be around -20 .. +20 dB normally
         if arr.max() > 50:  # looks like dBm offset
