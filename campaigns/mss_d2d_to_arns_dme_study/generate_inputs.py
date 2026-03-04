@@ -97,7 +97,7 @@ def generate_inputs():
         params.imt.topology.central_altitude = 200
 
         # Channel Model
-        params.single_earth_station.channel_model = "FPSL"
+        params.single_earth_station.channel_model = "FSPL"
 
         # P.619 model parameters.
         # 3dB polarization loss, as suggested by P.619

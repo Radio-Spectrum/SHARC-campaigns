@@ -149,7 +149,7 @@ single_earth_station:
     pattern: OMNI
     gain: 5.4
   adjacent_ch_reception: 'OFF'
-  channel_model: FPSL
+  channel_model: FSPL
   param_p619:
     earth_station_lat_deg: -25.2637
     earth_station_alt_m: 200
