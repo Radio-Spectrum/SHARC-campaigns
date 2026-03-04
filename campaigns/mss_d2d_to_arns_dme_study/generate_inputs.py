@@ -14,7 +14,7 @@ from campaigns.mss_d2d_to_arns_dme_study.constants import (
 
 SEED = 82
 
-MSS_DC_CENTER_FREQ = 970.5  # Mhz
+MSS_DC_CENTER_FREQ = 957.5  # Mhz
 # wp4c 107
 # R23 wp4c 528
 
