@@ -1,7 +1,4 @@
 id: system-4.698-960MHz-block2.690km
-# FIXME: places where something needs to be changed to run the scenario properly
-# TODO: places where it would be interesting to implement changes for simulation
-# OPTIONS: places where you should choose between one or other options
 
 metadata:
   referenced_documents:
@@ -25,73 +22,103 @@ metadata:
 #################################################################
 
 mss_d2d:
-  name: system-4.698-960MHz-block2.620km  # MSS_D2D system name
-  adjacent_ch_emissions: ACLR  # from document, in dBW/MHz
-  adjacent_ch_leak_ratio: 45   # OPTIONS: 45 dBsd for adjacent, 50 for non-adjacent
-  spectral_mask: IMT-2020  # NOTE: IGNORE THIS PARAMETER, NOT USED
-  frequency: -1                # center frequency [MHz] (PER SCENARIO)
+    # MSS_D2D system name
+    name: system-4.698-960MHz-block2.690km
+    # Adjacent channel emissions type
+    # Possible values are "ACLR", "SPECTRAL_MASK" and "OFF"
+    adjacent_ch_emissions: SPECTRAL_MASK # (PER SCENARIO)
+    # chosen spectral Mask
+    spectral_mask: MSS
+    # MSS_D2D system center frequency in MHz (PER SCENARIO)
+    frequency: -1
+    # MSS_D2d system bandwidth in MHz
+    bandwidth: 5
+    # MSS_D2D cell radius in network topology [m] (PER SCENARIO)
+    cell_radius: 24000
+    # Satellite power density in dBW/Hz
+    tx_power_density: -63.6
+    # Polarization loss [dB] (PER SCENARIO)
+    # P.619 suggests 3dB polarization loss as good constant value for monte carlo
+    polarization_loss: 0
+    # Number of sectors (PER SCENARIO)
+    num_sectors: 19
+    # Base Station Antenna parameters:
+    antenna:
+        # pattern: ARRAY System 4  # Uncomment to use System4 phased array antenna
+        pattern: Antenna System 4
+        gain: 0.0
+        antenna_system_4:
+            antenna_parameters_high:
+                antenna_gain: 34.6
+                antenna_3_dB_bw: 3.06
+                antenna_l_s: -35
+                far_out_side_lobe: -25
+            antenna_parameters_low:
+                antenna_gain: 40.0
+                antenna_3_dB_bw: 1.68
+                antenna_l_s: -20
+                far_out_side_lobe: -15
+        array:
+            element_max_g: 4.86
+            n_rows: 80
+            n_columns: 96
+            element_horiz_spacing: 0.5
+            element_vert_spacing: 0.5
+            element_pattern: FIXED
+    sat_is_active_if: # (PER SCENARIO)
+        # for a satellite to be active, it needs to respect ALL conditions
+        conditions:
+            # - LAT_LONG_INSIDE_COUNTRY
+            # - MAXIMUM_ELEVATION_FROM_ES
+            - MINIMUM_ELEVATION_FROM_ES
+        minimum_elevation_from_es: 5
+        # maximum_elevation_from_es: 5
+        # lat_long_inside_country:
+        #     # You may specify another shp file for country borders reference
+        #     # country_shapes_filename: sharc/topology/countries/ne_110m_admin_0_countries.shp
+        #     country_names:
+        #         - Brazil
+        #         - Argentina
+        #     # margin from inside of border [km]
+        #     # if positive, makes border smaller by x km
+        #     # if negative, makes border bigger by x km
+        #     margin_from_border: 0
+    beam_positioning:
+      service_grid:
+        minimum_service_angle: 32
+    # channel model, possible values are "FSPL" (free-space path loss),
+    #                                    "SatelliteSimple" (FSPL + 4 + clutter loss)
+    #                                    "P619"
+    channel_model: FSPL # (PER SCENARIO)
+    # param_p619:
+    #     ###########################################################################
+    #     # altitude of ES system [m]
+    #     earth_station_alt_m: 1200
+    #     ###########################################################################
+    #     # latitude of ES system [m]
+    #     earth_station_lat_deg: -15.7801
+    #     ###########################################################################
+    #     # difference between longitudes of IMT-NTN station and FSS-ES system [deg]
+    #     #   (positive if space-station is to the East of earth-station)
+    #     earth_station_long_diff_deg: 0.0
+    #     ###########################################################################
+    #     # year season: SUMMER of WINTER
+    #     season: SUMMER
+    # Orbit parameters
+    orbits:
+        # Number of planes
+      - n_planes: 96
+        # Inclination in degrees
+        inclination_deg: 53.0
+        # Perigee in km
+        perigee_alt_km: 690.0
+        # Apogee in km
+        apogee_alt_km: 690.0
+        # Number of satellites per plane
+        sats_per_plane: 1
+        # Longitude of the first ascending node in degrees
+        long_asc_deg: 1.875
+        # Phasing in degrees
+        phasing_deg: 97.5
 
-  bandwidth: 20            # OPTIONS: 3, 5, 10 or 20 [MHz]
-  cell_radius: 22335       # beam radius on ground [m] (PER SCENARIO)
-  tx_power_density: -63.6  # dBW/Hz
-  # Polarization loss [dB] (PER SCENARIO)
-  # P.619 suggests 3dB polarization loss as good constant value for monte carlo
-  polarization_loss: 0
-  num_sectors: 19  # Number of sectors (PER SCENARIO)
 
-  antenna:
-    pattern: Antenna System 4
-    # FIXME: peak gain should be different when beam is at max steering angle
-    gain: 34.6
-    itu_r_s_1528:
-      # FIXME: L_F is currently hardcoded to 0 in simulator
-      antenna_3_dB_bw: 3.06
-      # FIXME: fix parameter name. While we pass as L_S, it actually means L_N
-      antenna_l_s: -35
-      # far-out side-lobe level
-      far_out_side_lobe: -25
-  antenna:
-    pattern: "ARRAY System 4"
-    array:
-      element_max_g: 4.86
-      n_rows: 80
-      n_columns: 96
-      element_horiz_spacing: 0.5
-      element_vert_spacing: 0.5
-      element_pattern: "FIXED"
-  # Uncomment to use the S.1528 antenna instead of the Array System 4
-  # antenna:
-  #   pattern: Antenna System 4
-  #   antenna_system_4:
-  #     antenna_parameters_high:
-  #       antenna_gain: 34.6
-  #       # FIXME: L_F is currently hardcoded to 0 in simulator
-  #       antenna_3_dB_bw: 3.06
-  #       # FIXME: fix parameter name. While we pass as L_S, it actually means L_N
-  #       antenna_l_s: -35
-  #       # far-out side-lobe level
-  #       far_out_side_lobe: -25
-  #     antenna_parameters_low:
-  #       antenna_gain: 40.0
-  #       # FIXME: L_F is currently hardcoded to 0 in simulator
-  #       antenna_3_dB_bw: 1.68
-  #       # FIXME: fix parameter name. While we pass as L_S, it actually means L_N
-  #       antenna_l_s: -20
-  #       # far-out side-lobe level
-  #       far_out_side_lobe: -15
-
-  sat_is_active_if: # (PER SCENARIO)
-    conditions:  # for a satellite to be active, it needs to respect ALL conditions
-      - MINIMUM_ELEVATION_FROM_ES
-    minimum_elevation_from_es: 50
-
-  channel_model: FSPL # (PER SCENARIO)
-
-  orbits:  # Orbit parameters
-    - n_planes: 96            # Number of planes
-      inclination_deg: 53.0  # Inclination in degrees
-      perigee_alt_km: 690.0  # Perigee in km
-      apogee_alt_km: 690.0   # Apogee in km
-      sats_per_plane: 1      # Number of satellites per plane
-      long_asc_deg: 0.0      # Longitude of the first ascending node in degrees
-      phasing_deg: 97.5      # Phasing in degrees
