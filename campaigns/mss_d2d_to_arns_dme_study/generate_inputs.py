@@ -163,8 +163,8 @@ def generate_inputs():
         # Let the MSS Earth station be randomly located within the service area.
         es_geom.location.type = "UNIFORM_DIST"
         # These coordinates are relative to the topology central longitude - Asunción in this case.
-         es_geom.location.uniform_dist.min_dist_to_center = 1e-2  # make it small - close to center
-         es_geom.location.uniform_dist.max_dist_to_center = 1000e3
+        es_geom.location.uniform_dist.min_dist_to_center = 1e-2  # make it small - close to center
+        es_geom.location.uniform_dist.max_dist_to_center = 1000e3
     
         0
         # Vary antenna pointinhg angles uniformly.

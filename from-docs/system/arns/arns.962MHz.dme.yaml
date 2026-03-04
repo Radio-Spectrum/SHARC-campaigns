@@ -1,7 +1,7 @@
 #### MSS Parameters @7.3GHz
 # Single Earth Station representing an MSS Earth Station in the 2.1GHz band.
 
-id: arns.962MHz.radar
+id: arns.962MHz.dme
 
 metadata:
   referenced_documents:

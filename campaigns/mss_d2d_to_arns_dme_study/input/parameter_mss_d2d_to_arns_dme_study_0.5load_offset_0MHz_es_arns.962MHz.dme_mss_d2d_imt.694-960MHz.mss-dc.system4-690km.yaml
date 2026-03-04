@@ -1,0 +1,167 @@
+metadata:
+  based_on_ids:
+  - imt.694-960MHz.mss-dc.system4-690km
+  - arns.962MHz.dme
+  imt.694-960MHz.mss-dc.system4-690km:
+    referenced_documents:
+    - WP4C-Working-Document-4C-356, Annex 7
+    notes:
+    - If imt mss dc is `interfered_with`, imt_link should always be `UPLINK`
+    - If imt mss dc is not `interfered_with`, imt_link should always be `DOWNLINK`
+  arns.962MHz.dme:
+    referenced_documents: null
+imt:
+  minimum_separation_distance_bs_ue: 0
+  interfered_with: false
+  frequency: 970.5
+  bandwidth: 5
+  rb_bandwidth: 0.1
+  adjacent_ch_reception: 'OFF'
+  adjacent_ch_emissions: SPECTRAL_MASK
+  spurious_emissions: -13.0
+  guard_band_ratio: 0
+  topology:
+    central_latitude: -25.2637
+    central_longitude: -57.5759
+    central_altitude: 200
+    type: MSS_DC
+    mss_dc:
+      beam_radius: 24000.0
+      orbits:
+      - n_planes: 96
+        inclination_deg: 53.0
+        perigee_alt_km: 690.0
+        apogee_alt_km: 690.0
+        sats_per_plane: 1
+        long_asc_deg: 1.875
+        phasing_deg: 97.5
+      sat_is_active_if:
+        conditions:
+        - MINIMUM_ELEVATION_FROM_ES
+        minimum_elevation_from_es: 23.5
+      beam_positioning:
+        service_grid:
+          minimum_service_angle: 32.0
+          transform_grid_randomly: true
+          grid_in_zone:
+            type: CIRCLE
+            circle:
+              center_lat: -25.2637
+              center_lon: -57.5759
+              radius_km: 1500.0
+          eligible_sats_margin_from_border: 0.0
+        type: SERVICE_GRID
+  adjacent_antenna_model: SINGLE_ELEMENT
+  bs:
+    load_probability: 0.5
+    conducted_power: 33.39
+    height: 525000
+    noise_figure: 5.0
+    ohmic_loss: 0.0
+    adjacent_ch_leak_ratio: 46
+    antenna:
+      pattern: ARRAY System 4
+      gain: 0.0
+      antenna_system_4:
+        antenna_parameters_high:
+          antenna_gain: 34.6
+          antenna_3_dB_bw: 1.53
+          antenna_l_s: -35
+          far_out_side_lobe: -25
+        antenna_parameters_low:
+          antenna_gain: 40.0
+          antenna_3_dB_bw: 0.84
+          antenna_l_s: -20
+          far_out_side_lobe: -15
+      array:
+        element_max_g: 4.86
+        n_rows: 80
+        n_columns: 96
+        element_horiz_spacing: 0.5
+        element_vert_spacing: 0.5
+        element_pattern: FIXED
+    use_oob_antenna: false
+  ue:
+    k: 1
+    k_m: 1
+    indoor_percent: 0.0
+    distribution_type: UNIFORM_IN_CELL
+    distribution_distance: RAYLEIGH
+    distribution_azimuth: UNIFORM
+    tx_power_control: false
+    p_o_pusch: -92.2
+    alpha: 0.8
+    p_cmax: 23
+    power_dynamic_range: 63
+    height: 1.5
+    noise_figure: 9
+    ohmic_loss: 0
+    body_loss: 4
+    antenna:
+      array:
+        element_pattern: FIXED
+        element_max_g: -3
+        n_rows: 1
+        n_columns: 1
+  uplink:
+    attenuation_factor: 0.4
+    sinr_min: -10
+    sinr_max: 22
+  downlink:
+    attenuation_factor: 0.8
+    sinr_min: -10
+    sinr_max: 30
+  channel_model: FSPL
+  noise_temperature: 290
+  imt_dl_intra_sinr_calculation_disabled: true
+  spectral_mask: STEPPED
+  spectral_mask_steps: !!python/tuple
+  - -18.599700043360187
+  - -23.599700043360187
+single_earth_station:
+  frequency: 963.75
+  bandwidth: 3.5
+  tx_power_density: 0
+  noise_temperature: 170
+  adjacent_ch_selectivity: 45
+  polarization_loss: 3
+  geometry:
+    height: 10000
+    azimuth:
+      type: UNIFORM_DIST
+      uniform_dist:
+        min: -180.0
+        max: 180.0
+    elevation:
+      type: UNIFORM_DIST
+      uniform_dist:
+        min: 5.0
+        max: 90.0
+    location:
+      type: UNIFORM_DIST
+      fixed:
+        x: 0.0
+        y: 0.0
+      uniform_dist:
+        min_dist_to_center: 0.01
+        max_dist_to_center: 1000000.0
+  antenna:
+    pattern: OMNI
+    gain: 5.4
+  adjacent_ch_reception: 'OFF'
+  channel_model: FPSL
+  param_p619:
+    earth_station_lat_deg: -25.2637
+    earth_station_alt_m: 200
+    mean_clutter_height: low
+    below_rooftop: 0.0
+general:
+  seed: 82
+  num_snapshots: 10000
+  overwrite_output: false
+  output_dir: /Users/robsonvieira/Anatel/SHARC-campaigns/campaigns/mss_d2d_to_arns_dme_study/output
+  output_dir_prefix: output_mss_d2d_to_arns_dme_study_0.5load_offset_0MHz_es_arns.962MHz.dme_mss_d2d_imt.694-960MHz.mss-dc.system4-690km
+  system: SINGLE_EARTH_STATION
+  imt_link: DOWNLINK
+  enable_adjacent_channel: true
+  enable_cochannel: false
