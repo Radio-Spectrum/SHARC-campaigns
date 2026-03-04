@@ -1,7 +1,7 @@
 #### MSS Parameters @7.3GHz
 # Single Earth Station representing an MSS Earth Station in the 2.1GHz band.
 
-id: mss.2100MHz.7.1.4-forward-R
+id: mss.2100MHz.7.1.5-ES-type-1
 
 metadata:
   referenced_documents:
@@ -9,10 +9,10 @@ metadata:
 
 single_earth_station:
   frequency: 2172.5  # MHz - center frequency of the forward link at the edge of the band
-  bandwidth: 1.25  # MHz
+  bandwidth: 0.0216  # MHz
   tx_power_density: 0  # dBW/Hz - no info - system description only for receiver
-  noise_temperature: 273  # K
-  adjacent_ch_selectivity: 20.0  # dB
+  noise_temperature: 150  # K
+  adjacent_ch_selectivity: 30.0  # dB
   polarization_loss: 0  #
 
   geometry:
@@ -34,6 +34,7 @@ single_earth_station:
         y: 0.0
 
   antenna:
-    pattern: OMNI  # Custom pattern for Hibleo-X MSS UE #https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1091-0-199409-I!!PDF-E.pdf 
-    gain: 6.36 # Gain calculated by G/T = -18 dBi defined in document table 4B
+    pattern: OMNI # Custom pattern for Hibleo-X MSS UE
+    gain: 2 # Antenna gain defined in document table
     
+

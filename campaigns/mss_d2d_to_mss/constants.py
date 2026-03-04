@@ -12,9 +12,12 @@ warn("IMT DCs used are not actually proper for current use case")
 # NOTE: Parameters @2.5GHz may not be all equal...
 # tx power is definitely different (2dB diff)
 IMT_MSS_DC_IDS = [
-    "imt.2110-2200MHz.mss-dc.system3-525km",
-    "imt.2110-2200MHz.mss-dc.system3-340km",
+    # "imt.2110-2200MHz.mss-dc.system3-525km",
+    # "imt.2110-2200MHz.mss-dc.system3-340km",
+    "imt.2300-2690MHz.mss-dc.system3-340km",
+    "imt.2300-2690MHz.mss-dc.system3-525km",
 ]
+
 MSS_DC_LOAD_FACTORS = [
     0.2,
     0.5,
@@ -26,8 +29,9 @@ SINGLE_ES_MSS_IDS = [
     "mss.2500MHz.hibleo-xl-1",
     "mss.2500MHz.ast-ng-c-3",
 
-    # "mss.2100MHz.7.1.4-forward-R", # 2100 MHz band systems
-    # "mss.2100MHz.7.1.5-ES-type-2"
+    # "mss.2100MHz.7.1.4-forward-R",  # 2100 MHz band systems
+    # "mss.2100MHz.7.1.5-ES-type-2",
+    # "mss.2100MHz.7.1.5-ES-type-1"
 ]
 
 MSS_ES_TO_READABLE = {
@@ -35,14 +39,17 @@ MSS_ES_TO_READABLE = {
     "mss.2500MHz.hibleo-xl-1": "Hibleo-XL-1",
     "mss.2500MHz.ast-ng-c-3": "AST-NG-C-3",
 
-    #"mss.2100MHz.7.1.4-forward-R": "OMNI", # 2100 MHz band systems
-    #"mss.2100MHz.7.1.5-ES-type-2": "OMNI"
+    # "mss.2100MHz.7.1.4-forward-R": "7.1.4_forward-R",  # 2100 MHz band systems
+    # "mss.2100MHz.7.1.5-ES-type-2": "ES_type-2",
+    # "mss.2100MHz.7.1.5-ES-type-1": "ES_type-1"
 
 }
 
 IMT_MSS_DC_ID_TO_READABLE = {
-    "imt.2110-2200MHz.mss-dc.system3-525km": "MSS DC @525km",
-    "imt.2110-2200MHz.mss-dc.system3-340km": "MSS DC @340km",
+    # "imt.2110-2200MHz.mss-dc.system3-525km": "MSS DC @525km",
+    # "imt.2110-2200MHz.mss-dc.system3-340km": "MSS DC @340km",
+    "imt.2300-2690MHz.mss-dc.system3-340km": "MSS DC @340km",
+    "imt.2300-2690MHz.mss-dc.system3-525km": "MSS DC @525km",
 }
 
 
@@ -62,4 +69,3 @@ if __name__ == "__main__":
     print("CAMPAIGN_STR", CAMPAIGN_STR)
     print("CAMPAIGN_DIR", CAMPAIGN_DIR)
     print("INPUTS_DIR", INPUTS_DIR)
-

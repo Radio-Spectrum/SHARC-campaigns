@@ -3,9 +3,9 @@ import numpy as np
 from sharc.results import Results, SampleList
 from sharc.post_processor import PostProcessor
 
-from campaigns.mss_d2d_to_mss.constants import (
-    CAMPAIGN_DIR, MSS_ES_TO_READABLE, IMT_MSS_DC_ID_TO_READABLE,
-    IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
+from campaigns.mss_d2d_to_mss_adj_study.constants import (
+    CAMPAIGN_DIR, MSS_ES_TO_READABLE, IMT_MSS_DC_ID_TO_READABLE, OFFSET_LABELS,
+    IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS, OFFSET_LABELS_READABLE,
     get_specific_pattern,
 )
 
@@ -70,20 +70,20 @@ def linestyle_getter(results):
 post_processor.add_results_linestyle_getter(linestyle_getter)
 
 # Legend labels
-for mss_dc_id, mss_es_id, load_factor in product(
-    IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS, MSS_DC_LOAD_FACTORS
+for mss_dc_id, mss_es_id, load_factor, offset_label in product(
+    IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS, MSS_DC_LOAD_FACTORS, OFFSET_LABELS
 ):
     readable_mss = IMT_MSS_DC_ID_TO_READABLE[mss_dc_id]
     readable_sys = MSS_ES_TO_READABLE[mss_es_id]
     readable_load = f"Load = {load_factor * 100}%"
     post_processor.add_plot_legend_pattern(
         dir_name_contains=get_specific_pattern(
-            mss_dc_id, mss_es_id, load_factor),
-        legend=f"{readable_sys}; {readable_mss}, {readable_load}"
+            mss_dc_id, mss_es_id, load_factor, offset_label),
+        legend=f"{readable_sys}; {readable_mss}, {OFFSET_LABELS_READABLE[offset_label]}, {readable_load}"
     )
 
 # Generate plots
-plots = post_processor.generate_ccdf_plots_from_results(ccdf_results)
+plots = post_processor.generate_ccdf_plots_from_results(ccdf_results, n_bins=200, cutoff_percentage=1e-5)
 post_processor.add_plots(plots)
 
 plots = post_processor.generate_cdf_plots_from_results(cdf_results)
@@ -117,6 +117,12 @@ for attr, plot_type in attributes_to_plot:
     if plot is None:
         continue
 
+    if attr == "system_inr":
+        plot.add_vline(x=-6, line_dash="dot", line_color="gray", annotation_text="-6dB", annotation_position="top right")
+        plot.add_vline(x=-12.2, line_dash="dot", line_color="gray", annotation_text="-12.2dB", annotation_position="top right")
+        plot.add_hline(y=0.001, line_dash="dot", line_color="gray", annotation_text="0.1%", annotation_position="left")
+        plot.add_hline(y=0.2, line_dash="dot", line_color="gray", annotation_text="20%", annotation_position="left")
+
     plot.update_xaxes(
         linewidth=1,
         linecolor='black',
@@ -146,7 +152,7 @@ for attr, plot_type in attributes_to_plot:
         legend=dict(
             font=dict(size=14),
             x=0.2,
-            y=-0.5,
+            y=-0.8,
             orientation='h',
             xanchor='left',
             yanchor='bottom',

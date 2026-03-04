@@ -1,0 +1,61 @@
+id: system-3-itu-R-2.1GHz-1500km
+
+metadata:
+  referenced_documents:
+    - Rec. ITU-R M.1184-3, Tables 4a and 4b (System R)
+
+mss_d2d:
+    name: ITU_System_R_LEO_2.1GHz
+    
+    # Emissões fora da banda (importante para coexistência com IMT terrestre)
+    adjacent_ch_emissions: SPECTRAL_MASK
+    spectral_mask: MSS
+    
+    # Frequência de Downlink (Service Link)
+    # Tabela 4b indica "2.1 GHz". Centralizado em 2140 MHz para exemplo.
+    frequency: 2165.0
+    
+    # Largura de Banda
+    # A Nota 2 da Tabela 4b especifica: "RF channel bandwidth 15 MHz"
+    bandwidth: 15.0
+    
+    cell_radius: 1
+    
+    # Densidade de Potência
+    # Baseado no EIRP do Sistema R (~31.7 dBW/carrier ou similar na Tabela 4b)
+    # Ajustado para banda de 15 MHz
+    tx_power_density: -40.0
+    
+    polarization_loss: 0
+    
+    # Número de feixes
+    # Tabela 4a indica "1" feixe (Cobertura Global/Regional ampla)
+    num_sectors: 1
+    
+    antenna_pattern: ITU-R-S.1528-Taylor
+    antenna_s1528:
+        # Ganho estimado para feixe amplo
+        antenna_gain: 19.0
+        slr: 20.0
+        n_side_lobes: 2
+        l_r: 1.2
+        l_t: 1.2
+
+    sat_is_active_if:
+        conditions:
+            - MINIMUM_ELEVATION_FROM_ES
+        # Tabela 4b: Mínimo 10 graus
+        minimum_elevation_from_es: 10.0
+
+    channel_model: FSPL
+
+    # Parâmetros Orbitais (Tabela 4a - Coluna R)
+    orbits:
+      - n_planes: 4
+        inclination_deg: 74.0
+        perigee_alt_km: 1500.0
+        apogee_alt_km: 1500.0
+        # 48 satélites total / 4 planos = 12 satélites por plano
+        sats_per_plane: 12
+        long_asc_deg: 0.0
+        phasing_deg: 30.0
