@@ -6,7 +6,7 @@ Extracts real simulation parameters from input filenames and output directory st
 from pathlib import Path
 import re
 from campaigns.utils.constants import ROOT_DIR
-from campaigns.mss_d2d_to_arns_study.constants import CAMPAIGN_DIR, INPUTS_DIR, OUTPUT_DIR
+from campaigns.mss_d2d_to_arns_radar_study.constants import CAMPAIGN_DIR, INPUTS_DIR, OUTPUT_DIR
 
 def extract_simulation_info():
     """Extract real simulation information from filenames and file structure."""
@@ -78,7 +78,7 @@ def generate_simulation_section(info):
     markdown = f"""## MSS D2D-to-MSS Adjacent Channel Simulation Campaign
 
 ### Campaign Overview
-- **Name**: mss_d2d_to_arns_study
+- **Name**: mss_d2d_to_arns_radar_study
 - **Type**: Adjacent Channel Interference Analysis
 - **Victim Receiver**: MSS Earth Station (at offset frequencies)
 - **Interferer**: IMT D2D (System 3) at MSS DC band center
@@ -151,7 +151,7 @@ def generate_simulation_section(info):
 
 ### Directory Structure
 ```
-mss_d2d_to_arns_study/
+mss_d2d_to_arns_radar_study/
 ├── input/
 │   └── parameter_*.yaml ({info['num_input_files']} files)
 ├── output/
@@ -190,7 +190,7 @@ def main():
 ## Document Information
 - **Generated**: 20 de fevereiro de 2026
 - **Data Source**: Real simulation inputs and outputs
-- **Campaign**: mss_d2d_to_arns_study (Adjacent Channel Scenario)
+- **Campaign**: mss_d2d_to_arns_radar_study (Adjacent Channel Scenario)
 
 ---
 
