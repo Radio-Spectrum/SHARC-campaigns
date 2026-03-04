@@ -2,8 +2,8 @@ import argparse
 import sys
 from sharc.run_multiple_campaigns_mut_thread import run_campaign
 
-from campaigns.ast_mss_d2d_to_imt_cpe.generate_inputs import clear_inputs, generate_inputs
-from campaigns.ast_mss_d2d_to_imt_cpe.constants import CAMPAIGN_NAME, INPUTS_DIR
+from campaigns.system4_mss_d2d_to_imt_pfd.generate_inputs import clear_inputs, generate_inputs
+from campaigns.system4_mss_d2d_to_imt_pfd.constants import CAMPAIGN_NAME, INPUTS_DIR
 
 def main():
     parser = argparse.ArgumentParser(description="IMT to MSS campaign runner")

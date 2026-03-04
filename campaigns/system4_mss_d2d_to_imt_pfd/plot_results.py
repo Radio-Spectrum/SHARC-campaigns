@@ -5,7 +5,7 @@ import re as re
 from sharc.results import Results, SampleList
 from sharc.post_processor import PostProcessor
 
-from campaigns.ast_mss_d2d_to_imt_cpe.constants import (
+from campaigns.system4_mss_d2d_to_imt_pfd.constants import (
     CAMPAIGN_DIR,
     IMT_UE_TYPE,
     MSS_D2D_LOAD_FACTOR,

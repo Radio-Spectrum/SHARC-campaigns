@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from sharc.satellite.scripts.plot_footprints import plot_fp, FootPrintOpts
 from sharc.support.sharc_geom import CoordinateSystem
 from sharc.satellite.utils.sat_utils import sat_elevation_to_offaxis, offaxis_to_sat_elevation, earth_arc_length_from_nadir
-from campaigns.ast_mss_d2d_to_imt_cpe.constants import INPUTS_DIR
+from campaigns.system4_mss_d2d_to_imt_pfd.constants import INPUTS_DIR
 
 MY_PATH = Path(__file__).resolve().parent
 

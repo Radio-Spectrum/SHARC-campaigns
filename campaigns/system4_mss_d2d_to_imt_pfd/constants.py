@@ -2,7 +2,7 @@ from campaigns.utils.constants import SHARC_SIM_ROOT_DIR
 import re
 import numpy as np
 
-CAMPAIGN_NAME = "ast_mss_d2d_to_imt_cpe"
+CAMPAIGN_NAME = "system4_mss_d2d_to_imt_pfd"
 CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
 
 # CAMPAIGN_DIR = ROOT_DIR / CAMPAIGN_STR

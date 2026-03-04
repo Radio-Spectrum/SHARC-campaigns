@@ -5,7 +5,7 @@ from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
 import argparse
 from time import time
-from campaigns.ast_mss_d2d_to_imt_cpe.constants import (
+from campaigns.system4_mss_d2d_to_imt_pfd.constants import (
     CAMPAIGN_STR,
     CAMPAIGN_NAME,
     INPUTS_DIR,
