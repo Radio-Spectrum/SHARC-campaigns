@@ -32,8 +32,8 @@ mss_d2d:
     # Tabela 4a indica "1" feixe (Cobertura Global/Regional ampla)
     num_sectors: 1
     
-    antenna_pattern: ITU-R-S.1528-Taylor
     antenna_s1528:
+        pattern: ITU-R-S.1528-Taylor
         # Ganho estimado para feixe amplo
         antenna_gain: 19.0
         slr: 20.0

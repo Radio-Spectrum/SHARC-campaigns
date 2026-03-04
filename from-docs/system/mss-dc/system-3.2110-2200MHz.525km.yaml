@@ -38,13 +38,8 @@ mss_d2d:
     # The maximum number of beams per satellite.
     # NOTE: This is used when implementing System3 OOBE model
     max_num_of_beams: 90
-    # Satellite antenna pattern
-    # Antenna pattern from ITU-R S.1528
-    # Possible values: "ITU-R-S.1528-Section1.2", "ITU-R-S.1528-LEO"
-    antenna_pattern: ITU-R-S.1528-Taylor
-    # NOTE: doc specifies lambda = 0.15m
-    # we calculate based on frequency, giving out approx. 0.14m
     antenna:
+        pattern: ITU-R-S.1528-Taylor
         # Maximum Antenna gain in dBi
         gain: 34.1
         itu_r_s_1528:
