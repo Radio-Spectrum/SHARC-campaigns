@@ -6,7 +6,7 @@ from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.mss_d2d_to_arns_dme_study.constants import (
+from campaigns.mss_d2d_to_arns_ldacs_study.constants import (
     CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR, OFFSET_LABELS,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
     get_specific_pattern
@@ -86,9 +86,9 @@ def generate_inputs():
         # NOTE: needed for performance. Discards unnecessary calcs.
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        # NOTE: Check the ACS values!!
+        # ACS (90) >> ACLR (45, 50)
+        # so ACS attenuates too much and isn't relevant to the study
         params.single_earth_station.adjacent_ch_reception = "OFF"
-        params.single_earth_station.adjacent_ch_selectivity = 45
 
         # Geometry
         # Set the simulation reference to City of Asunción, Paraguay
@@ -155,18 +155,16 @@ def generate_inputs():
         params.imt.bs.use_oob_antenna = False  # will be set to True for adjacent channel scenarios in loop below
 
         #################### MSS Earth Station Parameters ##############
-        # MHz. Setting to the center of the victim ES band (Hibleo-X) to be more conservative.
-        params.single_earth_station.frequency = 964 + params.single_earth_station.bandwidth / 2
         # position ES at reference
         es_geom = params.single_earth_station.geometry
-        es_geom.height = 10  # meters
         # Let the MSS Earth station be randomly located within the service area.
-        es_geom.location.type = "UNIFORM_DIST"
+        es_geom.location.type = "FIXED"
+        es_geom.location.fixed.x = 0.
+        es_geom.location.fixed.y = 0.
         # These coordinates are relative to the topology central longitude - Asunción in this case.
         es_geom.location.uniform_dist.min_dist_to_center = 1e-2  # make it small - close to center
         es_geom.location.uniform_dist.max_dist_to_center = 1000e3
-    
-        0
+
         # Vary antenna pointinhg angles uniformly.
         es_geom.azimuth.type = "UNIFORM_DIST"
         es_geom.azimuth.uniform_dist.max = 180.

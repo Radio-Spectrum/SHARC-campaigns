@@ -1,19 +1,16 @@
-#### MSS Parameters @7.3GHz
-# Single Earth Station representing an MSS Earth Station in the 2.1GHz band.
-
 id: arns.2700MHz.radar
 
 metadata:
   referenced_documents:
-  #  - Parameters based on Document 4C/356-E - 6 May 2025
+   - Parameters based on Document ITU-R M.1464-2, Table 1, Radar A
 
 single_earth_station:
   frequency: 2703  # MHz - center frequency of the forward link at the edge of the band
   bandwidth: 6.0  # MHz
   tx_power_density: 0  # dBW/Hz - no info - system description only for receiver
-  noise_temperature: 685.75  # K (10ˆ0,4 * 273)
-  adjacent_ch_selectivity: 20.0  # dB
-  polarization_loss: 0  #
+  noise_temperature: 438  #  (F -1)xTo, To = 290k, F = 4 dB, (10ˆ0,4 - 1)* 290
+  adjacent_ch_selectivity: null  # NOTE: no info on doc
+  polarization_loss: 0
 
 
   geometry:
@@ -35,6 +32,9 @@ single_earth_station:
         y: 0.0
 
   antenna:
-    pattern: OMNI  # Custom pattern for Hibleo-X MSS UE #https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1091-0-199409-I!!PDF-E.pdf 
+    # TODO: csc^2+30
+    # elev_beamwidth = 4.8
+    # azim_beamwidth = 1.3
+    pattern: OMNI
     gain: 33.5 # Gain calculated by G/T = -18 dBi defined in document table 4B
     

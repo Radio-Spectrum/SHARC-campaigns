@@ -1,18 +1,22 @@
-#### MSS Parameters @7.3GHz
-# Single Earth Station representing an MSS Earth Station in the 2.1GHz band.
-
-id: arns.964MHz.dme
+id: arns.964MHz.ldacs
 
 metadata:
   referenced_documents:
-  #  - Parameters based on Document 4C/356-E - 6 May 2025
+   - Parameters based on R23-WP4C-C-0216!!MSW-E
 
 single_earth_station:
-  frequency: 964  # MHz - center frequency of the forward link at the edge of the band
+  frequency: 964.25  # MHz - center frequency of the forward link at the edge of the band
   bandwidth: 0.5  # MHz
   tx_power_density: 0  # dBW/Hz - no info - system description only for receiver
-  noise_temperature: 438  #  (F -1)xTo, To = 290k, F = 4 dB, (10ˆ0,4 - 1)* 290
-  adjacent_ch_selectivity: 20.0  # dB
+  noise_temperature: 864.5  #  (F -1)xTo, To = 290k, F = 6 dB, (10ˆ0,6 - 1)* 290
+  # ACS @ freq. offset (MHz)
+  # 0 @ 0.25
+  # 6 @ 0.3
+  # 40 @ 0.4
+  # 70 @ 0.5
+  # 80 @ 0.75
+  # 90 @ 1.5
+  adjacent_ch_selectivity: null  # dB
   polarization_loss: 0  #
 
 

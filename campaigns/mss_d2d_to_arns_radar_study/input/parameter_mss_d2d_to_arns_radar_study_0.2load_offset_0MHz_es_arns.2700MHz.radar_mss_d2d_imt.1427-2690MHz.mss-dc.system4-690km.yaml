@@ -9,7 +9,8 @@ metadata:
     - If imt mss dc is `interfered_with`, imt_link should always be `UPLINK`
     - If imt mss dc is not `interfered_with`, imt_link should always be `DOWNLINK`
   arns.2700MHz.radar:
-    referenced_documents: null
+    referenced_documents:
+    - Parameters based on Document ITU-R M.1464-2, Table 1, Radar A
 imt:
   minimum_separation_distance_bs_ue: 0
   interfered_with: false
@@ -122,11 +123,11 @@ single_earth_station:
   frequency: 2703.0
   bandwidth: 6.0
   tx_power_density: 0
-  noise_temperature: 685.75
-  adjacent_ch_selectivity: 45
+  noise_temperature: 438
+  adjacent_ch_selectivity: null
   polarization_loss: 3
   geometry:
-    height: 1.5
+    height: 8
     azimuth:
       type: UNIFORM_DIST
       uniform_dist:
@@ -138,12 +139,10 @@ single_earth_station:
         min: 5.0
         max: 90.0
     location:
-      type: NETWORK
+      type: FIXED
       fixed:
         x: 0.0
         y: 0.0
-      network:
-        min_dist_to_bs: 24000.0
   antenna:
     pattern: OMNI
     gain: 33.5
@@ -158,7 +157,7 @@ general:
   seed: 82
   num_snapshots: 10000
   overwrite_output: false
-  output_dir: /Users/robsonvieira/Anatel/SHARC-campaigns/campaigns/mss_d2d_to_arns_radar_study/output
+  output_dir: /home/artistreak/projects/Radio-Spectrum/SHARC-campaigns/campaigns/mss_d2d_to_arns_radar_study/output
   output_dir_prefix: output_mss_d2d_to_arns_radar_study_0.2load_offset_0MHz_es_arns.2700MHz.radar_mss_d2d_imt.1427-2690MHz.mss-dc.system4-690km
   system: SINGLE_EARTH_STATION
   imt_link: DOWNLINK

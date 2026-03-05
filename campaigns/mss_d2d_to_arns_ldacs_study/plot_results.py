@@ -3,7 +3,7 @@ import numpy as np
 from sharc.results import Results, SampleList
 from sharc.post_processor import PostProcessor
 
-from campaigns.mss_d2d_to_arns_dme_study.constants import (
+from campaigns.mss_d2d_to_arns_ldacs_study.constants import (
     CAMPAIGN_DIR, MSS_ES_TO_READABLE, IMT_MSS_DC_ID_TO_READABLE, OFFSET_LABELS,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS, OFFSET_LABELS_READABLE,
     get_specific_pattern,

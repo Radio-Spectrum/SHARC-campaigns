@@ -9,11 +9,12 @@ metadata:
     - If imt mss dc is `interfered_with`, imt_link should always be `UPLINK`
     - If imt mss dc is not `interfered_with`, imt_link should always be `DOWNLINK`
   arns.962MHz.dme:
-    referenced_documents: null
+    referenced_documents:
+    - Parameters based on R23-WP4C-C-0216!!MSW-E
 imt:
   minimum_separation_distance_bs_ue: 0
   interfered_with: false
-  frequency: 970.5
+  frequency: 957.5
   bandwidth: 5
   rb_bandwidth: 0.1
   adjacent_ch_reception: 'OFF'
@@ -98,11 +99,8 @@ imt:
     ohmic_loss: 0
     body_loss: 4
     antenna:
-      array:
-        element_pattern: FIXED
-        element_max_g: -3
-        n_rows: 1
-        n_columns: 1
+      pattern: OMNI
+      gain: -3
   uplink:
     attenuation_factor: 0.4
     sinr_min: -10
@@ -122,21 +120,21 @@ single_earth_station:
   frequency: 963.75
   bandwidth: 3.5
   tx_power_density: 0
-  noise_temperature: 170
-  adjacent_ch_selectivity: 45
-  polarization_loss: 3
+  noise_temperature: 438
+  adjacent_ch_selectivity: null
+  polarization_loss: 0
   geometry:
     height: 10000
     azimuth:
       type: UNIFORM_DIST
       uniform_dist:
-        min: -180.0
-        max: 180.0
+        min: -180
+        max: 180
     elevation:
       type: UNIFORM_DIST
       uniform_dist:
-        min: 5.0
-        max: 90.0
+        min: 10
+        max: 90
     location:
       type: UNIFORM_DIST
       fixed:
@@ -144,7 +142,7 @@ single_earth_station:
         y: 0.0
       uniform_dist:
         min_dist_to_center: 0.01
-        max_dist_to_center: 1000000.0
+        max_dist_to_center: 200000.0
   antenna:
     pattern: OMNI
     gain: 5.4
@@ -159,7 +157,7 @@ general:
   seed: 82
   num_snapshots: 10000
   overwrite_output: false
-  output_dir: /Users/robsonvieira/Anatel/SHARC-campaigns/campaigns/mss_d2d_to_arns_dme_study/output
+  output_dir: /home/artistreak/projects/Radio-Spectrum/SHARC-campaigns/campaigns/mss_d2d_to_arns_dme_study/output
   output_dir_prefix: output_mss_d2d_to_arns_dme_study_0.2load_offset_0MHz_es_arns.962MHz.dme_mss_d2d_imt.694-960MHz.mss-dc.system4-690km
   system: SINGLE_EARTH_STATION
   imt_link: DOWNLINK

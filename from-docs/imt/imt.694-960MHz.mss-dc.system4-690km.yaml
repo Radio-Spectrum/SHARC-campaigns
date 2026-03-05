@@ -223,23 +223,8 @@ imt:
         # User equipment body loss [dB]
         body_loss: 4
         antenna:
-            array:
-                ###########################################################################
-                # Radiation pattern of each antenna element
-                # Possible values: "M2101", "F1336", "FIXED"
-                element_pattern: FIXED
-                ###########################################################################
-                # BS/UE maximum transmit/receive element gain [dBi]
-                #                           = 15, for M.2292
-                # default: element_max_g = 5, for M.2101
-                #                           = -3, for M.2292
-                element_max_g: -3
-                ###########################################################################
-                # BS/UE number of rows in antenna array
-                n_rows: 1
-                ###########################################################################
-                # BS/UE number of columns in antenna array
-                n_columns: 1
+            pattern: OMNI
+            gain: -3
     ###########################################################################
     # Uplink parameters. Only needed when using uplink on imt
     uplink:

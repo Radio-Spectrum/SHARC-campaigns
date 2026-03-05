@@ -86,9 +86,8 @@ def generate_inputs():
         # NOTE: needed for performance. Discards unnecessary calcs.
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        # NOTE: Check the ACS values!!
+        # No info on ACS
         params.single_earth_station.adjacent_ch_reception = "OFF"
-        params.single_earth_station.adjacent_ch_selectivity = 45
 
         # Geometry
         # Set the simulation reference to City of Asunción, Paraguay
@@ -159,13 +158,10 @@ def generate_inputs():
         params.single_earth_station.frequency = 2700 + params.single_earth_station.bandwidth / 2
         # position ES at reference
         es_geom = params.single_earth_station.geometry
-        es_geom.height = 1.5  # meters
         # Let the MSS Earth station be randomly located within the service area.
-        es_geom.location.type = "UNIFORM_DIST"
-        # These coordinates are relative to the topology central longitude - Asunción in this case.
-        es_geom.location.uniform_dist.min_dist_to_center = 1e-2  # make it small - close to center
-        es_geom.location.uniform_dist.max_dist_to_center = 1000e3
-        #es_geom.location.network.min_dist_to_bs = params.imt.topology.mss_dc.beam_radius
+        es_geom.location.type = "FIXED"
+        es_geom.location.fixed.x = 0.0
+        es_geom.location.fixed.y = 0.0
 
         # Vary antenna pointinhg angles uniformly.
         es_geom.azimuth.type = "UNIFORM_DIST"

@@ -32,7 +32,7 @@ MSS_DC_LOAD_FACTORS = [
 # MSS victim earth station/user terminal
 SINGLE_ES_MSS_IDS = [
 
-    "arns.962MHz.ldacs"
+    "arns.964MHz.ldacs"
     #"arns.2700MHz.radar"
     #"mss.2500MHz.hibleo-x",
     #"mss.2500MHz.hibleo-xl-1",

@@ -6,7 +6,7 @@ from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.mss_d2d_to_arns_ldacs_study.constants import (
+from campaigns.mss_d2d_to_arns_dme_study.constants import (
     CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR, OFFSET_LABELS,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
     get_specific_pattern
@@ -86,9 +86,9 @@ def generate_inputs():
         # NOTE: needed for performance. Discards unnecessary calcs.
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
-        # NOTE: Check the ACS values!!
+        # ACS (70) >> ACLR (45, 50)
+        # so ACS attenuates too much and isn't relevant to the study
         params.single_earth_station.adjacent_ch_reception = "OFF"
-        params.single_earth_station.adjacent_ch_selectivity = 45
 
         # Geometry
         # Set the simulation reference to City of Asunción, Paraguay
@@ -98,10 +98,11 @@ def generate_inputs():
 
         # Channel Model
         params.single_earth_station.channel_model = "FSPL"
+        params.single_earth_station.polarization_loss = 0
 
         # P.619 model parameters.
         # 3dB polarization loss, as suggested by P.619
-        params.single_earth_station.polarization_loss = 3
+        # params.single_earth_station.polarization_loss = 3
         params.single_earth_station.param_p619.earth_station_lat_deg = params.imt.topology.central_latitude
         params.single_earth_station.param_p619.earth_station_alt_m = params.imt.topology.central_altitude
         # NOTE: we chose rural/low cluttered environment since MSS UEs are normally there
@@ -155,8 +156,6 @@ def generate_inputs():
         params.imt.bs.use_oob_antenna = False  # will be set to True for adjacent channel scenarios in loop below
 
         #################### MSS Earth Station Parameters ##############
-        # MHz. Setting to the center of the victim ES band (Hibleo-X) to be more conservative.
-        params.single_earth_station.frequency = 962 + params.single_earth_station.bandwidth / 2
         # position ES at reference
         es_geom = params.single_earth_station.geometry
         es_geom.height = 10000  # meters
@@ -164,16 +163,19 @@ def generate_inputs():
         es_geom.location.type = "UNIFORM_DIST"
         # These coordinates are relative to the topology central longitude - Asunción in this case.
         es_geom.location.uniform_dist.min_dist_to_center = 1e-2  # make it small - close to center
-        es_geom.location.uniform_dist.max_dist_to_center = 1000e3
-    
-        0
+        es_geom.location.uniform_dist.max_dist_to_center = 200e3
+
         # Vary antenna pointinhg angles uniformly.
-        es_geom.azimuth.type = "UNIFORM_DIST"
-        es_geom.azimuth.uniform_dist.max = 180.
-        es_geom.azimuth.uniform_dist.min = -180.
-        es_geom.elevation.type = "UNIFORM_DIST"
-        es_geom.elevation.uniform_dist.max = 90.
-        es_geom.elevation.uniform_dist.min = 5.
+        if params.single_earth_station.antenna.pattern != "OMNI":
+            raise NotImplementedError(
+                "You should probably update this to point the antenna downwards"
+            )
+        # es_geom.azimuth.type = "UNIFORM_DIST"
+        # es_geom.azimuth.uniform_dist.max = 180.
+        # es_geom.azimuth.uniform_dist.min = -180.
+        # es_geom.elevation.type = "UNIFORM_DIST"
+        # es_geom.elevation.uniform_dist.max = 90.
+        # es_geom.elevation.uniform_dist.min = 5.
 
         for mss_dc_load in MSS_DC_LOAD_FACTORS:
             for mss_dc_freq, offset_label, _ in MSS_DC_TX_OFFSETS:
