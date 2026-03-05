@@ -5,8 +5,32 @@ import argparse
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
 from campaigns.mss_d2d_to_imt_cross_border.run import CAMPAIGN_STR, CAMPAIGN_DIR, get_output_dir_start, INPUTS_DIR
-
 from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
+
+
+import yaml
+
+
+POWER_CONTROL_ZONES_STR = """
+  power_control_zones:
+    zones:
+      - power_backoff_db: 0.0
+        geometry:
+          type: FROM_COUNTRIES
+          from_countries:
+            country_names:
+            - Brazil
+            margin_from_border: 150.0
+      - power_backoff_db: 10.0
+        geometry:
+          type: FROM_COUNTRIES
+          from_countries:
+              country_names:
+              - Brazil
+              margin_from_border: 0.0
+"""
+pwr_ctrl_zone_params = yaml.safe_load(POWER_CONTROL_ZONES_STR)
+
 
 DC_MSS_BANDWIDTH_MHZ = 5.0
 # Band configurations
@@ -113,10 +137,16 @@ def generate(
     for imt_id, dc_mss_id, load_factor, link in product(IMT_IDS, choosen_mss_ids, DC_MSS_LOAD_FACTORS, LINKS):
 
         print(f"Generating parameters for IMT {imt_id} and MSS-DC {dc_mss_id} with load factor {load_factor} and link {link}...")
+        ####### Power control zones configuration
+        # Inject power backoff zone parameters
+        mss_params_dict = factory._get_param_as_dict(factory._get_param_dir(dc_mss_id))
+        mss_params_dict['mss_d2d']['power_control_zones'] = {}
+        mss_params_dict['mss_d2d']['power_control_zones']['zones'] = pwr_ctrl_zone_params['power_control_zones']['zones']
+
         params = factory.load_from_id(
             imt_id
-        ).load_from_id(
-            dc_mss_id
+        ).load_from_dict(
+            mss_params_dict
         ).load_from_dict(
             {"general": general}
         ).build()
