@@ -351,7 +351,7 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
 
         for trace in plot.data:
             if trace.name:
-                match = re.search(r".*Load Factor = ([\d.]+)%;", trace.name)
+                match = re.search(r".*Load Factor = ([\d.]+)%", trace.name)
                 if match:
                     load_factor = match.group(1)
                     if load_factor == "50":
