@@ -6,7 +6,7 @@ from sharc.antenna.antenna_s1528 import AntennaS1528Taylor
 
 from campaigns.utils.parameters_factory import ParametersFactory
 from campaigns.utils.dump_parameters import dump_parameters
-from campaigns.mss_d2d_to_arns_ldacs_study.constants import (
+from campaigns.mss_d2d_to_arns_dme_study.constants import (
     CAMPAIGN_NAME, INPUTS_DIR, OUTPUT_DIR, OFFSET_LABELS,
     IMT_MSS_DC_IDS, MSS_DC_LOAD_FACTORS, SINGLE_ES_MSS_IDS,
     get_specific_pattern
@@ -97,7 +97,7 @@ def generate_inputs():
         params.imt.topology.central_altitude = 200
 
         # Channel Model
-        params.single_earth_station.channel_model = "FSPL"
+        params.single_earth_station.channel_model = "P619"
 
         # P.619 model parameters.
         # 3dB polarization loss, as suggested by P.619
@@ -156,10 +156,10 @@ def generate_inputs():
 
         #################### MSS Earth Station Parameters ##############
         # MHz. Setting to the center of the victim ES band (Hibleo-X) to be more conservative.
-        params.single_earth_station.frequency = 962 + params.single_earth_station.bandwidth / 2
+        params.single_earth_station.frequency = 964 + params.single_earth_station.bandwidth / 2
         # position ES at reference
         es_geom = params.single_earth_station.geometry
-        es_geom.height = 10000  # meters
+        es_geom.height = 10  # meters
         # Let the MSS Earth station be randomly located within the service area.
         es_geom.location.type = "UNIFORM_DIST"
         # These coordinates are relative to the topology central longitude - Asunción in this case.
