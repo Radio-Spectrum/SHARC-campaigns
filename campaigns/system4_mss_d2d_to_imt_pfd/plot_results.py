@@ -23,7 +23,7 @@ cutoff_percentage = 1e-6
 
 # output_ast_mss_d2d_to_imt_cpe_24exclusion_0.2load_imt-cpe_imt.upto-1GHz.single-bs.urban-macro-bs_system-4.698-960MHz-block2.690km_2025-11-10_01
 output_dir_pattern = re.compile(
-    r".*/output_ast_mss_d2d_to_imt_cpe_(\d+)exclusion_(\d+)beam_elev_(\d+\.\d+)power_backoff_(\d+)load_.*"
+    r".*/output_system4_mss_d2d_to_imt_pfd_(\d+)exclusion_(\d+)beam_elev_(\d+\.\d+)power_backoff_(\d+)load_.*"
 )
 
 parser = argparse.ArgumentParser(description='Generate simulation plots')
