@@ -35,6 +35,10 @@ single_earth_station:
     # TODO: csc^2+30
     # elev_beamwidth = 4.8
     # azim_beamwidth = 1.3
-    pattern: OMNI
-    gain: 33.5 # Gain calculated by G/T = -18 dBi defined in document table 4B
-    
+    pattern: CSC^2
+    csc_2:
+      elevation_beamwidth_3db: 4.8
+      azim_beamwidth_3db: 1.35
+      theta_end: 30.0
+      floor_gain_db: -55.0
+    gain: 33.5

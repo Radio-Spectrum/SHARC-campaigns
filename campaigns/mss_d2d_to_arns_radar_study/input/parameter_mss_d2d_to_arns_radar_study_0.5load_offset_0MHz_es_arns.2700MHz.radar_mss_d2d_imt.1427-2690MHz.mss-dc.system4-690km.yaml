@@ -144,10 +144,15 @@ single_earth_station:
         x: 0.0
         y: 0.0
   antenna:
-    pattern: OMNI
+    pattern: CSC^2
+    csc_2:
+      elevation_beamwidth_3db: 4.8
+      azim_beamwidth_3db: 1.35
+      theta_end: 30.0
+      floor_gain_db: -55.0
     gain: 33.5
   adjacent_ch_reception: 'OFF'
-  channel_model: P619
+  channel_model: FSPL
   param_p619:
     earth_station_lat_deg: -25.2637
     earth_station_alt_m: 200
