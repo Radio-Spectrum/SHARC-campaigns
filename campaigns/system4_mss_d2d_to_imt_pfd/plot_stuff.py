@@ -14,63 +14,70 @@ MY_PATH = Path(__file__).resolve().parent
 EARTH_RADIUS_M = 6371e3
 
 def plot_antenna():
-    parameters = ParametersMssD2d()
-    param_file = MY_PATH.parent.parent / "from-docs/system/mss-dc/system-4.698-960MHz-block2.690km.yaml"
-    parameters.load_parameters_from_file(param_file)
-    # parameters.read_params()
-    ant_params = parameters.antenna
-    # ant = AntennaFactory.create_antenna(ant_params, 0.0, 0.0)
-    antenna_high = AntennaS1528(ant_params.antenna_system_4.antenna_parameters_high)
-    antenna_low = AntennaS1528(ant_params.antenna_system_4.antenna_parameters_low)
-    off_axis_angle = np.linspace(0, 60, num=int(1e4))
-    gains = antenna_high.calculate_gain(
-        off_axis_angle_vec=off_axis_angle
-    )
-    idx_4dB = np.where(gains <= ant_params.antenna_system_4.antenna_parameters_high.antenna_gain - 4.0)[0][0]
-    angle_4dB = off_axis_angle[idx_4dB]
-    g = gains[idx_4dB]
-    print("3dB angle: ", f"{off_axis_angle[np.where(
-        gains <= ant_params.antenna_system_4.antenna_parameters_high.antenna_gain - 3.0)[0][0]]:.2f}")
-    print("4dB angle: ", angle_4dB)
-    print("for gain of: ", g)
-    print("when it should be eq:", ant_params.antenna_system_4.antenna_parameters_high.antenna_gain - 4.0)
-    h = parameters.orbits[0].perigee_alt_km * 1e3  # in meters
-    r = np.tan(np.deg2rad(angle_4dB)) * h
-    print("resulting in radius of: ", r)
+    sys4_ids = [
+        "system-4.698-960MHz-block2.690km.yaml",
+        "system-4.1427-2690MHz.690km.yaml"
+    ]
+    for sid in sys4_ids:
+        parameters = ParametersMssD2d()
+        param_file = MY_PATH.parent.parent / "from-docs/system/mss-dc/" / sid
+        parameters.load_parameters_from_file(param_file)
+        print(f"Loading parameters from sys id: {sid}")
+        # parameters.read_params()
+        ant_params = parameters.antenna
+        # ant = AntennaFactory.create_antenna(ant_params, 0.0, 0.0)
+        antenna_high = AntennaS1528(ant_params.antenna_system_4.antenna_parameters_high)
+        antenna_low = AntennaS1528(ant_params.antenna_system_4.antenna_parameters_low)
+        off_axis_angle = np.linspace(0, 60, num=int(1e4))
+        gains = antenna_high.calculate_gain(
+            off_axis_angle_vec=off_axis_angle
+        )
+        idx_4dB = np.where(gains <= ant_params.antenna_system_4.antenna_parameters_high.antenna_gain - 4.0)[0][0]
+        angle_4dB = off_axis_angle[idx_4dB]
+        g = gains[idx_4dB]
+        print("3dB angle: ", f"{off_axis_angle[np.where(
+            gains <= ant_params.antenna_system_4.antenna_parameters_high.antenna_gain - 3.0)[0][0]]:.2f}")
+        print("4dB angle: ", angle_4dB)
+        print("for gain of: ", g)
+        print("when it should be eq:", ant_params.antenna_system_4.antenna_parameters_high.antenna_gain - 4.0)
+        h = parameters.orbits[0].perigee_alt_km * 1e3  # in meters
+        r = np.tan(np.deg2rad(angle_4dB)) * h
+        print("resulting in radius of: ", r)
 
-    low_elev_gains = antenna_low.calculate_gain(
-        off_axis_angle_vec=off_axis_angle
-    )
-    idx_4dB = np.where(low_elev_gains <= ant_params.antenna_system_4.antenna_parameters_low.antenna_gain - 4.0)[0][0]
-    angle_4dB = off_axis_angle[idx_4dB]
-    g = low_elev_gains[idx_4dB]
+        low_elev_gains = antenna_low.calculate_gain(
+            off_axis_angle_vec=off_axis_angle
+        )
+        idx_4dB = np.where(low_elev_gains <= ant_params.antenna_system_4.antenna_parameters_low.antenna_gain - 4.0)[0][0]
+        angle_4dB = off_axis_angle[idx_4dB]
+        g = low_elev_gains[idx_4dB]
 
-    print("---- Low Elevation Antenna ----")
+        print("---- Low Elevation Antenna ----")
 
-    print("3dB angle: ", f"{off_axis_angle[
-        np.where(low_elev_gains <= ant_params.antenna_system_4.antenna_parameters_low.antenna_gain - 3.0)[0][0]]:.2f}")
-    print("4dB angle: ", angle_4dB)
-    print("for gain of: ", g)
-    print("when it should be eq:", ant_params.antenna_system_4.antenna_parameters_low.antenna_gain - 4.0)
-    h = parameters.orbits[0].perigee_alt_km * 1e3  # in meters
-    r = np.tan(np.deg2rad(angle_4dB)) * h
-    print("resulting in radius of: ", r)
+        print("3dB angle: ", f"{off_axis_angle[
+            np.where(low_elev_gains <= ant_params.antenna_system_4.antenna_parameters_low.antenna_gain - 3.0)[0][0]]:.2f}")
+        print("4dB angle: ", angle_4dB)
+        print("for gain of: ", g)
+        print("when it should be eq:", ant_params.antenna_system_4.antenna_parameters_low.antenna_gain - 4.0)
+        h = parameters.orbits[0].perigee_alt_km * 1e3  # in meters
+        r = np.tan(np.deg2rad(angle_4dB)) * h
+        print("resulting in radius of: ", r)
 
-    plt.figure(figsize=(6, 6))
-    plt.plot(np.concatenate((-off_axis_angle[::-1], off_axis_angle)), np.concatenate((gains[::-1], gains)))
-    plt.plot(np.concatenate((-off_axis_angle[::-1], off_axis_angle)), np.concatenate((low_elev_gains[::-1], low_elev_gains)))
-    plt.xlabel('off axis angle (degrees)')
-    plt.ylabel('Gain (dB)')
-    plt.xticks(np.arange(-100, 100, 20))
-    plt.xlim((-75, 75))
-    plt.ylim((np.min((gains, low_elev_gains)) - 5, np.max((gains, low_elev_gains)) + 5))
-    plt.legend(['Nadir to 50deg Elevation', '50deg Elevation and below'])
-    # plt.minorticks_on()
-    # plt.gca().xaxis.set_minor_locator(plt.MultipleLocator(2))
-    # plt.gca().yaxis.set_minor_locator(plt.MultipleLocator(2.5))
-    plt.grid(True, which='both')
+        plt.figure(figsize=(6, 6))
+        plt.title(f"Antenna pattern for id: {sid}")
+        plt.plot(np.concatenate((-off_axis_angle[::-1], off_axis_angle)), np.concatenate((gains[::-1], gains)))
+        plt.plot(np.concatenate((-off_axis_angle[::-1], off_axis_angle)), np.concatenate((low_elev_gains[::-1], low_elev_gains)))
+        plt.xlabel('off axis angle (degrees)')
+        plt.ylabel('Gain (dB)')
+        plt.xticks(np.arange(-100, 100, 20))
+        plt.xlim((-75, 75))
+        plt.ylim((np.min((gains, low_elev_gains)) - 5, np.max((gains, low_elev_gains)) + 5))
+        plt.legend(['Nadir to 50deg Elevation', '50deg Elevation and below'])
+        # plt.minorticks_on()
+        # plt.gca().xaxis.set_minor_locator(plt.MultipleLocator(2))
+        # plt.gca().yaxis.set_minor_locator(plt.MultipleLocator(2.5))
+        plt.grid(True, which='both')
 
-    plt.show()
+        plt.show()
 
 def plot_fps():
     # pars = [
@@ -257,4 +264,4 @@ def plot_pfd_analysis():
 if __name__ == "__main__":
     plot_antenna()
     # plot_fps()
-    plot_pfd_analysis()
+    # plot_pfd_analysis()
