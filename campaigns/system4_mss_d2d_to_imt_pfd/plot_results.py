@@ -168,6 +168,11 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
             # Store as SampleList in Result object - NOTE: imt_dl_pfd_aggregated attribute does not exist in the 
             # Results class
             res.imt_dl_pfd_aggregated = SampleList(imt_dl_pfd_aggregated)
+            ## Calculate the PFD limit @INR=-6dB
+            pfd_limit = np.round(
+                10 * np.log10(BOLTZMANN_CONSTANT * ue_noise_temp * 1e6) + ue_noise_fig + -6.0 - \
+                ue_antenna_gain + ue_body_loss - 20 * np.log10(wavelen) + 10 * np.log10(4 * np.pi),
+                1)
 
     post_processor.RESULT_FIELDNAME_TO_PLOT_INFO.update({
         "imt_dl_pfd_aggregated": {
@@ -257,7 +262,7 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
         imt_dl_pfd_external_plot = post_processor.get_plot_by_results_attribute_name(
             pfd_attr, plot_type="ccdf")
         if imt_dl_pfd_external_plot is not None:
-            pfd_limit = -114.93  # dBW/m2.MHz
+            # pfd_limit = -114.93  # dBW/m2.MHz
             imt_dl_pfd_external_plot.add_vline(
                 x=pfd_limit,
                 line_dash="dash",
