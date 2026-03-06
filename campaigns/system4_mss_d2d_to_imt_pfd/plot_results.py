@@ -238,7 +238,7 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
         )
 
     # Customize PFD plots
-    for pfd_attr in ['imt_dl_pfd_aggregated-ccdf', 'imt_dl_pfd']:
+    for pfd_attr in ['imt_dl_pfd_aggregated', 'imt_dl_pfd']:
         imt_dl_pfd_external_plot = post_processor.get_plot_by_results_attribute_name(
             pfd_attr, plot_type="ccdf")
         if imt_dl_pfd_external_plot is not None:
