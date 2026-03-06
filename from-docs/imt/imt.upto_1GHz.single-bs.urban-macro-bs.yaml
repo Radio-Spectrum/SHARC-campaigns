@@ -15,6 +15,7 @@ imt:
   frequency: 710                                  # IMT center frequency [MHz]
   bandwidth: 10                                   # Total bandwidth [MHz]
   rb_bandwidth: 0.180                             # Resource Block bandwidth [MHz]
+  noise_temperature: 290                          # IMT receiver noise temperature [K]
   adjacent_antenna_model: SINGLE_ELEMENT          # Adjacent antenna model: SINGLE_ELEMENT or BEAMFORMING
   # FIXME:
   spectral_mask: 3GPP E-UTRA                      # Spectral mask type: IMT-2020 or 3GPP E-UTRA

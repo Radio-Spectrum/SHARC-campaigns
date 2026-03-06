@@ -1,9 +1,12 @@
 import numpy as np
+from pathlib import Path
 from itertools import product
 import argparse
 import re as re
+from campaigns.utils.parameters_factory import ParametersFactory
 from sharc.results import Results, SampleList
 from sharc.post_processor import PostProcessor
+from sharc.parameters.constants import BOLTZMANN_CONSTANT, SPEED_OF_LIGHT
 
 from campaigns.system4_mss_d2d_to_imt_pfd.constants import (
     CAMPAIGN_DIR,
@@ -17,6 +20,8 @@ from campaigns.system4_mss_d2d_to_imt_pfd.constants import (
 from campaigns.system4_mss_d2d_to_imt_pfd.generate_inputs import (
     campaign_parameters
 )
+
+MY_PATH = Path(__file__).resolve().parent
 
 # used to cut off the CCDF tails
 cutoff_percentage = 1e-6
@@ -70,6 +75,8 @@ attributes_to_plot = [
 
 samples_for_ccdf = [attr[0] for attr in attributes_to_plot if attr[1] == "ccdf"]
 samples_for_cdf = [attr[0] for attr in attributes_to_plot if attr[1] == "cdf"]
+
+factory = ParametersFactory()
 
 def linestyle_getter(results):
     """
@@ -137,19 +144,27 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
     # Convert interferece power to PFD
     # This is used to calculute aggregate PFD as the simulator generates PDF per interferer
     for res in ccdf_results:
-        if hasattr(res, "imt_dl_interf_power"):
-            imt_dl_interf_power_samples = np.array(res.imt_dl_interf_power)
-            # NOTE: Make sure all the parameters used here are aligned with the campaign settings!!
-            imt_freq_mhz = 758.0  # MHz
-            imt_bw_mhz = 5.0  # MHz
-            guard_band_fraction = 0.1  # 10% guard band
+        if hasattr(res, "imt_dl_inr"):
+            imt_dl_inr_samples = np.array(res.imt_dl_inr)
+            # Get the IMT parameters used in the simulation
+            # WARNING: Check if any default value has been changed in the generator!!
+            imt_params_dict = factory._get_param_as_dict(factory._get_param_dir(imt_id))
+            imt_bw_mhz = imt_params_dict['imt']['bandwidth']
+            guard_band_fraction = imt_params_dict['imt']['guard_band_ratio']
+            rb_bandwidth = imt_params_dict['imt']['rb_bandwidth']
             # UE band calculated from the number PRBs
-            ue_bandwidth_mhz = int(5.0 * (1 - guard_band_fraction) / 0.18) * 0.18  # MHz
-            ue_body_loss = 4.0  # dB
+            ue_bandwidth_mhz = int(5.0 * (1 - guard_band_fraction) / rb_bandwidth) * rb_bandwidth  # MHz
+            ue_body_loss = imt_params_dict['imt']['ue']['body_loss']
+            ue_noise_temp = imt_params_dict['imt']['noise_temperature']
+            ue_noise_fig = imt_params_dict['imt']['ue']['noise_figure']
             ue_antenna_gain = -3.0  # dBi
-            wavelen = 3e8 / (imt_freq_mhz * 1e6)  # m
-            imt_dl_pfd_aggregated = imt_dl_interf_power_samples - ue_antenna_gain \
-                - 10 * np.log10(wavelen**2 / (4 * np.pi)) + ue_body_loss - 10 * np.log10(ue_bandwidth_mhz)
+            ue_freq_mhz = imt_frequency_mhz + ue_bandwidth_mhz / 2
+            wavelen = SPEED_OF_LIGHT / (ue_freq_mhz * 1e6)  # m
+            # imt_dl_pfd_aggregated = imt_dl_inr_samples - ue_antenna_gain \
+            #     - 10 * np.log10(wavelen**2 / (4 * np.pi)) + ue_body_loss - 10 * np.log10(ue_bandwidth_mhz)
+            imt_dl_pfd_aggregated = \
+                10 * np.log10(BOLTZMANN_CONSTANT * ue_noise_temp * 1e6) + ue_noise_fig + imt_dl_inr_samples - \
+                ue_antenna_gain + ue_body_loss - 20 * np.log10(wavelen) + 10 * np.log10(4 * np.pi)
             # Store as SampleList in Result object - NOTE: imt_dl_pfd_aggregated attribute does not exist in the 
             # Results class
             res.imt_dl_pfd_aggregated = SampleList(imt_dl_pfd_aggregated)
