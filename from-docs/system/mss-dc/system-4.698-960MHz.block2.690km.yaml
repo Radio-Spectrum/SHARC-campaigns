@@ -104,7 +104,7 @@ mss_d2d:
         # Number of satellites per plane
         sats_per_plane: 1
         # Longitude of the first ascending node in degrees
-        long_asc_deg: 1.875
+        long_asc_deg: 0.0
         # Phasing in degrees
         phasing_deg: 97.5
 
