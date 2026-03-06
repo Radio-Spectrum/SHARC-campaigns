@@ -135,6 +135,7 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
     post_processor.add_results_linestyle_getter(linestyle_getter)
 
     # Convert interferece power to PFD
+    # This is used to calculute aggregate PFD as the simulator generates PDF per interferer
     for res in ccdf_results:
         if hasattr(res, "imt_dl_interf_power"):
             imt_dl_interf_power_samples = np.array(res.imt_dl_interf_power)
@@ -236,39 +237,40 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
             title_text="INR [dB]",
         )
 
-    # Add PFD limit line
-    imt_dl_pfd_external_plot = post_processor.get_plot_by_results_attribute_name(
-        "imt_dl_pfd", plot_type="ccdf")
-    if imt_dl_pfd_external_plot is not None:
-        pfd_limit = -114.93  # dBW/m2.MHz
-        imt_dl_pfd_external_plot.add_vline(
-            x=pfd_limit,
-            line_dash="dash",
-            line_color="red",
-            annotation_text=f"PFD Limit ({pfd_limit} dBW/m²/MHz)",
-            annotation_position="top left",
-            annotation_font_size=14,
-        )
-        imt_dl_pfd_external_plot.update_yaxes(
-            title_text="CCDF",
-        )
-        imt_dl_pfd_external_plot.update_xaxes(
-            title_text="PFD [dBW/m²/MHz]",
-        )
-        imt_dl_pfd_external_plot.update_layout(
-            legend=dict(
-                font=dict(size=14),
-                x=-0.2,
-                y=-0.0,
-                # xanchor='left',
-                orientation='h',
-                xanchor='left',
-                yanchor='bottom',
-                bgcolor='rgba(255,255,255,0.7)',
-                bordercolor='black',
-                borderwidth=1
+    # Customize PFD plots
+    for pfd_attr in ['imt_dl_pfd_aggregated-ccdf', 'imt_dl_pfd']:
+        imt_dl_pfd_external_plot = post_processor.get_plot_by_results_attribute_name(
+            pfd_attr, plot_type="ccdf")
+        if imt_dl_pfd_external_plot is not None:
+            pfd_limit = -114.93  # dBW/m2.MHz
+            imt_dl_pfd_external_plot.add_vline(
+                x=pfd_limit,
+                line_dash="dash",
+                line_color="red",
+                annotation_text=f"PFD Limit ({pfd_limit} dBW/m²/MHz)",
+                annotation_position="top left",
+                annotation_font_size=14,
             )
-        )
+            imt_dl_pfd_external_plot.update_yaxes(
+                title_text="CCDF",
+            )
+            imt_dl_pfd_external_plot.update_xaxes(
+                title_text="PFD [dBW/m²/MHz]",
+            )
+            imt_dl_pfd_external_plot.update_layout(
+                legend=dict(
+                    font=dict(size=14),
+                    x=-0.2,
+                    y=-0.0,
+                    # xanchor='left',
+                    orientation='h',
+                    xanchor='left',
+                    yanchor='bottom',
+                    bgcolor='rgba(255,255,255,0.7)',
+                    bordercolor='black',
+                    borderwidth=1
+                )
+            )
 
     HTMLS_DIR = campaign_ouput_dir / "htmls"
     HTMLS_DIR.mkdir(exist_ok=True)
@@ -276,7 +278,7 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
     # Adding PFD aggregated to attributes to plot
     attributes_to_plot.append(("imt_dl_pfd_aggregated", "ccdf"))
     for attr, plot_type in attributes_to_plot:
-        file = HTMLS_DIR / f"{attr}-{plot_type}.html"
+        file = HTMLS_DIR / f"{attr}-{plot_type}_{imt_frequency_mhz}mhz_{"array" if use_phased_array else "fixed"}_pattern.html"
         plot = post_processor.get_plot_by_results_attribute_name(attr, plot_type=plot_type)
         if plot is None:
             print("Skipping", attr, plot_type)
