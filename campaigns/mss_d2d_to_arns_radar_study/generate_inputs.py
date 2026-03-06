@@ -167,9 +167,9 @@ def generate_inputs():
         es_geom.azimuth.type = "UNIFORM_DIST"
         es_geom.azimuth.uniform_dist.max = 180.
         es_geom.azimuth.uniform_dist.min = -180.
-        es_geom.elevation.type = "UNIFORM_DIST"
-        es_geom.elevation.uniform_dist.max = 90.
-        es_geom.elevation.uniform_dist.min = 5.
+        # es_geom.elevation.type = "FIXED"  # according to radar antenna pattern
+        # es_geom.elevation.uniform_dist.max = 90.
+        # es_geom.elevation.uniform_dist.min = 5.
 
         for mss_dc_load in MSS_DC_LOAD_FACTORS:
             for mss_dc_freq, offset_label, _ in MSS_DC_TX_OFFSETS:

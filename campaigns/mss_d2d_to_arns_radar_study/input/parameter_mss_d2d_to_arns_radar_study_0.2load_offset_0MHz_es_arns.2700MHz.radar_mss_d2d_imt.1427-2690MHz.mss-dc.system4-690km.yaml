@@ -34,7 +34,7 @@ imt:
         perigee_alt_km: 690.0
         apogee_alt_km: 690.0
         sats_per_plane: 1
-        long_asc_deg: 1.875
+        long_asc_deg: 0.0
         phasing_deg: 97.5
       sat_is_active_if:
         conditions:
@@ -134,10 +134,8 @@ single_earth_station:
         min: -180.0
         max: 180.0
     elevation:
-      type: UNIFORM_DIST
-      uniform_dist:
-        min: 5.0
-        max: 90.0
+      type: FIXED
+      fixed: 2.0
     location:
       type: FIXED
       fixed:
@@ -152,7 +150,7 @@ single_earth_station:
       floor_gain_db: -55.0
     gain: 33.5
   adjacent_ch_reception: 'OFF'
-  channel_model: FSPL
+  channel_model: P619
   param_p619:
     earth_station_lat_deg: -25.2637
     earth_station_alt_m: 200
