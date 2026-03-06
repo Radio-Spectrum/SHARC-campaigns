@@ -55,6 +55,8 @@ DC_MSS_IDS = [
     "system-3.698-960MHz.525km",
     "system-3.2110-2200MHz.340km",
     "system-3.2110-2200MHz.525km",
+    "system-3.1427-1518MHz.340km",
+    "system-3.1427-1518MHz.525km",
     "system-3.2300-2690MHz.340km",
     "system-3.2300-2690MHz.525km",
     "system-4.698-960MHz.block2.690km",
@@ -64,8 +66,8 @@ DC_MSS_IDS = [
 BAND_TO_DC_MSS_ID_MAP = {
     "B1": ["system-2.694MHz.698-960MHz.500km", "system-3.698-960MHz.340km",
            "system-3.698-960MHz.525km", "system-4.698-960MHz.block2.690km"],
-    "B2": ["system-2.1427-1518MHz.500km", "system-3.1427-2690MHz.340km",
-           "system-3.1427-2690MHz.525km", "system-4.1427-2690MHz.690km"],
+    "B2": ["system-2.1427-1518MHz.500km", "system-3.1427-1518MHz.340km",
+           "system-3.1427-1518MHz.525km", "system-4.1427-2690MHz.690km"],
     "B3": ["system-2.1805-1920MHz.2110-2170MHz.500km", "system-3.2110-2200MHz.340km",
            "system-3.2110-2200MHz.525km", "system-4.1427-2690MHz.690km"],
     "B4": ["system-2.2300-2400MHz.500km", "system-3.2300-2690MHz.340km",
@@ -83,7 +85,8 @@ IMT_IDS = [
     "imt.1-3GHz.single-bs.aas-macro-bs",
 ]
 
-LINKS = ["dl", "ul"]
+LINKS = ["dl"]
+# LINKS = ["dl", "ul"]
 
 IMT_MSS_DC_ID_TO_READABLE = {
     "system-2.694MHz.698-960MHz.500km": "Sys2",
@@ -120,8 +123,9 @@ def generate(
     co_channel: bool,
     band_id: str,
     choosen_mss_ids: str,
+    apply_power_control: bool
 ):
-
+    # if apply_power_control, then only uses first margin
     general = {
         "seed": 1026,
         ###########################################################################
@@ -140,8 +144,9 @@ def generate(
         ####### Power control zones configuration
         # Inject power backoff zone parameters
         mss_params_dict = factory._get_param_as_dict(factory._get_param_dir(dc_mss_id))
-        mss_params_dict['mss_d2d']['power_control_zones'] = {}
-        mss_params_dict['mss_d2d']['power_control_zones']['zones'] = pwr_ctrl_zone_params['power_control_zones']['zones']
+        if apply_power_control:
+            mss_params_dict['mss_d2d']['power_control_zones'] = {}
+            mss_params_dict['mss_d2d']['power_control_zones']['zones'] = pwr_ctrl_zone_params['power_control_zones']['zones']
 
         params = factory.load_from_id(
             imt_id
@@ -261,7 +266,10 @@ def generate(
         params.imt.topology.single_bs.azimuth = [0.0]
 
         params.mss_d2d.beams_load_factor = load_factor
-        for border in distances:
+        ds = distances
+        if apply_power_control:
+            ds = ds[:1]
+        for border in ds:
             params.mss_d2d.beam_positioning.service_grid.grid_in_zone.from_countries.margin_from_border = border
             params.general.output_dir = f"{CAMPAIGN_DIR}/output/"
             postfix = get_specific_pattern(
@@ -297,6 +305,11 @@ def cmd_line_parser() -> argparse.Namespace:
 
     parser.add_argument(
         "--adj",
+        action="store_true",
+        help="Whether to use only adjacent channel (true/false). Default: false",
+    )
+    parser.add_argument(
+        "--power_control",
         action="store_true",
         help="Whether to use only adjacent channel (true/false). Default: false",
     )
@@ -356,6 +369,7 @@ if __name__ == "__main__":
         not args.adj,
         args.band_id,
         args.mss_ids,
+        args.power_control,
     )
     n_of_inputs = np.sum([item.name.endswith(".yaml")
                          for item in INPUTS_DIR.iterdir()])
