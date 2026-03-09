@@ -3,6 +3,7 @@ from pathlib import Path
 from itertools import product
 import argparse
 import re as re
+import pandas as pd
 from campaigns.utils.parameters_factory import ParametersFactory
 from sharc.results import Results, SampleList
 from sharc.post_processor import PostProcessor
@@ -215,6 +216,31 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
                     pwr_boff,
                     lf)
             )
+        # generate some statistics for INR
+        percentile_data = []
+        for res in ccdf_results:
+            if specific in res.output_directory:
+                attrs = ["imt_dl_inr", "imt_dl_pfd_aggregated"]
+                for attr in attrs:
+                    if hasattr(res, attr):
+                        attr_vals = getattr(res, attr)
+                        if len(attr_vals) == 0:
+                            print(f"No {attr} data for {specific}")
+                            continue
+                        percentile_data.append({
+                            "Attribute": attr,
+                            "DC-MSS System": mss_d2d_id,
+                            "Power Backoff (dB)": pwr_boff,
+                            "Min. beam elev. (deg)": beam_elev,
+                            "Load": lf,
+                            "Margin (km)": exclusion_margin_km,
+                            "p50 (dB)": np.percentile(attr_vals, 50),
+                            "p99.5 (dB)": np.percentile(attr_vals, 99.5),
+                            "p99.9 (dB)": np.percentile(attr_vals, 99.9)
+                        })
+    percentile_table = pd.DataFrame(percentile_data)
+
+
     # ^: typing.List[Results]
 
     plots = post_processor.generate_ccdf_plots_from_results(
@@ -295,6 +321,7 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
     HTMLS_DIR = campaign_ouput_dir / "htmls"
     HTMLS_DIR.mkdir(exist_ok=True)
     print(f"Saving plots in {HTMLS_DIR}")
+    percentile_table.to_csv(HTMLS_DIR / "pfd_percentiles.csv", index=False)
     # Adding PFD aggregated to attributes to plot
     attributes_to_plot.append(("imt_dl_pfd_aggregated", "ccdf"))
     for attr, plot_type in attributes_to_plot:
