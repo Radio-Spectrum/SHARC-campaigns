@@ -191,6 +191,7 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
     #             res.system_dl_interf_power_per_mhz
     #         ) - 30)
 
+    percentile_data = []
     for (
         imt_ue_type,
         _,  # ignore imt frequency from combination
@@ -217,7 +218,6 @@ for imt_frequency_mhz in campaign_parameters['imt_frequencies_mhz']:
                     lf)
             )
         # generate some statistics for INR
-        percentile_data = []
         for res in ccdf_results:
             if specific in res.output_directory:
                 attrs = ["imt_dl_inr", "imt_dl_pfd_aggregated"]
