@@ -1,22 +1,3 @@
-# from sharc.run_multiple_campaigns_mut_thread import run_campaign
-from campaigns.utils.constants import SHARC_SIM_ROOT_DIR, ROOT_DIR
-
-CAMPAIGN_NAME = "mss_d2d_to_imt_cross_border"
-CAMPAIGN_STR = f"campaigns/{CAMPAIGN_NAME}"
-
-CAMPAIGN_DIR = ROOT_DIR / CAMPAIGN_STR
-INPUTS_DIR = CAMPAIGN_DIR / "input/"
-
-def get_output_dir_start(mss_id: str, co_channel: bool):
-    return f"output_{mss_id}_{"co" if co_channel else "adj"}"
-
-# if __name__ == "__main__":
-#     # Run the campaigns
-#     # This function will execute the campaign with the given name.
-#     # It will look for the campaign directory under the specified name and
-#     # start the necessary processes.
-#     run_campaign(CAMPAIGN_NAME)
-
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import os
@@ -24,6 +5,11 @@ from pathlib import Path
 import subprocess
 import sys
 import sharc
+from campaigns.mss_d2d_to_mss_adj_study.constants import CAMPAIGN_NAME, INPUTS_DIR
+from campaigns.mss_d2d_to_mss_adj_study.generate_inputs import (
+    clear_inputs,
+    generate_inputs,
+)
 
 
 def _run_command(param_file: Path, main_cli_path: Path) -> int:
@@ -59,12 +45,32 @@ def run_local_campaign() -> None:
 
 
 def main():
-    # Sanity check: ensure we have inputs
-    if not INPUTS_DIR.exists() or not any(INPUTS_DIR.glob("*.yaml")):
-        print(
-            f"[ERROR] No input YAMLs found in '{INPUTS_DIR}'. "
-        )
-        return 2
+    parser = argparse.ArgumentParser(
+        description="MSS D2D to MSS campaign runner"
+    )
+    parser.add_argument(
+        "-dg", "--dont-generate",
+        action="store_true",
+        help=(
+            "Skip generating input parameter files before running "
+            "(default: generate inputs)."
+        ),
+    )
+    args = parser.parse_args()
+
+    if not args.dont_generate:
+        # TODO: add unit testing to campaigns?
+        # test_calculate_equivalent_acs()
+        clear_inputs()
+        generate_inputs()
+    else:
+        # Sanity check: if skipping generation, ensure we have inputs
+        if not INPUTS_DIR.exists() or not any(INPUTS_DIR.glob("*.yaml")):
+            print(
+                f"[ERROR] No input YAMLs found in '{INPUTS_DIR}'. "
+                "Remove --dont-generate or run the generator first."
+            )
+            return 2
 
     print(f"[INFO] Running campaign: {CAMPAIGN_NAME}")
     try:

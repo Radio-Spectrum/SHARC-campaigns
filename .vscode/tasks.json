@@ -1,0 +1,76 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "SHARC: install editable",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "-m",
+        "pip",
+        "install",
+        "-e",
+        "/home/daniel/opt/SharcSimulator/SHARC"
+      ],
+      "options": {
+        "env": {
+          "SHARC_HOME": "/home/daniel/opt/SharcSimulator/SHARC",
+          "PYTHONPATH": "/home/daniel/opt/SharcSimulator/SHARC:/home/daniel/opt/SharcSimulator/SHARC-campaigns"
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Campaigns: install editable",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "-m",
+        "pip",
+        "install",
+        "-e",
+        "."
+      ],
+      "options": {
+        "env": {
+          "SHARC_HOME": "/home/daniel/opt/SharcSimulator/SHARC",
+          "PYTHONPATH": "/home/daniel/opt/SharcSimulator/SHARC:/home/daniel/opt/SharcSimulator/SHARC-campaigns"
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "SHARC: validate import",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "-c",
+        "import sharc, pathlib; print('sharc ok:', pathlib.Path(sharc.__file__).resolve())"
+      ],
+      "options": {
+        "env": {
+          "SHARC_HOME": "/home/daniel/opt/SharcSimulator/SHARC",
+          "PYTHONPATH": "/home/daniel/opt/SharcSimulator/SHARC:/home/daniel/opt/SharcSimulator/SHARC-campaigns"
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Campaigns: generate mss_d2d_to_mss_2500MHz inputs",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python",
+      "args": [
+        "-m",
+        "campaigns.mss_d2d_to_mss_2500MHz.generate_inputs"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "SHARC_HOME": "/home/daniel/opt/SharcSimulator/SHARC",
+          "PYTHONPATH": "/home/daniel/opt/SharcSimulator/SHARC:/home/daniel/opt/SharcSimulator/SHARC-campaigns"
+        }
+      },
+      "problemMatcher": []
+    }
+  ]
+}
