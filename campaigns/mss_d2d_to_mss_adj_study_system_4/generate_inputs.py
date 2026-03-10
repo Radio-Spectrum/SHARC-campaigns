@@ -39,7 +39,7 @@ def get_taylor_cell_radius(
 
 general = {
     "seed": SEED,
-    "num_snapshots": 10,
+    "num_snapshots": 5000,
     "overwrite_output": False,
     "output_dir": str(OUTPUT_DIR),
     "output_dir_prefix": "to-update",
@@ -79,7 +79,7 @@ def generate_inputs():
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
         # lower bound of closest DL MSS DC band
-        params.imt.frequency = 2162.5
+        params.imt.frequency = 2162.5  # Will be varied in loop below. We set it here just to calculate the adjacent channel leakage based on the correct frequency.
         # Note: ES receive frequency will be varied in loop below
 
         params.imt.adjacent_ch_emissions = "ACLR"
@@ -106,12 +106,16 @@ def generate_inputs():
         params.single_earth_station.param_p619.mean_clutter_height = "low"
         params.single_earth_station.param_p619.below_rooftop = 0.  # zero means clutter loss is not applied
 
+
         ########## MSS DC Parameters ##########
         # To-do: add to system 3 from-docs file when available
         #if "340km" in imt_id:
         #    params.imt.topology.mss_dc.max_num_of_beams = 105
         #elif "525km" in imt_id:
         #    params.imt.topology.mss_dc.max_num_of_beams = 90
+
+        params.imt.topology.mss_dc.beam_radius = 24e3
+        params.imt.topology.mss_dc.beam_positioning.service_grid.minimum_service_angle = 32.
 
         ########### SERVICE GRID ###########
         # Create a circular service grid centered at Asunción with 1000 km of radius.
@@ -120,7 +124,7 @@ def generate_inputs():
         params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.type = "CIRCLE"
         params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.center_lat = -25.2637
         params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.center_lon = -57.5759
-        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.radius_km = 1500.0
+        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.radius_km = 1000.0
         params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = -200.0
 
         ########### Active Satellite conditions ###########
@@ -129,7 +133,7 @@ def generate_inputs():
         params.imt.topology.mss_dc.sat_is_active_if.conditions = [
             "MINIMUM_ELEVATION_FROM_ES",
         ]
-        params.imt.topology.mss_dc.sat_is_active_if.minimum_elevation_from_es = 5.  # Degree
+        params.imt.topology.mss_dc.sat_is_active_if.minimum_elevation_from_es = 23.5  # Degree
 
         # Set adjacent antenna pattern
         # Get cell radius based on co-channel antenna pattern
@@ -154,7 +158,8 @@ def generate_inputs():
         # es_geom.location.uniform_dist.min_dist_to_center = 1e-2  # make it small - close to center
         # es_geom.location.uniform_dist.max_dist_to_center = 1000e3
         es_geom.location.network.min_dist_to_bs = params.imt.topology.mss_dc.beam_radius
-
+        #params.single_earth_station.frequency = 2162.5  # We fixed MSS frequency and vary IMT one in the loop.
+        
         # Vary antenna pointinhg angles uniformly.
         es_geom.azimuth.type = "UNIFORM_DIST"
         es_geom.azimuth.uniform_dist.max = 180.

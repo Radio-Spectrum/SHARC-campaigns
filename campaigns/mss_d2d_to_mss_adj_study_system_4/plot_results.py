@@ -30,15 +30,15 @@ INR_FILE = "system_inr.csv"
 
 # Which curves to plot - configure here
 # Format: (load_factor, offset_label, es_type, sat_distance, custom_label)
-#   - load_factor: 0.1, 0.2, 0.5 or None for all
-#   - offset_label: "offset_0MHz", "offset_minus5MHz", "offset_minus10MHz", "offset_minus15MHz", or None for all
+#   - load_factor: 0.2, 0.5 or None for all
+#   - offset_label: "offset_minus5MHz", "offset_minus10MHz", or None for all
 #   - es_type: "7.1.4-forward-R", "7.1.5-ES-type-1", "7.1.5-ES-type-2" or None for all
-#   - sat_distance: "525km", "340km" or None for all
+#   - sat_distance: "690km" or None for all
 #   - custom_label: Custom name for this curve (optional, None uses auto-generated label)
 CURVES_TO_PLOT = [
     # Examples (uncomment to use):
-    # (0.1, "offset_0MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - Nominal"),
-    # (0.1, None, "7.1.5-ES-type-1", "525km", None),  # All offsets
+    # (0.2, "offset_minus5MHz", "7.1.5-ES-type-1", "690km", "ES Type-1 @ 690km - (-5 MHz)"),
+    # (0.2, None, "7.1.5-ES-type-1", "690km", None),  # All offsets
 ]
 
 # If CURVES_TO_PLOT is empty, plot all curves
@@ -80,12 +80,11 @@ def parse_features_from_path(path: Path) -> Dict[str, Optional[str]]:
     elif "7.1.5-es-type-2" in s:
         es_type = "7.1.5-ES-type-2"
     
-    # Extract satellite distance
+    # Extract satellite distance (e.g., 690km)
     sat_distance = None
-    if "525km" in s:
-        sat_distance = "525km"
-    elif "340km" in s:
-        sat_distance = "340km"
+    sat_match = re.search(r"(\d+km)", s)
+    if sat_match:
+        sat_distance = sat_match.group(1)
     
     # Extract execution number (e.g., _01, _02 from end of folder name)
     exec_match = re.search(r"_(\d{4}-\d{2}-\d{2})_(\d+)$", s_original)
@@ -459,7 +458,7 @@ def plot_ccdf_inr(
             "7.1.5-ES-type-1": 1,
             "7.1.5-ES-type-2": 2,
         }
-        sat_order = {"525km": 0, "340km": 1}
+        sat_order = {"690km": 0, "525km": 1, "340km": 2}
         offset_order = {
             "offset_0MHz": 0,
             "offset_minus5MHz": 1,
@@ -603,16 +602,20 @@ if __name__ == "__main__":
         # ========== ES Type-2 (7.1.5-ES-type-2) ==========
         # @ 525 km
         #(0.1, "offset_0MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - Nominal (2162.5 MHz)"),
-        (0.1, "offset_minus5MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-5 MHz, 2157.5 MHz)"),
-        (0.1, "offset_minus10MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-10 MHz, 2152.5 MHz)"),
-        (0.1, "offset_minus15MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-15 MHz, 2142.5 MHz)"),
+        #(0.2, "offset_minus5MHz", "7.1.5-ES-type-2", "690km", "ES Type-2 @ 690km - (-5 MHz, 2157.5 MHz)"),
+        #(0.2, "offset_minus10MHz", "7.1.5-ES-type-2", "690km", "ES Type-2 @ 690km - (-10 MHz, 2152.5 MHz)"),
+        #(0.5, "offset_minus5MHz", "7.1.5-ES-type-2", "690km", "ES Type-2 @ 690km - (-5 MHz, 2157.5 MHz)"),
+        #(0.5, "offset_minus10MHz", "7.1.5-ES-type-2", "690km", "ES Type-2 @ 690km - (-10 MHz, 2152.5 MHz)"),
         
         # @ 340 km
         #(0.1, "offset_0MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - Nominal (2162.5 MHz)"),
-        (0.1, "offset_minus5MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-5 MHz, 2157.5 MHz)"),
-        (0.1, "offset_minus10MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-10 MHz, 2152.5 MHz)"),
-        (0.1, "offset_minus15MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-15 MHz, 2142.5 MHz)"),
+        (0.2, "offset_minus5MHz", "7.1.5-ES-type-2", "690km", "ES Type-2 @ 690km - (-5 MHz, 2157.5 MHz)"),
+        (0.2, "offset_minus10MHz", "7.1.5-ES-type-2", "690km", "ES Type-2 @ 690km - (-10 MHz, 2152.5 MHz)"),
+        (0.5, "offset_minus5MHz", "7.1.5-ES-type-2", "690km", "ES Type-2 @ 690km - (-5 MHz, 2157.5 MHz)"),
+        (0.5, "offset_minus10MHz", "7.1.5-ES-type-2", "690km", "ES Type-2 @ 690km - (-10 MHz, 2152.5 MHz)"),
     ]
+    # Leave empty to plot all generated simulations for system 4
+    curves_to_plot = []
     # Legend configuration
     legend_location = "best"
     legend_font_size = 10

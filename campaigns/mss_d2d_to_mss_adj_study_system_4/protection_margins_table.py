@@ -16,8 +16,8 @@ from campaigns.mss_d2d_to_mss_adj_study_system_4.constants import CAMPAIGN_DIR
 
 # Protection criteria: (threshold_dB, CCDF_probability)
 PROTECTION_CRITERIA = [
-    (-6.0, 0.001),   # -6 dB at 0.1% (CCDF)
-    (-12.0, 0.20),   # -12 dB at 80% of time (20% CCDF)
+    (-6.0, 0.2),   
+    (-12.0, 0.001),  
 ]
 
 INR_FILE = "system_inr.csv"
@@ -45,10 +45,9 @@ def parse_features_from_path(path: Path) -> Dict[str, Optional[str]]:
         es_type = "7.1.5-ES-type-2"
     
     sat_distance = None
-    if "525km" in s:
-        sat_distance = "525km"
-    elif "340km" in s:
-        sat_distance = "340km"
+    sat_match = re.search(r"(\d+km)", s)
+    if sat_match:
+        sat_distance = sat_match.group(1)
     
     exec_match = re.search(r"_(\d{4}-\d{2}-\d{2})_(\d+)$", s_original)
     execution_num = int(exec_match.group(2)) if exec_match else None
