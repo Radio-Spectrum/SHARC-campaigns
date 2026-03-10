@@ -23,13 +23,13 @@ samples_for_cdf = [
 
 ccdf_results = Results.load_many_from_dir(
     CAMPAIGN_DIR / "output",
-    # filter_fn=lambda x: "mss_d2d_to_eess" in x,
+    # filter_fn=lambda x: "_0.00" in x,
     only_latest=True,
     only_samples=samples_for_ccdf)
 
 cdf_results = Results.load_many_from_dir(
     CAMPAIGN_DIR / "output",
-    # filter_fn=lambda x: "mss_d2d_to_eess" in x,
+    # filter_fn=lambda x: "_0.00" in x,
     only_latest=True,
     only_samples=samples_for_cdf)
 
@@ -56,54 +56,59 @@ def linestyle_getter(results):
     """
     i = 0
     styles = ["solid", "dot", "dash", "dashdot"]
-    if "spurious_mask" in results.output_directory:
+    if "0.0" in results.output_directory:
+        i = i
+    elif "24." in results.output_directory:
         i = i + 1
-    if "340km" in results.output_directory:
+    elif "48." in results.output_directory:
         i = i + 2
     return styles[i]
 
 
 post_processor.add_results_linestyle_getter(linestyle_getter)
 
-for mss_dc in [
-    "imt.2110-2200MHz.mss-dc.system3-525km",
-    "imt.2110-2200MHz.mss-dc.system3-340km",
+for imt_mss_dc_id in [
+    # "imt.2110-2200MHz.mss-dc.system3-525km",
+    # "imt.2110-2200MHz.mss-dc.system3-340km",
+    "imt.1427-2690MHz.mss-dc.system4-690km",
 ]:
-    readable_mss = MSS_ID_TO_READABLE[mss_dc]
-    for sys_name in [
+    readable_mss = MSS_ID_TO_READABLE[imt_mss_dc_id]
+    for eess_sys_id in [
         "eess.2200-2290MHz.system-B",
         "eess.2200-2290MHz.system-D",
     ]:
-        readable_sys = SYS_ID_TO_READABLE[sys_name]
-        for load in [
-            0.2,
-            0.5,
-            1
+        readable_sys = SYS_ID_TO_READABLE[eess_sys_id]
+        for excl_radius_km in [
+            0.0001,
+            24.,
+            48.
         ]:
-            readable_load = f"Load = {load * 100}%"
-            for mask in [
-                "mss",
-                "spurious",
+            for load in [
+                0.2,
+                0.5,
             ]:
-                readable_mask = {
-                    "mss": "@2197.5",
-                    "spurious": "@2167.5",
-                }[mask]
-                for elev in [5, 30, 60, 90, "uniform"]:
-                    if elev == "uniform":
-                        readable_elev = "Elev = Unif. Dist."
-                    else:
-                        readable_elev = f"Elev = {elev}º"
+                for freq_offset in [
+                    0,
+                    5,
+                ]:
+                    readable_load = f"Load = {load * 100}%"
+
+                    readable_offset = {
+                        0: "first_adj",
+                        5: "second_adj",
+                    }[freq_offset]
                     # IMT-MSS-D2D-DL to EESS
+                    # hack to cope with almost zero excl radius
+                    excl_readius_readable = "0.0km" if excl_radius_km < 0.1 else f"{excl_radius_km:.2f}km"
                     post_processor\
                         .add_plot_legend_pattern(
                             dir_name_contains=get_specific_pattern(
-                                elev, sys_name, mss_dc, mask, load
+                                "uniform", eess_sys_id, imt_mss_dc_id, readable_offset, excl_radius_km, load
                             ),
-                            legend=f"{readable_sys}; {readable_mss}, {readable_load}, {readable_mask}"
+                            legend=f"{readable_sys}; {readable_mss}, {readable_load}, {readable_offset}, {excl_readius_readable}"
                             # legend=f"{readable_sys}, {readable_elev}; {readable_mss}, {readable_load}, {readable_mask}"
                         )
-# ^: typing.List[Results]
+    # ^: typing.List[Results]
 
 plots = post_processor.generate_ccdf_plots_from_results(
     ccdf_results
@@ -199,7 +204,7 @@ for attr, plot_type in attributes_to_plot:
         legend=dict(
             font=dict(size=14),
             x=0.2,
-            y=-0.5,
+            y=-1.0,
             # xanchor='left',
             orientation='h',
             xanchor='left',
@@ -207,7 +212,10 @@ for attr, plot_type in attributes_to_plot:
             bgcolor='rgba(255,255,255,0.7)',
             bordercolor='black',
             borderwidth=1
-        )
+        ),
+        width=800,
+        height=1400
     )
+
     plot.write_html(file=file, include_plotlyjs="cdn", auto_open=auto_open)
 

@@ -27,29 +27,6 @@ general = {
 }
 
 
-def get_taylor_cell_radius(
-    params_s1528: ParametersAntennaS1528,
-    sat_alt_km: float,
-    attempt_max_angle: float = 10.0,
-    attempt_resolution: int = int(1e6)
-):
-    antenna = AntennaS1528Taylor(
-        params_s1528
-    )
-    off_axis = np.linspace(0, attempt_max_angle, attempt_resolution)
-    gains = antenna.calculate_gain(
-        off_axis_angle_vec=off_axis,
-        # theta is set to 0 since it makes no difference
-        # when antenna pattern is circular
-        theta_vec=0,
-    )
-    angle_7dB_i = np.where(gains <= params_s1528.antenna_gain - 7)[0][0]
-    angle_7dB = off_axis[angle_7dB_i]
-    cell_radius = np.tan(np.deg2rad(angle_7dB)) * sat_alt_km * 1e3
-
-    return int(cell_radius)
-
-
 def estimate_eess_antenna_diameter(
     frequency,
     antenna_gain,
@@ -73,8 +50,7 @@ def generate_inputs():
     factory = ParametersFactory()
 
     for imt_mss_dc_id in [
-        "imt.2110-2200MHz.mss-dc.system3-525km",
-        "imt.2110-2200MHz.mss-dc.system3-340km",
+        "imt.1427-2690MHz.mss-dc.system4-690km",
     ]:
         for eess_sys_id in [
             "eess.2200-2290MHz.system-B",
@@ -93,18 +69,30 @@ def generate_inputs():
             ##########
             # Scenario
 
-            params.general.enable_adjacent_channel = True
+            params.general.enable_adjacent_channel = True  # this adjacent study only
             params.general.enable_cochannel = False
             params.imt.interfered_with = False
             # NOTE: needed for performance. Discards unnecessary calcs.
             params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
+            ######### Adjacent parameters specific to system4
+            # Adjacent antenna model is the same as in-band.
+            # params.imt.adjacent_ch_emissions = "ACLR"
+            # OOBE mask
+            params.imt.spurious_emissions = -30
             params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
+            params.imt.spectral_mask = "STEPPED"
+            system3_eirp_mask_vals = \
+                params.imt.bs.conducted_power - 10 * np.log10(params.imt.bandwidth) - np.array([45, 50])
+            system3_eirp_mask_vals = np.concatenate((system3_eirp_mask_vals, [params.imt.spurious_emissions]))
+            params.imt.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
+            params.imt.bs.use_oob_antenna = False
 
+            # channel parameters for EESS station
             params.single_earth_station.frequency = 2200 + \
                 params.single_earth_station.bandwidth / 2
             # NOTE: it seems that ACS was not used in previous iterations
-            params.single_earth_station.adjacent_ch_reception = "ACS"
+            params.single_earth_station.adjacent_ch_reception = "OFF"
 
             # Geometry
             # Refernce latitude and longitude taken from Cuiaba station
@@ -123,61 +111,70 @@ def generate_inputs():
             eess_geom.azimuth.uniform_dist.max = 180.
             eess_geom.azimuth.uniform_dist.min = -180.
 
-            # Parameters used for P.619
-            # WARNING: Remember to set the lut in propagation/Dataset!
-            params.single_earth_station.season = "SUMMER"
-            # params.single_earth_station.channel_model = "FSPL"
-            params.single_earth_station.channel_model = "P619"
+            eess_geom.elevation.type = "UNIFORM_DIST"
+            eess_geom.elevation.uniform_dist.min = 5.
+            eess_geom.elevation.uniform_dist.max = 90.
+
             # 3dB polarization loss, as suggested by P.619
             params.single_earth_station.polarization_loss = 3
+            params.single_earth_station.param_p619.earth_station_lat_deg = params.imt.topology.central_latitude
+            params.single_earth_station.param_p619.earth_station_alt_m = params.imt.topology.central_altitude
+            # NOTE: we chose rural/low cluttered environment since MSS UEs are normally there
+            params.single_earth_station.param_p619.mean_clutter_height = "low"
+            params.single_earth_station.param_p619.below_rooftop = 0.  # zero means clutter loss is not applied
 
             params.single_earth_station.param_p619.earth_station_lat_deg = params.imt.topology.central_latitude
             params.single_earth_station.param_p619.earth_station_alt_m = params.imt.topology.central_altitude
-            # TODO: decide on these params:
-            params.single_earth_station.param_p619.mean_clutter_height = "low"
-            params.single_earth_station.param_p619.below_rooftop = 0
 
             ##########
             # MSS DC Parameters
 
             # Beam pointing
+            # params.imt.topology.mss_dc.beam_positioning.type = "SERVICE_GRID"
+            # params.imt.topology.mss_dc.beam_positioning.service_grid.country_names = [
+            #     "Brazil", "Argentina", "Bolivia", "Chile", "Peru", "Paraguay", "Uruguay"
+            # ]
+            # # this is distance in km so that actual best satellite is used for each grid point
+            # angle_dist_between_planes = 360 / \
+            #     params.imt.topology.mss_dc.orbits[0].n_planes
+            # margin = -np.ceil((angle_dist_between_planes / 2) * 111)
+            # params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = int(
+            #     margin)
+
+            # # Beam is active if satellite
+            # params.imt.topology.mss_dc.sat_is_active_if.conditions = [
+            #     "LAT_LONG_INSIDE_COUNTRY",
+            #     "MINIMUM_ELEVATION_FROM_ES",
+            # ]
+            # params.imt.topology.mss_dc.sat_is_active_if.lat_long_inside_country.country_names = [
+            #     "Brazil", "Argentina", "Bolivia", "Chile", "Peru", "Paraguay", "Uruguay"
+            # ]
+            # params.imt.topology.mss_dc.sat_is_active_if.lat_long_inside_country.margin_from_border = \
+            #     params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border
+
+            # Create a circular service grid centered at Cuiabá
             params.imt.topology.mss_dc.beam_positioning.type = "SERVICE_GRID"
-            params.imt.topology.mss_dc.beam_positioning.service_grid.country_names = [
-                "Brazil", "Argentina", "Bolivia", "Chile", "Peru", "Paraguay", "Uruguay"
-            ]
-            # this is distance in km so that actual best satellite is used for each grid point
-            angle_dist_between_planes = 360 / \
-                params.imt.topology.mss_dc.orbits[0].n_planes
-            margin = -np.ceil((angle_dist_between_planes / 2) * 111)
-            params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = int(
-                margin)
+            params.imt.topology.mss_dc.beam_positioning.service_grid.transform_grid_randomly = True
+            params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.type = "CIRCLE"
+            params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.center_lat = \
+                params.imt.topology.central_latitude
+            params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.center_lon = \
+                params.imt.topology.central_longitude
+            params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.circle.radius_km = 1500.0
+            params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = 0.0
+            # Set a narrower elevation angle to increase the chance to have a server satellite
+            params.imt.topology.mss_dc.sat_is_active_if.minimum_elevation_from_es = 23.5  # Degree
 
-            # Beam is active if satellite
-            params.imt.topology.mss_dc.sat_is_active_if.conditions = [
-                "LAT_LONG_INSIDE_COUNTRY",
-                "MINIMUM_ELEVATION_FROM_ES",
-            ]
-            params.imt.topology.mss_dc.sat_is_active_if.lat_long_inside_country.country_names = [
-                "Brazil", "Argentina", "Bolivia", "Chile", "Peru", "Paraguay", "Uruguay"
-            ]
-            params.imt.topology.mss_dc.sat_is_active_if.lat_long_inside_country.margin_from_border = \
-                params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border
+            # Create a circular exclusion radius arround the victim station
+            grid_exclusion_zone = params.imt.topology.mss_dc.beam_positioning.service_grid.grid_exclusion_zone
+            grid_exclusion_zone.type = "CIRCLE"
+            grid_exclusion_zone.circle.center_lat = params.imt.topology.central_latitude
+            grid_exclusion_zone.circle.center_lon = params.imt.topology.central_longitude
+            # Exclusion radius varied in exclusion radius scenario bellow
+            # grid_exclusion_zone.circle.radius_km = 0.00001
 
-            # Set adjacent antenna pattern
-            # Editor's note say that 1528 should still be used in adjacent studies
-            # params.imt.bs.antenna.pattern = "ARRAY"
-
-            # Get cell radius based on co-channel antenna pattern
-            params.imt.frequency = 2197.5
-            params.imt.bs.antenna.itu_r_s_1528.frequency = 2000
-            params.imt.bs.antenna.set_external_parameters(
-                frequency=2000,
-            )
-            # params.imt.validate("propagating-imt")
-            params.imt.topology.mss_dc.beam_radius = get_taylor_cell_radius(
-                params.imt.bs.antenna.itu_r_s_1528,
-                params.imt.topology.mss_dc.orbits[0].apogee_alt_km,
-            )
+            params.imt.topology.mss_dc.beam_radius = 24e3
+            params.imt.topology.mss_dc.beam_positioning.service_grid.minimum_service_angle = 32.
             print(
                 f"A cell radius of {params.imt.topology.mss_dc.beam_radius} will be used for MSS DC")
 
@@ -205,44 +202,39 @@ def generate_inputs():
             antenna_model_param.diameter = diam
 
             params.imt.spurious_emissions = -13
-            for load in [
-                0.2,
-                0.5,
+            for excl_radius_km in [
+                0.0001,
+                1 * params.imt.topology.mss_dc.beam_radius / 1000,
+                2 * params.imt.topology.mss_dc.beam_radius / 1000
             ]:
-                params.imt.bs.load_probability = load
-                for mask in [
-                    "MSS",
-                    "spurious"
+                grid_exclusion_zone.circle.radius_km = excl_radius_km
+                for load in [
+                    0.2,
+                    0.5,
                 ]:
-                    readable_mask = {
-                        "MSS": "mss",
-                        "spurious": "spurious"
-                    }[mask]
+                    params.imt.bs.load_probability = load
+                    for freq_offset in [
+                        0,
+                        5,
+                    ]:
+                        readable_offset = {
+                            0: "first_adj",
+                            5: "second_adj",
+                        }[freq_offset]
 
-                    if mask == "spurious":
-                        # there is no need to simulate both masks since
-                        # for this freq only spurious emissions reach eess
-                        params.imt.spectral_mask = "MSS"
-                        params.imt.frequency = 2167.5
-                    else:
-                        params.imt.frequency = 2197.5
-                        params.imt.spectral_mask = mask
+                        params.imt.bandwidth = 5  # MHz
+                        params.imt.frequency = 2200 - params.imt.bandwidth / 2 - freq_offset
 
-                    # also do uniform dist of elevation angles
-                    params.single_earth_station.geometry.elevation.type = "UNIFORM_DIST"
-                    params.single_earth_station.geometry.elevation.uniform_dist.min = 5.
-                    params.single_earth_station.geometry.elevation.uniform_dist.max = 90.
+                        specific = get_specific_pattern(
+                            "uniform", eess_sys_id, imt_mss_dc_id, readable_offset, excl_radius_km, load
+                        )
+                        params.general.output_dir_prefix = OUTPUT_START_NAME + specific
 
-                    specific = get_specific_pattern(
-                        "uniform", eess_sys_id, imt_mss_dc_id, readable_mask, load
-                    )
-                    params.general.output_dir_prefix = OUTPUT_START_NAME + specific
-
-                    dump_parameters(
-                        INPUTS_DIR / (PARAMETER_START_NAME +
-                                      specific + ".yaml"),
-                        params,
-                    )
+                        dump_parameters(
+                            INPUTS_DIR / (PARAMETER_START_NAME +
+                                        specific + ".yaml"),
+                            params,
+                        )
 
 
 def clear_inputs():
