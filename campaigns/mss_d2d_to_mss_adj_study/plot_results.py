@@ -61,11 +61,11 @@ for res in ccdf_results:
 
 def linestyle_getter(results):
     """Choose line style based on folder name."""
-    i = 0
+    i = -1
     styles = ["solid", "dot", "dash", "dashdot"]
-    if "spurious_mask" in results.output_directory:
+    if "0.2load" in results.output_directory:
         i += 1
-    if "340km" in results.output_directory:
+    elif "0.5load" in results.output_directory:
         i += 2
     return styles[i]
 

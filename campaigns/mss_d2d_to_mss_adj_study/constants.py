@@ -9,8 +9,8 @@ OUTPUT_DIR = CAMPAIGN_DIR / "output/"
 
 # MSS DC as IMT
 IMT_MSS_DC_IDS = [
-    "imt.2300-2690MHz.mss-dc.system3-525km",
-    "imt.2300-2690MHz.mss-dc.system3-340km",
+    # "imt.2300-2690MHz.mss-dc.system3-525km",
+    # "imt.2300-2690MHz.mss-dc.system3-340km",
     "imt.1427-2690MHz.mss-dc.system4-690km",
 ]
 MSS_DC_LOAD_FACTORS = [
