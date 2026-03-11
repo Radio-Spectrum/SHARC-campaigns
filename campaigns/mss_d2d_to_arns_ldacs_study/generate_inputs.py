@@ -25,6 +25,10 @@ MSS_DC_TX_OFFSETS = [
     #(MSS_DC_CENTER_FREQ + , "offset_120MHz", "Spurious domain"),
 ]
 
+ANTENNAS = [
+    "Antenna System 4",
+]
+
 def get_taylor_cell_radius(
     params_s1528: ParametersAntennaS1528,
     sat_alt_km: float,
@@ -66,7 +70,7 @@ def generate_inputs():
     factory = ParametersFactory()
     total = 0
 
-    for imt_id, single_es_id in product(IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS):
+    for imt_id, single_es_id, antenna_model in product(IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS, ANTENNAS):
         print(f"[Building params for {imt_id} -> {single_es_id}]")
 
         params = factory.load_from_id(
@@ -210,13 +214,14 @@ def generate_inputs():
                         # OOBE mask
                         params.imt.adjacent_ch_emissions = "SPECTRAL_MASK"
                         params.imt.spectral_mask = "STEPPED"
+                        params.imt.bs.antenna.pattern = antenna_model
                         system3_eirp_mask_vals = \
                             params.imt.bs.conducted_power - 10 * np.log10(params.imt.bandwidth) - np.array([45, 50])
                         params.imt.spectral_mask_steps = tuple([float(i) for i in system3_eirp_mask_vals])
                         params.imt.bs.use_oob_antenna = False
 
                 specific = get_specific_pattern(
-                    imt_id, single_es_id, mss_dc_load, offset_label
+                    imt_id, single_es_id, mss_dc_load, offset_label, antenna_model
                 )
                 params.general.output_dir_prefix = OUTPUT_START_NAME + specific
 

@@ -8,7 +8,7 @@ single_earth_station:
   frequency: 964.25  # MHz - center frequency of the forward link at the edge of the band
   bandwidth: 0.5  # MHz
   tx_power_density: 0  # dBW/Hz - no info - system description only for receiver
-  noise_temperature: 864.5  #  (F -1)xTo, To = 290k, F = 6 dB, (10ˆ0,6 - 1)* 290
+  noise_temperature: 1154.5  #  (F)xTo, To = 290k, F = 6 dB, (10ˆ0,6)* 290
   # ACS @ freq. offset (MHz)
   # 0 @ 0.25
   # 6 @ 0.3

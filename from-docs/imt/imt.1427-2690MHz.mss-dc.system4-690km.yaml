@@ -103,7 +103,7 @@ imt:
     # Defines the antenna model to be used in compatibility studies between
     # IMT and other services in adjacent band
     # Possible values: SINGLE_ELEMENT, BEAMFORMING
-    adjacent_antenna_model: SINGLE_ELEMENT
+    adjacent_antenna_model: BEAMFORMING
     # Base station parameters - MSS DC satellite
     bs:
         ###########################################################################

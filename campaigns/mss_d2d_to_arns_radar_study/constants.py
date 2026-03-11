@@ -84,12 +84,16 @@ def get_specific_pattern(
     mss_es_id: str,
     mss_d2d_load_factor: float,
     offset_label: str,
+    antenna_model: str
 ):
     """
     Generate a pattern string identifying the simulation configuration.
     offset_label: e.g., 'offset_0MHz', 'offset_minus5MHz'
     """
-    return f"{mss_d2d_load_factor}load_{offset_label}_es_{mss_es_id}_mss_d2d_{mss_d2d_id}"
+    antenna_model_short = "fixed"
+    if "ARRAY" in antenna_model:
+        antenna_model_short = "array"
+    return f"{mss_d2d_load_factor}load_{offset_label}_es_{mss_es_id}_mss_d2d_{mss_d2d_id}_antenna_{antenna_model_short}"
 
 
 if __name__ == "__main__":

@@ -72,17 +72,22 @@ def linestyle_getter(results):
 
 post_processor.add_results_linestyle_getter(linestyle_getter)
 
+ANTENNAS = [
+    "ARRAY System 4",
+    "Antenna System 4",
+]
+
 # Legend labels
-for mss_dc_id, mss_es_id, load_factor, offset_label in product(
-    IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS, MSS_DC_LOAD_FACTORS, OFFSET_LABELS
+for mss_dc_id, mss_es_id, load_factor, offset_label, antenna_model in product(
+    IMT_MSS_DC_IDS, SINGLE_ES_MSS_IDS, MSS_DC_LOAD_FACTORS, OFFSET_LABELS, ANTENNAS
 ):
     readable_mss = IMT_MSS_DC_ID_TO_READABLE[mss_dc_id]
     readable_sys = MSS_ES_TO_READABLE[mss_es_id]
     readable_load = f"Load = {load_factor * 100}%"
     post_processor.add_plot_legend_pattern(
         dir_name_contains=get_specific_pattern(
-            mss_dc_id, mss_es_id, load_factor, offset_label),
-        legend=f"{readable_sys}; {readable_mss}, {OFFSET_LABELS_READABLE[offset_label]}, {readable_load}"
+            mss_dc_id, mss_es_id, load_factor, offset_label, antenna_model),
+        legend=f"{readable_sys}; {readable_mss}, {OFFSET_LABELS_READABLE[offset_label]}, {readable_load}, {antenna_model}"
     )
 
 # Generate plots
@@ -122,9 +127,9 @@ for attr, plot_type in attributes_to_plot:
 
     if attr == "system_inr":
         plot.add_vline(x=-6, line_dash="dot", line_color="gray", annotation_text="-6dB", annotation_position="top right")
-        plot.add_vline(x=-12.2, line_dash="dot", line_color="gray", annotation_text="-12.2dB", annotation_position="top right")
-        plot.add_hline(y=0.001, line_dash="dot", line_color="gray", annotation_text="0.1%", annotation_position="left")
-        plot.add_hline(y=0.2, line_dash="dot", line_color="gray", annotation_text="20%", annotation_position="left")
+        plot.add_vline(x=-10.0, line_dash="dot", line_color="gray", annotation_text="-10dB", annotation_position="top right")
+        # plot.add_hline(y=0.001, line_dash="dot", line_color="gray", annotation_text="0.1%", annotation_position="left")
+        # plot.add_hline(y=0.2, line_dash="dot", line_color="gray", annotation_text="20%", annotation_position="left")
 
     plot.update_xaxes(
         linewidth=1,
