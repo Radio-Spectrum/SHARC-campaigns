@@ -9,8 +9,8 @@ OUTPUT_DIR = CAMPAIGN_DIR / "output/"
 
 # MSS DC as IMT
 IMT_MSS_DC_IDS = [
-    # "imt.2300-2690MHz.mss-dc.system3-525km",
-    # "imt.2300-2690MHz.mss-dc.system3-340km",
+    "imt.2300-2690MHz.mss-dc.system3-525km",
+    "imt.2300-2690MHz.mss-dc.system3-340km",
     "imt.1427-2690MHz.mss-dc.system4-690km",
 ]
 MSS_DC_LOAD_FACTORS = [
@@ -33,8 +33,8 @@ MSS_DC_LOAD_FACTORS = [
 SINGLE_ES_MSS_IDS = [
 
     "mss.2500MHz.hibleo-x",
-    "mss.2500MHz.hibleo-xl-1",
-    "mss.2500MHz.ast-ng-c-3",
+    # "mss.2500MHz.hibleo-xl-1",
+    # "mss.2500MHz.ast-ng-c-3",
 
     # "mss.2100MHz.7.1.4-forward-R",  # 2100 MHz band systems
     # "mss.2100MHz.7.1.5-ES-type-2",
@@ -43,8 +43,8 @@ SINGLE_ES_MSS_IDS = [
 
 MSS_ES_TO_READABLE = {
     "mss.2500MHz.hibleo-x": "Hibleo-X",
-    "mss.2500MHz.hibleo-xl-1": "Hibleo-XL-1",
-    "mss.2500MHz.ast-ng-c-3": "AST-NG-C-3",
+    # "mss.2500MHz.hibleo-xl-1": "Hibleo-XL-1",
+    # "mss.2500MHz.ast-ng-c-3": "AST-NG-C-3",
 
     # "mss.2100MHz.7.1.4-forward-R": "7.1.4_forward-R",  # 2100 MHz band systems
     # "mss.2100MHz.7.1.5-ES-type-2": "ES_type-2",
@@ -53,8 +53,8 @@ MSS_ES_TO_READABLE = {
 }
 
 IMT_MSS_DC_ID_TO_READABLE = {
-    "imt.2300-2690MHz.mss-dc.system3-525km": "MSS DC @525km",
-    "imt.2300-2690MHz.mss-dc.system3-340km": "MSS DC @340km",
+    "imt.2300-2690MHz.mss-dc.system3-525km": "SYS3 @525km",
+    "imt.2300-2690MHz.mss-dc.system3-340km": "SYS3 @340km",
     "imt.1427-2690MHz.mss-dc.system4-690km": "SYS4 @690km"
 }
 

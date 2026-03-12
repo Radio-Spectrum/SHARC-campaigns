@@ -30,8 +30,8 @@ samples_for_cdf = [attr[0] for attr in attributes_to_plot if attr[1] == "cdf"]
 ccdf_results = Results.load_many_from_dir(
     CAMPAIGN_DIR / "output",
     only_latest=True,
-    # filter_fn=lambda s: "imt.1427-2690MHz.mss-dc.system4-690km" in s,
-    filter_fn=lambda s: any(mss_id in str(s) for mss_id in IMT_MSS_DC_IDS),
+    filter_fn=lambda s: "mss.2500MHz.hibleo-x" in s,
+    # filter_fn=lambda s: any(mss_id in str(s) for mss_id in IMT_MSS_DC_IDS),
     only_samples=samples_for_ccdf
 )
 
