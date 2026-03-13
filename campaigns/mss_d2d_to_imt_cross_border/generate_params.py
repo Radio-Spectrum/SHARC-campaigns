@@ -20,14 +20,16 @@ POWER_CONTROL_ZONES_STR = """
           from_countries:
             country_names:
             - Brazil
+            - Argentina
             margin_from_border: 150.0
       - power_backoff_db: 10.0
         geometry:
           type: FROM_COUNTRIES
           from_countries:
-              country_names:
-              - Brazil
-              margin_from_border: 0.0
+            country_names:
+            - Brazil
+            - Argentina
+            margin_from_border: 0.0
 """
 pwr_ctrl_zone_params = yaml.safe_load(POWER_CONTROL_ZONES_STR)
 
@@ -84,6 +86,9 @@ DC_MSS_LOAD_FACTORS = [
 IMT_IDS = [
     "imt.1-3GHz.single-bs.aas-macro-bs",
 ]
+POWER_BACKOFF_VALUES = [
+    0., 10., 15.,
+]
 
 LINKS = ["dl"]
 # LINKS = ["dl", "ul"]
@@ -112,20 +117,19 @@ def get_specific_pattern(
     border: int,
     mss_d2d_load_factor: float,
     link: str,
+    pow_backoff: int
 ):
     """
     Generate a pattern string identifying the simulation configuration.
     """
-    return f"{dc_mss_id}_{imt_id}_{"co" if co_channel else "adj"}_{band_id}band_{border}km_{mss_d2d_load_factor}load_{link}"
+    return f"{dc_mss_id}_{imt_id}_{"co" if co_channel else "adj"}_{band_id}band_{border}km_{mss_d2d_load_factor}load_{link}_{int(pow_backoff)}backoff"
 
 def generate(
     num_snapshots: int,
     co_channel: bool,
     band_id: str,
     choosen_mss_ids: str,
-    apply_power_control: bool
 ):
-    # if apply_power_control, then only uses first margin
     general = {
         "seed": 1026,
         ###########################################################################
@@ -138,15 +142,15 @@ def generate(
 
     factory = ParametersFactory()
 
-    for imt_id, dc_mss_id, load_factor, link in product(IMT_IDS, choosen_mss_ids, DC_MSS_LOAD_FACTORS, LINKS):
+    for imt_id, dc_mss_id, load_factor, link, pow_backoff in product(IMT_IDS, choosen_mss_ids, DC_MSS_LOAD_FACTORS, LINKS, POWER_BACKOFF_VALUES):
 
         print(f"Generating parameters for IMT {imt_id} and MSS-DC {dc_mss_id} with load factor {load_factor} and link {link}...")
         ####### Power control zones configuration
         # Inject power backoff zone parameters
         mss_params_dict = factory._get_param_as_dict(factory._get_param_dir(dc_mss_id))
-        if apply_power_control:
-            mss_params_dict['mss_d2d']['power_control_zones'] = {}
-            mss_params_dict['mss_d2d']['power_control_zones']['zones'] = pwr_ctrl_zone_params['power_control_zones']['zones']
+        mss_params_dict['mss_d2d']['power_control_zones'] = {}
+        mss_params_dict['mss_d2d']['power_control_zones']['zones'] = pwr_ctrl_zone_params['power_control_zones']['zones']
+        mss_params_dict['mss_d2d']['power_control_zones']['zones'][1]['power_backoff_db'] = pow_backoff
 
         params = factory.load_from_id(
             imt_id
@@ -267,8 +271,6 @@ def generate(
 
         params.mss_d2d.beams_load_factor = load_factor
         ds = distances
-        if apply_power_control:
-            ds = ds[:1]
         for border in ds:
             params.mss_d2d.beam_positioning.service_grid.grid_in_zone.from_countries.margin_from_border = border
             params.general.output_dir = f"{CAMPAIGN_DIR}/output/"
@@ -280,6 +282,7 @@ def generate(
                 border,
                 load_factor,
                 link,
+                pow_backoff,
             )
             params.general.output_dir_prefix = f"output_mss_d2d_to_imt_cross_border_{postfix}"
             file = INPUTS_DIR / f"parameter_mss_d2d_to_imt_cross_border_{postfix}.yaml"
@@ -305,11 +308,6 @@ def cmd_line_parser() -> argparse.Namespace:
 
     parser.add_argument(
         "--adj",
-        action="store_true",
-        help="Whether to use only adjacent channel (true/false). Default: false",
-    )
-    parser.add_argument(
-        "--power_control",
         action="store_true",
         help="Whether to use only adjacent channel (true/false). Default: false",
     )
@@ -369,7 +367,6 @@ if __name__ == "__main__":
         not args.adj,
         args.band_id,
         args.mss_ids,
-        args.power_control,
     )
     n_of_inputs = np.sum([item.name.endswith(".yaml")
                          for item in INPUTS_DIR.iterdir()])

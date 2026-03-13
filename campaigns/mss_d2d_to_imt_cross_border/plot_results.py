@@ -17,6 +17,7 @@ from campaigns.mss_d2d_to_imt_cross_border.generate_params import (
     LINKS,
     DC_MSS_IDS,
     BAND_TO_DC_MSS_ID_MAP,
+    POWER_BACKOFF_VALUES
 )
 from campaigns.mss_d2d_to_imt_cross_border.run import CAMPAIGN_STR, CAMPAIGN_DIR, get_output_dir_start, INPUTS_DIR
 from campaigns.utils.constants import SHARC_SIM_ROOT_DIR
@@ -77,10 +78,18 @@ if __name__ == "__main__":
 
     attributes_to_plot = [
         "imt_dl_inr",
-        "imt_ul_inr"
+        "imt_ul_inr",
+        # "imt_system_path_loss",
+        # "system_imt_antenna_gain",
     ]
 
     adj_ch_readable = "adj" if args.adj else "co"
+    html_file_prefix = ""
+    for mss_id in args.mss_ids:
+        html_file_prefix += f"{mss_id}_"
+    html_file_prefix += f"{args.band_id}_"
+    html_file_prefix += f"{args.plot_type}_"
+    html_file_prefix += f"{adj_ch_readable}"
 
     results = Results.load_many_from_dir(
         OUTPUT_ROOT_FOLDER,
@@ -91,7 +100,7 @@ if __name__ == "__main__":
 
     percentile_data = []
     # Generate Legend labels and other information based on all output combinations
-    for imt_id, dc_mss_id, load_factor, link in product(IMT_IDS, args.mss_ids, DC_MSS_LOAD_FACTORS, LINKS):
+    for imt_id, dc_mss_id, load_factor, link, pow_backoff in product(IMT_IDS, args.mss_ids, DC_MSS_LOAD_FACTORS, LINKS, POWER_BACKOFF_VALUES):
         # dc_mss_params = factory.load_from_id(
         #     dc_mss_id
         # )
@@ -101,6 +110,7 @@ if __name__ == "__main__":
         distances = [min_margin, 2 * min_margin]
         readable_mss = IMT_MSS_DC_ID_TO_READABLE[dc_mss_id]
         readable_load = f"Load = {load_factor * 100}%"
+        readable_backoff = f"{int(pow_backoff)}dB Backoff"
         for border in distances:
             # generate legend labels
             postfix_str = get_specific_pattern(
@@ -111,10 +121,11 @@ if __name__ == "__main__":
                 border,
                 load_factor,
                 link,
+                pow_backoff
             )
             post_processor.add_plot_legend_pattern(
                 dir_name_contains=postfix_str,
-                legend=f"{readable_mss}, {readable_load}, {border} km margin, IMT-{link.upper()}"
+                legend=f"{readable_mss}, {readable_load}, {readable_backoff}, {border} km margin, IMT-{link.upper()}"
             )
             # generate some statistics for INR
             for res in results:
@@ -137,7 +148,7 @@ if __name__ == "__main__":
                         })
 
     percentile_table = pd.DataFrame(percentile_data)
-    percentile_table.to_csv(OUTPUT_ROOT_FOLDER / "inr_percentiles.csv", index=False)
+    percentile_table.to_csv(OUTPUT_ROOT_FOLDER / f"{html_file_prefix}_inr_percentiles.csv", index=False)
     post_processor.add_results_linestyle_getter(linestyle_getter)
 
     # If set to True the plots will be opened in the browser automatically
@@ -161,11 +172,6 @@ if __name__ == "__main__":
 
     # Ensure the "htmls" directory exists relative to the script directory
     htmls_dir = OUTPUT_ROOT_FOLDER / "htmls"
-    html_file_prefix = ""
-    for mss_id in args.mss_ids:
-        html_file_prefix += f"{mss_id}_"
-    html_file_prefix += f"{args.band_id}_"
-    html_file_prefix += f"{args.plot_type}"
     htmls_dir.mkdir(exist_ok=True)
 
     for attr in attributes_to_plot:
@@ -182,7 +188,9 @@ if __name__ == "__main__":
             ticks='inside',
             showline=True,
             gridcolor="#DCDCDC",
-            gridwidth=1.5
+            gridwidth=1.5,
+            title_font=dict(size=16),
+            tickfont=dict(size=16),
         )
         plot.update_yaxes(
             linewidth=1,
@@ -196,31 +204,37 @@ if __name__ == "__main__":
         plot.update_layout(
             xaxis_title_font=dict(size=24),
             yaxis_title_font=dict(size=24),
-            legend=dict(font=dict(size=20)),
             template="plotly_white"
         )
-        # plot.update_layout(
-        #     legend=dict(
-        #         orientation="v",
-        #         x=.6,
-        #         y=.1,
-        #         xanchor="right",
-        #         yanchor="bottom",
-        #         bgcolor="rgba(255,255,255,0.7)",
-        #         bordercolor="black",
-        #         borderwidth=1,
-        #         font=dict(size=20)
-        #     )
-        # )
-        # plot.update_layout(
-        #     width=900,
-        #     height=1000
-        # )
+        plot.update_layout(
+            legend=dict(
+                orientation="h",
+                x=.2,
+                y=-1.5,
+                xanchor="left",
+                yanchor="bottom",
+                bgcolor="rgba(255,255,255,0.7)",
+                bordercolor="black",
+                borderwidth=1,
+                font=dict(size=14)
+            )
+        )
+        plot.update_layout(
+            width=900,
+            height=1280
+        )
 
+        if "inr" in attr and args.plot_type == "ccdf":
+            plot.add_hline(
+                y=0.001, line_dash="dot", line_color="gray",
+                annotation_text="0.1%", annotation_position="left",
+            )
+            plot.add_vline(
+                x=-6, line_dash="dot", line_color="gray",
+                annotation_text="-6dB", annotation_position="top right"
+            )
         # Make grid lines darker
-        if plot is None:
-            print(f"Warning: No plot found for attribute '{attr}'")
-            continue 
-        plot.write_html(htmls_dir / f"{html_file_prefix}_{attr}.html")
+        plot.write_html(htmls_dir / f"{html_file_prefix}_{attr}.html", include_plotlyjs=True)
         # plot.show()
+
 
