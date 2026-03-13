@@ -82,11 +82,12 @@ DC_MSS_LOAD_FACTORS = [
 ]
 
 IMT_IDS = [
+    "imt.below-1GHz.single-bs.macro-bs",
     "imt.1-3GHz.single-bs.aas-macro-bs",
 ]
 
-LINKS = ["dl"]
-# LINKS = ["dl", "ul"]
+# LINKS = ["ul"]
+LINKS = ["dl", "ul"]
 
 IMT_MSS_DC_ID_TO_READABLE = {
     "system-2.694MHz.698-960MHz.500km": "Sys2",
@@ -138,7 +139,13 @@ def generate(
 
     factory = ParametersFactory()
 
-    for imt_id, dc_mss_id, load_factor, link in product(IMT_IDS, choosen_mss_ids, DC_MSS_LOAD_FACTORS, LINKS):
+    for dc_mss_id, load_factor, link in product(choosen_mss_ids, DC_MSS_LOAD_FACTORS, LINKS):
+        imt_freq_mhz = IMT_BAND_CONFIG_MAP[band_id]['imt_dl_center_f_mhz'] if link == "dl" \
+            else IMT_BAND_CONFIG_MAP[band_id]['imt_ul_center_f_mhz']
+        if imt_freq_mhz < 1e3:
+            imt_id = "imt.below-1GHz.single-bs.macro-bs"
+        else:
+            imt_id = "imt.1-3GHz.single-bs.aas-macro-bs"
 
         print(f"Generating parameters for IMT {imt_id} and MSS-DC {dc_mss_id} with load factor {load_factor} and link {link}...")
         ####### Power control zones configuration
@@ -160,8 +167,7 @@ def generate(
         # scenario
         params.general.imt_link = "DOWNLINK" if link == "dl" else "UPLINK"
         params.imt.interfered_with = True
-        params.imt.frequency = IMT_BAND_CONFIG_MAP[band_id]['imt_dl_center_f_mhz'] if link == "dl" \
-            else IMT_BAND_CONFIG_MAP[band_id]['imt_ul_center_f_mhz']
+        params.imt.frequency = imt_freq_mhz
         params.imt.bandwidth = IMT_BAND_CONFIG_MAP[band_id]['typical_bw']
         params.general.enable_cochannel = co_channel
         params.general.enable_adjacent_channel = True  # always on to generate out-of-band emissions
