@@ -15,9 +15,9 @@ SYS_IDS = [
 ]
 
 SYS_ID_TO_READABLE = {
-    "system-4.698-960MHz-block2.690km": "MSS DC System 4 @690km Block 2",
-    "system-4.698-960MHz-block2.690km-antenna-update": "MSS DC System 4 @690km Block 2",
-    "system-4.1427-2690MHz.690km": "MSS DC System 4 @2GHz",
+    "system-4.698-960MHz-block2.690km": "MSS DC System 4 Block 2 698-960MHz",
+    "system-4.698-960MHz-block2.690km-antenna-update": "MSS DC System 4 Block 2 698-960MHz",
+    "system-4.1427-2690MHz.690km": "MSS DC System 4 1427-2690MHz",
 }
 
 IMT_IDS = [
@@ -26,8 +26,8 @@ IMT_IDS = [
 ]
 
 IMT_ID_TO_READABLE = {
-    "imt.upto-1GHz.single-bs.urban-macro-bs": "IMT Macro @700MHZ",
-    "imt.1-3GHz.single-bs.aas-macro-bs": "IMT Macro @2GHz",
+    "imt.upto-1GHz.single-bs.urban-macro-bs": "IMT Macro upto-1GHz",
+    "imt.1-3GHz.single-bs.aas-macro-bs": "IMT Macro 1-3GHzGHz",
 }
 
 IMT_LINKS = [
@@ -44,18 +44,24 @@ MSS_D2D_LOAD_FACTOR = [0.2, 0.5]
 
 # Rec. ITU-R M.1036-7 IMT bands - downlink band lower limits
 IMT_A5_DL_BAND_LOW_MHZ = 758.0
+IMT_G2_DL_BAND_LOW_MHZ = 1475.0
 IMT_B4_DL_BAND_LOW_MHZ = 2110.0
+IMT_E1_DL_BAND_LOW_MHZ = 2300.0  # NOTE: This is a TDD only band!
 IMT_C1_DL_BAND_LOW_MHZ = 2620.0
 
 IMT_FREQUENCIES_MHZ = [
     IMT_A5_DL_BAND_LOW_MHZ,
+    IMT_G2_DL_BAND_LOW_MHZ,
     IMT_B4_DL_BAND_LOW_MHZ,
+    IMT_E1_DL_BAND_LOW_MHZ,
     IMT_C1_DL_BAND_LOW_MHZ,
 ]
 
 IMT_FREQ_TO_IDS_MAP = {
     IMT_A5_DL_BAND_LOW_MHZ: {"imt_id": "imt.upto-1GHz.single-bs.urban-macro-bs", "mss_id": "system-4.698-960MHz-block2.690km"},
+    IMT_G2_DL_BAND_LOW_MHZ: {"imt_id": "imt.1-3GHz.single-bs.aas-macro-bs", "mss_id": "system-4.1427-2690MHz.690km"},
     IMT_B4_DL_BAND_LOW_MHZ: {"imt_id": "imt.1-3GHz.single-bs.aas-macro-bs", "mss_id": "system-4.1427-2690MHz.690km"},
+    IMT_E1_DL_BAND_LOW_MHZ: {"imt_id": "imt.1-3GHz.single-bs.aas-macro-bs", "mss_id": "system-4.1427-2690MHz.690km"},
     IMT_C1_DL_BAND_LOW_MHZ: {"imt_id": "imt.1-3GHz.single-bs.aas-macro-bs", "mss_id": "system-4.1427-2690MHz.690km"},
 }
 
