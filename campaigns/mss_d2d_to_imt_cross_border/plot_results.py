@@ -31,25 +31,17 @@ def linestyle_getter(result: Results):
     """
     Returns a line style string based on the prefix found in the result's output directory.
     """
-    styles = ["solid", "dot", "dash", "longdash", "dashdot", "longdashdot"]
     dirname = result.output_directory
-    pattern = re.compile(
-        r".*/" + OUTPUT_FOLDER_REGEX
-    )
-    match = pattern.match(dirname)
-    if not match:
-        return "solid"
 
-    border_km, load_pct, link_type = match.groups()
-
-    if load_pct == "0.1":
+    if "15backoff" in dirname:
+        return "dot"
+    elif "10backoff" in dirname:
+        return "dash"
+    elif "0backoff" in dirname:
         return "solid"
-    elif load_pct == "0.2":
-        return "dashdot"
-    elif load_pct == "0.5":
-        return "longdash"
     else:
         return "solid"
+
 
 if __name__ == "__main__":
     post_processor = PostProcessor()
