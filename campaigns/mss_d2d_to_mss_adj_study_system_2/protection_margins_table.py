@@ -12,7 +12,11 @@ from pathlib import Path
 from typing import Dict, Optional, Tuple, List
 import numpy as np
 
-from campaigns.mss_d2d_to_mss_adj_study_system_2.constants import CAMPAIGN_DIR
+from campaigns.mss_d2d_to_mss_adj_study_system_2.constants import (
+    CAMPAIGN_DIR,
+    MSS_DC_LOAD_FACTORS,
+    ES_RX_OFFSETS,
+)
 
 # Protection criteria: (threshold_dB, CCDF_probability)
 PROTECTION_CRITERIA = [
@@ -44,12 +48,6 @@ def parse_features_from_path(path: Path) -> Dict[str, Optional[str]]:
     elif "7.1.5-es-type-2" in s:
         es_type = "7.1.5-ES-type-2"
     
-    sat_distance = None
-    if "525km" in s:
-        sat_distance = "525km"
-    elif "340km" in s:
-        sat_distance = "340km"
-    
     exec_match = re.search(r"_(\d{4}-\d{2}-\d{2})_(\d+)$", s_original)
     execution_num = int(exec_match.group(2)) if exec_match else None
     
@@ -62,10 +60,33 @@ def parse_features_from_path(path: Path) -> Dict[str, Optional[str]]:
         "load_factor": load_factor,
         "offset_label": offset_label,
         "es_type": es_type,
-        "sat_distance": sat_distance,
         "execution_num": execution_num,
         "base_name": base_name
     }
+
+
+def filter_latest_executions(inr_files: List[Path]) -> List[Path]:
+    """Keep only the latest execution for each simulation configuration."""
+    grouped: Dict[str, List[Tuple[Optional[int], Path]]] = {}
+
+    for csv_path in inr_files:
+        output_folder = csv_path.parent
+        features = parse_features_from_path(output_folder)
+        base_name = features.get("base_name")
+        exec_num = features.get("execution_num")
+
+        if base_name is None:
+            continue
+        if base_name not in grouped:
+            grouped[base_name] = []
+        grouped[base_name].append((exec_num, csv_path))
+
+    filtered_files: List[Path] = []
+    for files in grouped.values():
+        files.sort(key=lambda x: x[0] if x[0] is not None else -1, reverse=True)
+        filtered_files.append(files[0][1])
+
+    return filtered_files
 
 
 def load_inr_from_csv(csv_path: Path) -> np.ndarray:
@@ -146,6 +167,12 @@ def main():
         return
     
     print(f"Found {len(inr_files)} INR files")
+    inr_files = filter_latest_executions(inr_files)
+    print(f"After duplicate filtering (latest): {len(inr_files)} files")
+
+    # System 2 valid values from constants.py
+    valid_load_factors = set(MSS_DC_LOAD_FACTORS)
+    valid_offsets = {offset_label for _, offset_label, _ in ES_RX_OFFSETS}
     
     # Collect results
     results = []
@@ -153,6 +180,14 @@ def main():
     for csv_path in sorted(inr_files):
         output_folder = csv_path.parent
         features = parse_features_from_path(output_folder)
+
+        # Guard against unrelated folders and keep only System 2 combinations.
+        if features["load_factor"] not in valid_load_factors:
+            continue
+        if features["offset_label"] not in valid_offsets:
+            continue
+        if features["es_type"] is None:
+            continue
         
         inr_data = load_inr_from_csv(csv_path)
         if inr_data.size == 0:
@@ -168,15 +203,13 @@ def main():
         }
         
         offset_readable = {
-            "offset_0MHz": "Nominal (2162.5 MHz)",
             "offset_minus5MHz": "-5 MHz (2157.5 MHz)",
             "offset_minus10MHz": "-10 MHz (2152.5 MHz)",
-            "offset_minus15MHz": "-15 MHz (2142.5 MHz)",
+            "offset_minus15MHz": "-15 MHz (2147.5 MHz)",
         }
         
         es_name = es_readable.get(features["es_type"], features["es_type"])
         offset_name = offset_readable.get(features["offset_label"], features["offset_label"])
-        sat_name = features["sat_distance"]
         
         # Calculate margins for each protection criterion
         for thr_db, prob in PROTECTION_CRITERIA:
@@ -185,13 +218,12 @@ def main():
             if margin is not None:
                 # Determine status
                 if margin < 0:
-                    status = "✓ PASS"
+                    status = "PASS"
                 else:
-                    status = "✗ FAIL"
+                    status = "FAIL"
                 
                 results.append({
                     "ES_Type": es_name,
-                    "Satellite_Distance": sat_name,
                     "Load_Factor": features["load_factor"],
                     "Frequency_Offset": offset_name,
                     "Protection_Threshold": f"{thr_db:.1f} dB @ {prob*100:.2f}%",
@@ -203,41 +235,53 @@ def main():
         print("No results found")
         return
     
-    # Sort results
+    es_order = {
+        "System R": 0,
+        "ES Type-1": 1,
+        "ES Type-2": 2,
+    }
+    load_order = {value: idx for idx, value in enumerate(MSS_DC_LOAD_FACTORS)}
+    offset_order = {
+        "-5 MHz (2157.5 MHz)": 0,
+        "-10 MHz (2152.5 MHz)": 1,
+        "-15 MHz (2147.5 MHz)": 2,
+    }
+
+    # Sort results using System 2 canonical order.
     results_sorted = sorted(
         results,
         key=lambda x: (
-            x["ES_Type"],
-            x["Satellite_Distance"],
-            x["Load_Factor"] if x["Load_Factor"] is not None else float('inf'),
-            x["Frequency_Offset"],
+            es_order.get(x["ES_Type"], 99),
+            load_order.get(x["Load_Factor"], 99),
+            offset_order.get(x["Frequency_Offset"], 99),
+            x["Protection_Threshold"],
         )
     )
     
     # Save to CSV
     csv_file = CAMPAIGN_DIR / "protection_margins.csv"
     with open(csv_file, 'w', newline='') as f:
-        fieldnames = ["ES_Type", "Satellite_Distance", "Load_Factor", "Frequency_Offset", 
+        fieldnames = ["ES_Type", "Load_Factor", "Frequency_Offset", 
                      "Protection_Threshold", "Margin_dB", "Status"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(results_sorted)
     
-    print(f"\n✓ CSV saved to: {csv_file}\n")
+    print(f"\nCSV saved to: {csv_file}\n")
     
     # Print formatted table
-    print("=" * 140)
+    print("=" * 126)
     print("PROTECTION MARGINS TABLE - Negative = PASS (below threshold), Positive = FAIL (above threshold)")
-    print("=" * 140)
-    print(f"{'ES Type':<15} {'Satellite':<12} {'Load':<8} {'Frequency Offset':<25} {'Threshold':<20} {'Margin (dB)':<15} {'Status':<10}")
-    print("-" * 140)
+    print("=" * 126)
+    print(f"{'ES Type':<15} {'Load':<8} {'Frequency Offset':<25} {'Threshold':<20} {'Margin (dB)':<15} {'Status':<10}")
+    print("-" * 126)
     
     for row in results_sorted:
         load_display = f"{row['Load_Factor']:.2f}" if row['Load_Factor'] is not None else "N/A"
-        print(f"{row['ES_Type']:<15} {row['Satellite_Distance']:<12} {load_display:<8} {row['Frequency_Offset']:<25} "
+        print(f"{row['ES_Type']:<15} {load_display:<8} {row['Frequency_Offset']:<25} "
               f"{row['Protection_Threshold']:<20} {row['Margin_dB']:>14} {row['Status']:>9}")
     
-    print("=" * 140)
+    print("=" * 126)
     
     # Summary statistics
     passed = sum(1 for r in results_sorted if "PASS" in r["Status"])

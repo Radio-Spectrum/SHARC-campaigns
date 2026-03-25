@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import docx; print\\(docx.__version__\\)\")",
+      "Bash(pip install:*)",
+      "Bash(python -c \"import docx; print\\(''ok'', docx.__version__\\)\")",
+      "Bash(python -c \":*)",
+      "Bash(python campaigns/Contribuitions/add_system2_table.py)",
+      "Bash(python campaigns/Contribuitions/add_system2_to_intro_tables.py)",
+      "Bash(python campaigns/Contribuitions/patch_scenario_and_spectral_mask.py)",
+      "Bash(ls \"c:/Users/Daniel/Git/SHARC-campaigns/campaigns/Contribuitions/\"*.docx)"
+    ]
+  }
+}

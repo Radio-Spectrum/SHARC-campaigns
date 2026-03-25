@@ -31,15 +31,17 @@ INR_FILE = "system_inr.csv"
 
 # Which curves to plot - configure here
 # Format: (load_factor, offset_label, es_type, sat_distance, custom_label)
-#   - load_factor: 0.1, 0.2, 0.5 or None for all
-#   - offset_label: "offset_0MHz", "offset_minus5MHz", "offset_minus10MHz", "offset_minus15MHz", or None for all
+#   - load_factor: 0.2, 0.5 or None for all
+#   - offset_label: "offset_minus5MHz", "offset_minus10MHz", "offset_minus15MHz", or None for all
 #   - es_type: "7.1.4-forward-R", "7.1.5-ES-type-1", "7.1.5-ES-type-2" or None for all
-#   - sat_distance: "525km", "340km" or None for all
+#   - sat_distance: None (System 2 has no satellite distance in path)
 #   - custom_label: Custom name for this curve (optional, None uses auto-generated label)
 CURVES_TO_PLOT = [
     # Examples (uncomment to use):
-    # (0.1, "offset_0MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - Nominal"),
-    # (0.1, None, "7.1.5-ES-type-1", "525km", None),  # All offsets
+    (0.2, "offset_minus5MHz", "7.1.5-ES-type-1", None, "ES Type-1 - Load 20% - (-5 MHz)"),
+    (0.2, "offset_minus10MHz", "7.1.5-ES-type-1", None, "ES Type-1 - Load 20% - (-10 MHz)"),
+    (0.2, "offset_minus15MHz", "7.1.5-ES-type-1", None, "ES Type-1 - Load 20% - (-15 MHz)"),
+    # (0.2, None, "7.1.5-ES-type-1", None, None),  # All offsets
 ]
 
 # If CURVES_TO_PLOT is empty, plot all curves
@@ -570,50 +572,9 @@ def plot_ccdf_inr(
 
 if __name__ == "__main__":
     # ===================== MAIN CONFIGURATION =====================
-    # Configure which curves to plot
-    # Format: (load_factor, offset_label, es_type, sat_distance, custom_label)
-    # offset_label options: "offset_0MHz", "offset_minus5MHz", "offset_minus10MHz", "offset_minus15MHz"
-    
-    curves_to_plot = [
-        # ========== System R (7.1.4-forward-R) ==========
-        # @ 525 km
-        #(0.1, "offset_0MHz", "7.1.4-forward-R", "525km", "System R @ 525km - Nominal (2162.5 MHz)"),
-        #(0.1, "offset_minus5MHz", "7.1.4-forward-R", "525km", "System R @ 525km - (2157.5 MHz)"),
-        #(0.1, "offset_minus10MHz", "7.1.4-forward-R", "525km", "System R @ 525km - (2152.5 MHz)"),
-        #(0.1, "offset_minus15MHz", "7.1.4-forward-R", "525km", "System R @ 525km - (2142.5 MHz)"),
-        
-        # @ 340 km
-        #(0.1, "offset_0MHz", "7.1.4-forward-R", "340km", "System R @ 340km - Nominal (2162.5 MHz)"),
-        #(0.1, "offset_minus5MHz", "7.1.4-forward-R", "340km", "System R @ 340km - (2157.5 MHz)"),
-        #(0.1, "offset_minus10MHz", "7.1.4-forward-R", "340km", "System R @ 340km - (2152.5 MHz)"),
-        #(0.1, "offset_minus15MHz", "7.1.4-forward-R", "340km", "System R @ 340km - (2142.5 MHz)"),
-        
-        # ========== ES Type-1 (7.1.5-ES-type-1) ==========
-        # @ 525 km
-        #(0.1, "offset_0MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - Nominal (2162.5 MHz)"),
-        #(0.1, "offset_minus5MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - (2157.5 MHz)"),
-        #(0.1, "offset_minus10MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - (2152.5 MHz)"),
-        #(0.1, "offset_minus15MHz", "7.1.5-ES-type-1", "525km", "ES Type-1 @ 525km - (2142.5 MHz)"),
-        
-        # @ 340 km
-        #(0.1, "offset_0MHz", "7.1.5-ES-type-1", "340km", "ES Type-1 @ 340km - Nominal (2162.5 MHz)"),
-        #(0.1, "offset_minus5MHz", "7.1.5-ES-type-1", "340km", "ES Type-1 @ 340km - (2157.5 MHz)"),
-        #(0.1, "offset_minus10MHz", "7.1.5-ES-type-1", "340km", "ES Type-1 @ 340km - (2152.5 MHz)"),
-        #(0.1, "offset_minus15MHz", "7.1.5-ES-type-1", "340km", "ES Type-1 @ 340km - (2142.5 MHz)"),
-        
-        # ========== ES Type-2 (7.1.5-ES-type-2) ==========
-        # @ 525 km
-        #(0.1, "offset_0MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - Nominal (2162.5 MHz)"),
-        (0.1, "offset_minus5MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-5 MHz, 2157.5 MHz)"),
-        (0.1, "offset_minus10MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-10 MHz, 2152.5 MHz)"),
-        (0.1, "offset_minus15MHz", "7.1.5-ES-type-2", "525km", "ES Type-2 @ 525km - (-15 MHz, 2142.5 MHz)"),
-        
-        # @ 340 km
-        #(0.1, "offset_0MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - Nominal (2162.5 MHz)"),
-        (0.1, "offset_minus5MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-5 MHz, 2157.5 MHz)"),
-        (0.1, "offset_minus10MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-10 MHz, 2152.5 MHz)"),
-        (0.1, "offset_minus15MHz", "7.1.5-ES-type-2", "340km", "ES Type-2 @ 340km - (-15 MHz, 2142.5 MHz)"),
-    ]
+    # Edit CURVES_TO_PLOT at the top of the file to select curves.
+    # If CURVES_TO_PLOT is empty, all available curves are plotted.
+
     # Legend configuration
     legend_location = "best"
     legend_font_size = 10
@@ -632,7 +593,7 @@ if __name__ == "__main__":
     # =========================================================
     
     plot_ccdf_inr(
-        curves_to_plot=curves_to_plot if curves_to_plot else None,
+        curves_to_plot=CURVES_TO_PLOT if CURVES_TO_PLOT else None,
         legend_loc=legend_location,
         legend_fontsize=legend_font_size,
         legend_ncol=legend_columns,

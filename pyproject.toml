@@ -6,3 +6,6 @@ version = "0.1"
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+include = ["campaigns", "campaigns.*"]
+

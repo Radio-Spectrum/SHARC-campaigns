@@ -20,13 +20,19 @@ MSS_DC_LOAD_FACTORS = [
 # Base frequency: 2162.5 MHz (lower bound of DCM band)
 # Variations: 2162.5 - offset values
 # All are adjacent-band scenarios
-ES_RX_OFFSETS = [  # (frequency, offset_label, description)
- #   (2162.5, "offset_0MHz", "nominal - 2162.5 MHz"),
-    (2157.5, "offset_minus5MHz", "2162.5 - 5 MHz"),
-    (2152.5, "offset_minus10MHz", "2162.5 - 10 MHz"),
-    (2147.5, "offset_minus15MHz", "2162.5 - 15 MHz"),
-]
 
+initial_frequency_MHz = 2120.0  # MHz
+steps = 1.25
+
+
+freq_1 = initial_frequency_MHz +  steps/2
+freq_2 = freq_1 + 5
+freq_3 = freq_2 + 5 
+ES_RX_OFFSETS = [ 
+    (freq_1, "First Adjacent Channel", f"{freq_1} MHz"),
+    (freq_2, "Second Adjacent Channel", f"{freq_2} MHz"),
+    (freq_3, "Third Adjacent Channel", f"{freq_3} MHz"),
+]
 # MSS victim earth station/user terminal
 SINGLE_ES_MSS_IDS = [
     "mss.2100MHz.7.1.4-forward-R",

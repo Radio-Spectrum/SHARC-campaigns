@@ -79,7 +79,7 @@ def generate_inputs():
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
         # lower bound of closest DL MSS DC band
-        params.imt.frequency = 2162.5  # Will be varied in loop below. We set it here just to calculate the adjacent channel leakage based on the correct frequency.
+        params.imt.frequency = 2117.5  # Will be varied in loop below. We set it here just to calculate the adjacent channel leakage based on the correct frequency.
         # Note: ES receive frequency will be varied in loop below
 
         params.imt.adjacent_ch_emissions = "ACLR"

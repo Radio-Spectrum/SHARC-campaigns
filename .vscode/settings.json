@@ -11,6 +11,5 @@
   "python.analysis.extraPaths": [
     "/home/daniel/opt/SharcSimulator/SHARC",
     "/home/daniel/opt/SharcSimulator/SHARC-campaigns"
-  ],
-  "python-envs.pythonProjects": []
+  ]
 }

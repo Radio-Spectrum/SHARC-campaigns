@@ -39,7 +39,7 @@ def get_taylor_cell_radius(
 
 general = {
     "seed": SEED,
-    "num_snapshots": 10,
+    "num_snapshots": 10000,
     "overwrite_output": False,
     "output_dir": str(OUTPUT_DIR),
     "output_dir_prefix": "to-update",
@@ -79,7 +79,7 @@ def generate_inputs():
         params.imt.imt_dl_intra_sinr_calculation_disabled = True
 
         # lower bound of closest DL MSS DC band
-        params.imt.frequency = 2162.5
+        params.imt.frequency = 2117.5
         # Note: ES receive frequency will be varied in loop below
 
         # Victim's adjacent channel reception characteristics
