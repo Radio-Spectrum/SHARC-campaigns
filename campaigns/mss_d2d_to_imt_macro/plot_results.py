@@ -87,7 +87,7 @@ if __name__ == "__main__":
         "imt_ul_total_interf_power",
         "imt_system_antenna_gain",
         # "imt_system_path_loss",
-        # "system_imt_antenna_gain",
+        "system_imt_antenna_gain",
     ]
 
     adj_ch_readable = "adj" if args.adj else "co"
@@ -137,22 +137,24 @@ if __name__ == "__main__":
             # generate some statistics for INR
             for res in results:
                 if postfix_str in res.output_directory:
-                    inr_attr = f"{'imt_dl_inr' if link == 'dl' else 'imt_ul_inr'}"
-                    if hasattr(res, inr_attr):
-                        inr_values = getattr(res, inr_attr)
-                        if len(inr_values) == 0:
-                            print(f"No {inr_attr} data for {postfix_str}")
-                            continue
-                        percentile_data.append({
-                            "DC-MSS System": readable_mss,
-                            "Load": readable_load,
-                            "IMT Link": link.upper(),
-                            "Margin (km)": border,
-                            "Attribute": inr_attr,
-                            "p50 (dB)": np.percentile(inr_values, 50),
-                            "p99.5 (dB)": np.percentile(inr_values, 99.5),
-                            "p99.9 (dB)": np.percentile(inr_values, 99.9)
-                        })
+                    # inr_attr = f"{'imt_dl_inr' if link == 'dl' else 'imt_ul_inr'}"
+                    for attr in attributes_to_plot:
+                        if hasattr(res, attr):
+                            inr_values = getattr(res, attr)
+                            if len(inr_values) == 0:
+                                print(f"No {attr} data for {postfix_str}")
+                                continue
+                            percentile_data.append({
+                                "DC-MSS System": readable_mss,
+                                "Load": readable_load,
+                                "IMT Link": link.upper(),
+                                "Margin (km)": border,
+                                "Attribute": attr,
+                                "p5 (dB)": np.percentile(inr_values, 5.),
+                                "p50 (dB)": np.percentile(inr_values, 50.),
+                                "p95.0 (dB)": np.percentile(inr_values, 95.0),
+                                "p99.9 (dB)": np.percentile(inr_values, 99.9)
+                            })
 
     percentile_table = pd.DataFrame(percentile_data)
     percentile_table.to_csv(OUTPUT_ROOT_FOLDER / f"{html_file_prefix}_inr_percentiles.csv", index=False)
@@ -171,7 +173,7 @@ if __name__ == "__main__":
     elif args.plot_type == "ccdf":
         plots = post_processor.generate_ccdf_plots_from_results(
             results,
-            n_bins=500,
+            n_bins=200,
             cutoff_percentage=0.0005
         )
 
@@ -184,10 +186,13 @@ if __name__ == "__main__":
     # combine imt_ul_sinr and imt_ul_sinr_ext into a single plot with two lines, one for each attribute
     plot_imt_ul_sinr = post_processor.get_plot_by_results_attribute_name("imt_ul_sinr", plot_type=args.plot_type)
     plot_imt_ul_sinr_ext = post_processor.get_plot_by_results_attribute_name("imt_ul_sinr_ext", plot_type=args.plot_type)
-    if plot_imt_ul_sinr is not None and plot_imt_ul_sinr_ext is not None:
+    plot_imt_ul_snr = post_processor.get_plot_by_results_attribute_name("imt_ul_snr", plot_type=args.plot_type)
+    if plot_imt_ul_sinr is not None and plot_imt_ul_sinr_ext is not None and plot_imt_ul_snr is not None:
         sinr_color = []
         if plot_imt_ul_sinr.data:
             for trace in plot_imt_ul_sinr.data:
+                trace.line.dash = 'dot'
+                trace.name = f"{trace.name} SINR Inter-cell interference"
                 if hasattr(trace, 'line') and hasattr(trace.line, 'color'):
                     sinr_color.append(getattr(trace.line, 'color', None))
 
@@ -195,6 +200,12 @@ if __name__ == "__main__":
             trace.name = f"{trace.name} SINR with external interference"
             trace.line.color = sinr_color[i % len(sinr_color)]
             trace.line.dash = 'dash'
+            plot_imt_ul_sinr.add_trace(trace)
+
+        for i, trace in enumerate(plot_imt_ul_snr.data):
+            trace.name = f"{trace.name} SNR (no interference)"
+            trace.line.color = sinr_color[i % len(sinr_color)]
+            trace.line.dash = 'solid'
             plot_imt_ul_sinr.add_trace(trace)
 
         plot_imt_ul_sinr.update_layout(
@@ -299,12 +310,13 @@ if __name__ == "__main__":
         interf_color = []
         if imt_ul_intra_interf_power.data:
             for trace in imt_ul_intra_interf_power.data:
+                trace.name = f"{trace.name} Inter-cell interference power"
                 if hasattr(trace, 'line') and hasattr(trace.line, 'color'):
                     interf_color.append(getattr(trace.line, 'color', None))
 
         if imt_ul_interf_power is not None:
             for i, trace in enumerate(imt_ul_interf_power.data):
-                trace.name = f"{trace.name} Interference Power with external interference"
+                trace.name = f"{trace.name} External interference power"
                 trace.line.color = interf_color[i % len(interf_color)] if interf_color else getattr(trace.line, 'color', None)
                 trace.line.dash = 'dash'
                 imt_ul_intra_interf_power.add_trace(trace)
