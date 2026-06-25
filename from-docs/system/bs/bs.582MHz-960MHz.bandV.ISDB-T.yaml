@@ -1,0 +1,40 @@
+#### BS Parameters 582-960MHz Band V ISDB-T
+
+id: bs.582MHz-960MHz.bandV.ISDB-T
+
+metadata:
+  referenced_documents:
+    - Broadcast System Parameters for ISDB-T based on Report ITU-R BT.2383-5
+
+single_earth_station:
+  frequency: 695               # MHz - center frequency of the 51 channel - 51th channel.
+  bandwidth: 6.0               # MHz
+  tx_power_density: -500       # dBW/Hz - no info - system description only for receiver
+  noise_temperature: 5756       # K This is equivalent to Thermal noise density (kT0) (dBm/Hz) −173.98 plus 7dB of noise figure, converted to K.
+  adjacent_ch_selectivity: 15  # dB
+  # NOTE: ACS is given as a mask in document
+  # Calculating your own ACS would let you not overstate rx interference
+
+  polarization_loss: 0         # dB
+  # NOTE: consider using 3dB polarization loss with P.619
+
+  geometry:
+    height: 10.0
+    azimuth:
+      type: FIXED
+      fixed: 0.0             # Always pointing to East
+    elevation:
+      type: FIXED
+      fixed: 0.0             # Always pointing to local horizon
+
+    location:
+      type: FIXED
+      fixed:                   # positioned at the reference point
+        x: 0.0
+        y: 0.0
+
+  antenna:
+    pattern: MODIFIED ITU-R BT.419
+    gain: 14.41                 # dBi - for fixed reception - may change with simulation scenario
+    itu_r_bt_419:
+      bs_system_band: BAND_V
