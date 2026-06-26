@@ -14,6 +14,7 @@ from campaigns.wp4c_oct_26_dc_mss_imt_to_bs.constants import (
     MSS_DC_LOAD_FACTORS,
     BS_IDS,
     BS_CHANNELS,
+    BS_REPECTION_TYPE,
     get_specific_pattern
 )
 
@@ -42,7 +43,7 @@ def generate_inputs():
     factory = ParametersFactory()
     total = 0
 
-    for imt_id, bs_id in product(IMT_MSS_DC_IDS, BS_IDS):
+    for imt_id, bs_id, bs_reception_type in product(IMT_MSS_DC_IDS, BS_IDS, BS_REPECTION_TYPE):
         print(f"[Building params for {imt_id} -> {bs_id}]")
 
         params = factory.load_from_id(
@@ -74,8 +75,8 @@ def generate_inputs():
         params.imt.topology.central_altitude = 96.
 
         # Channel Model
-        # params.single_earth_station.channel_model = "P619"
-        params.single_earth_station.channel_model = "FSPL"
+        params.single_earth_station.channel_model = "P619"
+        # params.single_earth_station.channel_model = "FSPL"
 
         # P.619 model parameters.
         # 3dB polarization loss, as suggested by P.619
@@ -159,6 +160,13 @@ def generate_inputs():
         # es_geom.elevation.uniform_dist.max = 90.
         # es_geom.elevation.uniform_dist.min = 5.
 
+        if bs_reception_type == "PORTABLE":
+            params.single_earth_station.antenna.gain = 2.14
+            params.single_earth_station.antenna.pattern = "OMNI"
+        elif bs_reception_type == "MOBILE":
+            params.single_earth_station.antenna.gain = 1.14
+            params.single_earth_station.antenna.pattern = "OMNI"
+
         for mss_dc_load in MSS_DC_LOAD_FACTORS:
             for bs_channel, channel_params in BS_CHANNELS.items():
                 params.single_earth_station.frequency = channel_params['center_freq_mhz']
@@ -208,7 +216,7 @@ def generate_inputs():
                         params.imt.bs.use_oob_antenna = False
 
                 specific = get_specific_pattern(
-                    imt_id, bs_id, mss_dc_load, bs_channel
+                    imt_id, bs_id, mss_dc_load, bs_channel, bs_reception_type
                 )
                 params.general.output_dir_prefix = OUTPUT_START_NAME + specific
 

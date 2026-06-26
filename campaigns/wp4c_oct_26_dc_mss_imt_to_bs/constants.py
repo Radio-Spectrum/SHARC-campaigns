@@ -46,6 +46,15 @@ BS_IDS = [
     "bs.582MHz-960MHz.bandV.ISDB-T",
 ]
 
+# Each BS type has a different antenna. We're adding it here instead
+# of creating new from-docs for each one.
+BS_REPECTION_TYPE = [
+    # "FIXED",
+    "PORTABLE",
+    "MOBILE",
+]
+
+
 BS_TO_READABLE = {
     "bs.582MHz-960MHz.bandV.DVB-T2": "DVB-T2",
     "bs.582MHz-960MHz.bandV.ISDB-T": "ISDB-T",
@@ -63,12 +72,13 @@ def get_specific_pattern(
     bs_id: str,
     mss_d2d_load_factor: float,
     bs_channel: int,
+    bs_reception_type: str
 ):
     """
     Generate a pattern string identifying the simulation configuration.
     offset_label: e.g., 'offset_0MHz', 'offset_minus5MHz'
     """
-    return f"{mss_d2d_load_factor}load_bs_{bs_id}_channel_{bs_channel}_mss_d2d_{mss_d2d_id}"
+    return f"{mss_d2d_load_factor}load_bs_{bs_id}_channel_{bs_channel}_{bs_reception_type}_mss_d2d_{mss_d2d_id}"
 
 
 if __name__ == "__main__":
