@@ -49,9 +49,9 @@ BS_IDS = [
 # Each BS type has a different antenna. We're adding it here instead
 # of creating new from-docs for each one.
 BS_REPECTION_TYPE = [
-    # "FIXED",
-    "PORTABLE",
-    "MOBILE",
+    "FIXED",
+    #"PORTABLE",
+    #"MOBILE",
 ]
 
 

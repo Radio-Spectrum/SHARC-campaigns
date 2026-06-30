@@ -194,5 +194,9 @@ for bs_reception_type in BS_REPECTION_TYPE:
                 borderwidth=1
             )
         )
+        plot.update_layout(
+            width=900,
+            height=1280
+        )
 
         plot.write_html(file=file, include_plotlyjs="cdn", auto_open=auto_open)

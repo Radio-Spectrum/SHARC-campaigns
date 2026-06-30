@@ -74,6 +74,11 @@ def generate_inputs():
         params.imt.topology.central_longitude = -69.93641
         params.imt.topology.central_altitude = 96.
 
+        # International Friendship Bridge
+        #params.imt.topology.central_latitude = -25.5549751
+        #params.imt.topology.central_longitude = -54.5746686
+        #params.imt.topology.central_altitude = 200.
+
         # Channel Model
         params.single_earth_station.channel_model = "P619"
         # params.single_earth_station.channel_model = "FSPL"
@@ -83,9 +88,8 @@ def generate_inputs():
         params.single_earth_station.polarization_loss = 3
         params.single_earth_station.param_p619.earth_station_lat_deg = params.imt.topology.central_latitude
         params.single_earth_station.param_p619.earth_station_alt_m = params.imt.topology.central_altitude
-        # NOTE: we chose rural/low cluttered environment since MSS UEs are normally there
-        params.single_earth_station.param_p619.mean_clutter_height = "low"
         params.single_earth_station.param_p619.below_rooftop = 0.  # zero means clutter loss is not applied
+        # params.single_earth_station.param_p619.mean_clutter_height = "low"
 
         # ########## MSS DC Parameters ##########
         # # System spefic parameters - NOTE: we should move this to the yaml files for each system
@@ -119,6 +123,9 @@ def generate_inputs():
         # margin = -np.ceil((angle_dist_between_planes / 2) * 111)
         # params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = int(
         #     margin)
+        params.imt.topology.mss_dc.beam_positioning.service_grid.grid_in_zone.from_countries.margin_from_border = params.imt.topology.mss_dc.beam_radius / 1000
+        print(f"Appling a margin from border of {params.imt.topology.mss_dc.beam_radius / 1000} kms")
+
         params.imt.topology.mss_dc.beam_positioning.service_grid.eligible_sats_margin_from_border = -700
 
         ########### Active Satellite conditions ###########
@@ -126,7 +133,14 @@ def generate_inputs():
         # Service grid eligible_sats_margin_from_border parameter will limit the extension of active satellites.
         params.imt.topology.mss_dc.sat_is_active_if.conditions = [
             "MINIMUM_ELEVATION_FROM_ES",
+            "LAT_LONG_INSIDE_COUNTRY",
         ]
+
+        params.imt.topology.mss_dc.sat_is_active_if.lat_long_inside_country.country_names = [
+            "Brazil", 
+        ]
+
+
         # Aprox. 1000km arround the Earth Station
         params.imt.topology.mss_dc.sat_is_active_if.minimum_elevation_from_es = 5.  # Degree
 
